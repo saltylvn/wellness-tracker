@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { ICON_VERSION } from "@/lib/iconVersion";
 
 // The "web app manifest": tells the phone this website can be installed
 // and how it should look when launched from the home screen.
@@ -13,8 +14,8 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#000000", // black system bars, to match the icon
     // Plain PNG files in public/ (made by `npm run icons` from lib/appIcon.tsx).
     icons: [
-      { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: `/icon-192.png?v=${ICON_VERSION}`, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: `/icon-512.png?v=${ICON_VERSION}`, sizes: "512x512", type: "image/png", purpose: "any" },
     ],
   };
 }

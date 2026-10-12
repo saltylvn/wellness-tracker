@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import SplashScreen from "@/components/SplashScreen";
 import "./globals.css";
+import { ICON_VERSION } from "@/lib/iconVersion";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,12 +16,13 @@ export const metadata: Metadata = {
   description: "DEVELOP: a wellness tracker for calories, macros, workouts, and cardio.",
   // The app icon as plain PNG files in public/ (made by `npm run icons` from lib/appIcon.tsx).
   // iPhones use apple-touch-icon.png for the home screen; browsers use the others for tabs.
+  // ?v= makes phones fetch a fresh copy instead of a saved old one (lib/iconVersion.ts).
   icons: {
     icon: [
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: `/icon-192.png?v=${ICON_VERSION}`, sizes: "192x192", type: "image/png" },
+      { url: `/icon-512.png?v=${ICON_VERSION}`, sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: `/apple-touch-icon.png?v=${ICON_VERSION}`, sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true, // open full-screen (no Safari toolbars) from the home screen

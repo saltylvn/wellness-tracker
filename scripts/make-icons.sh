@@ -11,5 +11,10 @@ for pair in "180:apple-touch-icon" "192:icon-192" "512:icon-512"; do
   sips -s format jpeg -s formatOptions 100 "public/$name.tmp.png" --out "public/$name.tmp.jpg" >/dev/null
   sips -s format png "public/$name.tmp.jpg" --out "public/$name.png" >/dev/null
   rm "public/$name.tmp.png" "public/$name.tmp.jpg"
+  node scripts/strip-png.mjs "public/$name.png" >/dev/null # drop the photo metadata sips adds
   echo "public/$name.png ($size x $size)"
 done
+# Older iPhones also look for this name; keep an identical copy.
+cp public/apple-touch-icon.png public/apple-touch-icon-precomposed.png
+echo "public/apple-touch-icon-precomposed.png (copy)"
+echo "Bump ICON_VERSION in lib/iconVersion.ts so phones fetch the new icon."
