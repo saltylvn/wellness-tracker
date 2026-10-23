@@ -1,5 +1,5 @@
 import { ApiError, GoogleGenAI, ThinkingLevel, type Part } from "@google/genai";
-import { buildModelChain, classifyGeminiError, isTimeoutError } from "./modelChain";
+import { buildModelChain, classifyGeminiError, isTimeoutError, raceModels } from "./modelChain";
 import {
   NUTRITION_JSON_SCHEMA,
   parseAiNutrition,
@@ -14,11 +14,12 @@ import {
   type CoachInput,
 } from "./weightCoach";
 
-// Time limits. The API route allows 30 seconds in total, so we stop trying new
-// models once ~24 seconds have passed, and never wait more than 9 seconds on one.
+// Time limits. The API route allows 30 seconds in total, so we stop trying models once
+// ~24 seconds have passed, and never wait more than 9 seconds on one. A model usually
+// answers in 1-1.5 seconds; if it hasn't after 1.5, a backup model starts alongside it.
 const TOTAL_BUDGET_MS = 24_000;
 const PER_MODEL_TIMEOUT_MS = 9_000;
-const MIN_ATTEMPT_MS = 3_000;
+const HEDGE_AFTER_MS = 1_500;
 
 export type EstimateInput = {
   description?: string;
@@ -105,9 +106,10 @@ export async function writeWeightCoachNote(input: CoachInput): Promise<string | 
 }
 
 // Google's free-tier models are sometimes overloaded ("high demand", HTTP 503), slow,
-// or retired. So we try a list of free models in order (see modelChain.ts) and use
-// the first one that answers. You can put your own favorite first with GEMINI_MODEL.
-async function runModelChain<T>(options: {
+// or retired. So we try a list of free models (see modelChain.ts), starting a backup
+// when one is slow, and use the first real answer. You can put your own favorite first
+// with GEMINI_MODEL.
+function runModelChain<T>(options: {
   apiKey: string;
   parts: Part[];
   systemInstruction: string;
@@ -117,46 +119,46 @@ async function runModelChain<T>(options: {
   read: (text: string | undefined) => { done: T } | { retry: T }; // check one model's reply
 }): Promise<T> {
   const ai = new GoogleGenAI({ apiKey: options.apiKey });
-  const deadline = Date.now() + TOTAL_BUDGET_MS;
-  let lastResult = options.busy;
 
-  for (const model of buildModelChain(process.env.GEMINI_MODEL)) {
-    const remaining = deadline - Date.now();
-    if (remaining < MIN_ATTEMPT_MS) break; // out of time: report what we have
+  return raceModels<T>({
+    models: buildModelChain(process.env.GEMINI_MODEL),
+    fallback: options.busy,
+    hedgeAfterMs: HEDGE_AFTER_MS,
+    budgetMs: TOTAL_BUDGET_MS,
+    attempt: async (model, cancelled) => {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: [{ role: "user", parts: options.parts }],
+          config: {
+            systemInstruction: options.systemInstruction,
+            responseMimeType: "application/json",
+            responseJsonSchema: options.schema,
+            temperature: 0.2,
+            maxOutputTokens: 2048,
+            thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL }, // fastest answers
+            abortSignal: AbortSignal.any([cancelled, AbortSignal.timeout(PER_MODEL_TIMEOUT_MS)]),
+          },
+        });
+        return options.read(response.text);
+      } catch (error) {
+        // Cancelled because another model already answered: nothing went wrong.
+        if (cancelled.aborted) return { retry: options.busy };
 
-    try {
-      const response = await ai.models.generateContent({
-        model,
-        contents: [{ role: "user", parts: options.parts }],
-        config: {
-          systemInstruction: options.systemInstruction,
-          responseMimeType: "application/json",
-          responseJsonSchema: options.schema,
-          temperature: 0.2,
-          maxOutputTokens: 2048,
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, // quick answers, fewer tokens
-          abortSignal: AbortSignal.timeout(Math.min(PER_MODEL_TIMEOUT_MS, remaining)),
-        },
-      });
+        const status = error instanceof ApiError ? error.status : undefined;
+        const message = error instanceof Error ? error.message : "";
+        const timedOut = isTimeoutError(error);
 
-      const outcome = options.read(response.text);
-      if ("done" in outcome) return outcome.done;
-      lastResult = outcome.retry;
-    } catch (error) {
-      const status = error instanceof ApiError ? error.status : undefined;
-      const message = error instanceof Error ? error.message : "";
-      const timedOut = isTimeoutError(error);
+        // Log what happened for debugging (never the API key).
+        console.error(
+          `Gemini request failed on ${model}:`,
+          timedOut ? "timed out" : status !== undefined ? `${status} ${message.slice(0, 160)}` : (error as Error)?.name ?? "unknown",
+        );
 
-      // Log what happened for debugging (never the API key).
-      console.error(
-        `Gemini request failed on ${model}:`,
-        timedOut ? "timed out" : status !== undefined ? `${status} ${message.slice(0, 160)}` : (error as Error)?.name ?? "unknown",
-      );
-
-      if (classifyGeminiError({ status, message, timedOut }) === "stop") return options.stopped;
-      lastResult = options.busy;
-    }
-  }
-
-  return lastResult;
+        return classifyGeminiError({ status, message, timedOut }) === "stop"
+          ? { stop: options.stopped }
+          : { retry: options.busy };
+      }
+    },
+  });
 }

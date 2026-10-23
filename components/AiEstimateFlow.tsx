@@ -17,6 +17,22 @@ type Stage =
 
 const CONFIDENCE_TEXT = { low: "Low confidence", medium: "Medium confidence", high: "High confidence" };
 
+// Matches the server's check in app/api/estimate-food/route.ts.
+const SENDABLE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+const MAX_UPLOAD_BYTES = 4_000_000;
+// The server gives up on the AI after ~24 seconds; don't spin forever if the network drops.
+const REQUEST_TIMEOUT_MS = 35_000;
+
+// Shrinks the photo for upload. If this phone can't (rare), send the original when the
+// server would accept it; otherwise there's nothing usable to send.
+async function photoForUpload(file: File): Promise<Blob | null> {
+  try {
+    return await resizeImageToJpeg(file);
+  } catch {
+    return SENDABLE_TYPES.includes(file.type) && file.size <= MAX_UPLOAD_BYTES ? file : null;
+  }
+}
+
 const inputClass = "w-full rounded-xl border border-border bg-background px-4 py-3 text-base";
 
 // One screen for both AI options:
@@ -27,12 +43,14 @@ export default function AiEstimateFlow({ mode, date }: Props) {
   const [stage, setStage] = useState<Stage>({ name: "input" });
   const [error, setError] = useState<string | null>(null);
   const [description, setDescription] = useState("");
-  const [photo, setPhoto] = useState<{ file: File; previewUrl: string } | null>(null);
+  // `upload` starts shrinking the photo as soon as it's picked, so it's ready by the time
+  // you tap Estimate.
+  const [photo, setPhoto] = useState<{ previewUrl: string; upload: Promise<Blob | null> } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   function choosePhoto(file: File | undefined) {
     if (photo) URL.revokeObjectURL(photo.previewUrl);
-    setPhoto(file ? { file, previewUrl: URL.createObjectURL(file) } : null);
+    setPhoto(file ? { previewUrl: URL.createObjectURL(file), upload: photoForUpload(file) } : null);
     setError(null);
   }
 
@@ -52,12 +70,20 @@ export default function AiEstimateFlow({ mode, date }: Props) {
       const body = new FormData();
       if (description.trim()) body.set("description", description.trim());
       if (mode === "photo" && photo) {
-        // Shrink it first: faster, cheaper, and avoids HEIC problems.
-        const resized = await resizeImageToJpeg(photo.file);
-        body.set("image", resized, "meal.jpg");
+        const image = await photo.upload;
+        if (!image) {
+          setError("Couldn't read that photo. Try a different one, or take a new picture.");
+          setStage({ name: "input" });
+          return;
+        }
+        body.set("image", image, image instanceof File ? image.name : "meal.jpg");
       }
 
-      const response = await fetch("/api/estimate-food", { method: "POST", body });
+      const response = await fetch("/api/estimate-food", {
+        method: "POST",
+        body,
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
       const result = (await response.json().catch(() => null)) as
         | { ok: true; estimate: AiEstimate }
         | { ok: false; message: string }
@@ -69,8 +95,12 @@ export default function AiEstimateFlow({ mode, date }: Props) {
         setError(result?.message ?? "Something went wrong. Please try again.");
         setStage({ name: "input" });
       }
-    } catch {
-      setError("Couldn't reach the AI. Check your connection and try again.");
+    } catch (error) {
+      setError(
+        error instanceof Error && error.name === "TimeoutError"
+          ? "The AI took too long. Please try again, or enter it manually."
+          : "Couldn't reach the AI. Check your connection and try again.",
+      );
       setStage({ name: "input" });
     }
   }

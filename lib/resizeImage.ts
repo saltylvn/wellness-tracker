@@ -1,9 +1,10 @@
 // Browser-only: shrinks a photo before it's uploaded. A phone photo can be 5-10 MB;
 // the AI doesn't need that detail, and smaller uploads are faster and cheaper.
-// Converting to JPEG also avoids HEIC compatibility problems.
+// Converting to JPEG also avoids HEIC compatibility problems. 768px is one "tile" for
+// Gemini, so it reads the photo faster than a bigger one, with the same estimates.
 export async function resizeImageToJpeg(
   file: File,
-  maxEdge = 1024,
+  maxEdge = 768,
   quality = 0.8,
 ): Promise<Blob> {
   // createImageBitmap applies the photo's rotation (EXIF) so it isn't sideways.
