@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 // Safe browser-protection headers for every page. They're skipped for the app icons (.png)
-// and the web app manifest: they do nothing for those files, and iPhones read those files
-// for "Add to Home Screen" (the home-screen icon started falling back to a letter after
-// these headers were added, so they're kept off anything the icon depends on).
+// and the web app manifest, where they do nothing. (They were ruled out as the cause of the
+// letter home-screen icon: that turned out to be the iOS 27.2 beta, which showed a letter for
+// every site, github.com included.)
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" }, // don't guess file types
   { key: "X-Frame-Options", value: "DENY" }, // no one can embed the app in another site
