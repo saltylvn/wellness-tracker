@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DEVELOP
 
-## Getting Started
+**A wellness tracker for weight, food, lifting and cardio.** An iPhone-first web app (installable PWA) I use every day: log meals by photo or description with AI-estimated calories and macros, follow a weekly lifting and cardio plan, and track weight against a target with a projected goal date.
 
-First, run the development server:
+> **Live:** [wellness-tracker-virid.vercel.app](https://wellness-tracker-virid.vercel.app) (Google sign-in) · **Status:** in daily use
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+[![CI](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## What it does
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Nutrition:** add food by **photo** or **typed description**, and Google Gemini estimates calories, protein, carbs and fat (always editable before saving). Daily totals against a calorie goal in a ring, macro goals with progress bars, a saved-foods library, and a one-tap water tracker.
+- **Fitness:** a week calendar drives the page. You choose which days are lifting and which are cardio.
+  - **Lifting days:** your own exercise list with sets and rep ranges, supersets, rest reminders, iOS-style scroll wheels to log weight and reps, and last time / today / heaviest on each exercise. A **#1000club** card totals bench, deadlift and squat 3-rep maxes toward 1,000 lb.
+  - **Cardio days:** run, cycle and swim with distance and time, plus weekly distance goals with progress bars.
+- **Weight:** a daily weigh-in on scroll wheels, start / current / target with a progress bar, a chart with the target line and a projection, weeks to go and a goal date at a fixed weekly pace. Gemini adds a one-line coaching note.
+- **Streaks:** consecutive-day streaks for food and for workouts (a planned rest day doesn't break it), with best-streak and milestone celebrations.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How it was built: AI-assisted engineering
 
-## Learn More
+I built DEVELOP with **Claude Code** as an AI pair programmer, starting as a beginner in web development. I owned the product and the decisions:
 
-To learn more about Next.js, take a look at the following resources:
+- every feature and screen, tested on my own iPhone;
+- small milestones, each one a pull request with tests, reviewed and merged by me (40+ merged PRs);
+- trade-offs like staying on free tiers, keeping AI calls on the server, and storing dates as local calendar days so streaks don't break at midnight.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)), alongside the code they shaped.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architecture
 
-## Deploy on Vercel
+| Layer             | Choice                                                                         | Why                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| UI and server     | Next.js 16 (App Router), React 19 Server Components and Server Actions, TypeScript | One codebase; data access and secrets stay on the server                          |
+| Styling           | Tailwind CSS v4 with named color tokens                                        | Consistent theme; mobile-first with 44px+ tap targets and safe-area insets            |
+| Database and auth | Supabase: Postgres, row-level security, Google sign-in                         | Real relational data; the database itself enforces who can see what                   |
+| AI                | Google Gemini (server-side only), JSON schema output, raced model chain        | Photo and text nutrition estimates on the free tier                                   |
+| Hosting and CI    | Vercel, GitHub Actions, Dependabot                                             | Every pull request is checked; every merge to `main` deploys                          |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Data model:** 12 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, tanning, AI request log), each created by a versioned SQL migration in [`supabase/migrations/`](supabase/migrations/).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## AI features
+
+| Feature            | How                                                                                                                                                                   |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Food from a photo  | The photo is shrunk to 768px on the phone as soon as it's picked, sent to Gemini with a JSON schema, validated and range-checked, and fills an editable form; nothing saves on its own |
+| Food from text     | Same pipeline from a plain description ("2 eggs and buttered toast")                                                                                                  |
+| Speed              | Fastest free models first with minimal thinking; if one hasn't answered in 1.5 s a backup starts alongside it and the first answer wins. Measured: **12.5 s → 1.3–2.5 s** |
+| Reliability        | Overloaded or retired models fall through to the next, a bad key stops at once, per-model timeouts and a total time budget                                           |
+| Weight coaching    | A one-line note, regenerated only when the numbers it was written for change                                                                                          |
+| Cost control       | A 40-a-day limit per person, logged in Postgres before the AI is called                                                                                              |
+
+## Security
+
+- **Row-level security on all 12 tables** (21 policies): every row belongs to one signed-in user, enforced by Postgres.
+- **Server-side secrets only:** the Gemini key never reaches the browser; AI replies are treated as untrusted input and validated before use. Google sign-in starts on the server.
+- **Security headers** on every page (nosniff, no framing, strict referrer policy).
+- **GitHub:** a protected `main` (pull requests only, required checks, no force-push), secret scanning with push protection, CodeQL code scanning, Dependabot alerts and security updates, and GitHub Actions pinned to commit SHAs.
+
+## Quality
+
+- **214 automated tests** (Vitest) for the pure logic: streaks, goal and weight-plan math, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), and more.
+- **A performance test** times the Fitness page's data loading against a simulated 50 ms database and fails if a day takes more than 2 round trips.
+- **CI on every pull request** (about 30 seconds): ESLint, TypeScript type check and all tests; plus Vercel's production build.
+
+## Running locally
+
+Requires Node.js 20+ and a free [Supabase](https://supabase.com) project.
+
+1. `npm install`
+2. Copy `.env.example` to `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `GEMINI_API_KEY` (a free key from Google AI Studio).
+3. Run the SQL files in `supabase/migrations/` in order in the Supabase SQL Editor, and enable Google sign-in.
+4. `npm run dev` and open http://localhost:3000
+
+`npm test` runs the unit tests; `npm run build` makes a production build.
+
+## Roadmap
+
+Shipped: PWA shell and deploy, Google sign-in, food log with macro goals, AI text and photo estimates, streaks, workouts, cardio, water, the Weight tab with an AI coaching note, and the DEVELOP rename with a launch splash.
+
+Next: polish and real-iPhone testing of photo logging, scroll wheels and checkboxes.
