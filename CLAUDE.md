@@ -35,6 +35,7 @@ Next.js (App Router) + TypeScript, Tailwind CSS, Supabase (Postgres, auth, stora
 - The Fitness page reads its data through `loadFitnessPage` in `lib/workouts/queries.ts`, in two rounds of parallel queries (round 1: plan, logged days, the weekday's exercises by weekday, tanning; round 2: the lift or cardio data). A test in `queries.test.ts` times it against a 50 ms stand-in database and fails if a lifting or cardio day takes more than 2 trips. Add new reads there, not inline in `page.tsx`.
 - Performance: tab links and "Jump to today" include `?date=` (from the phone's clock), so a tab tap loads the page once instead of bouncing through `GoToToday`; each tab has a `loading.tsx` (`PageSkeleton`) so taps respond instantly; "Continue with Google" starts on the server (`app/login/actions.ts`), so no Supabase code is sent to the browser; `WheelPicker` rows are memoized. Use `currentUserId` for sign-in checks.
 - Small, focused git commits with clear messages.
+- `main` is protected (GitHub ruleset "Protect main"): every change, including CLAUDE.md updates, goes through a pull request, Vercel's build check must pass before merging, and force-pushes and deleting `main` are blocked. No reviewer approval is required.
 
 - This is Next.js 16 (newer than most tutorials). Check the bundled docs in `node_modules/next/dist/docs/` before using a Next.js API (see `AGENTS.md`).
 - Today's date in the browser comes from the shared `useToday()` hook (`components/useToday.ts`; null on the server).
