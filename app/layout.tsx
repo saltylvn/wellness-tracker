@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Geist } from "next/font/google";
 import SplashScreen from "@/components/SplashScreen";
 import "./globals.css";
@@ -48,12 +49,15 @@ export const viewport: Viewport = {
 // the "no-splash" class so the splash stays hidden.
 const SPLASH_ONCE_SCRIPT = `try{var d=document.documentElement;if(sessionStorage.getItem("develop-splash")){d.classList.add("no-splash")}else{sessionStorage.setItem("develop-splash","1")}}catch(e){}`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // The Content Security Policy only runs scripts with this request's nonce (proxy.ts).
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     // suppressHydrationWarning: the script above adds a class to <html> before React starts.
     <html lang="en" className={`${geistSans.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: SPLASH_ONCE_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: SPLASH_ONCE_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col">
         <SplashScreen />

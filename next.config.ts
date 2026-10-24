@@ -8,7 +8,12 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" }, // don't guess file types
   { key: "X-Frame-Options", value: "DENY" }, // no one can embed the app in another site
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  // The app never uses the camera API (photos come from the phone's own picker), the
+  // microphone, location or payments, so no page (or injected code) can ask for them.
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" }, // other sites' windows can't reach this one
 ];
+// The Content Security Policy is sent by proxy.ts (it needs a fresh nonce per request).
 
 const nextConfig: NextConfig = {
   poweredByHeader: false, // don't advertise "Next.js" in every response

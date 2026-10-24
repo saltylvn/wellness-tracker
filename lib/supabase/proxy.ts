@@ -5,9 +5,15 @@ import { getSupabaseEnv } from "./env";
 // Runs on every page request (via /proxy.ts) to:
 //  1. keep the login session fresh (Supabase tokens expire and must be renewed)
 //  2. send logged-out visitors to /login, and logged-in ones away from it
-export async function updateSession(request: NextRequest) {
+//  `requestHeaders` are added to what the page sees (proxy.ts passes the CSP nonce).
+export async function updateSession(request: NextRequest, requestHeaders: Record<string, string> = {}) {
   const { url, publishableKey } = getSupabaseEnv();
-  let response = NextResponse.next({ request });
+  const forwarded = () => {
+    const headers = new Headers(request.headers);
+    Object.entries(requestHeaders).forEach(([key, value]) => headers.set(key, value));
+    return { headers };
+  };
+  let response = NextResponse.next({ request: forwarded() });
 
   const supabase = createServerClient(url, publishableKey, {
     cookies: {
@@ -16,7 +22,7 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet, headers) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        response = NextResponse.next({ request: forwarded() });
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options),
         );

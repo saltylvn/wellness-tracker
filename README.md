@@ -52,7 +52,7 @@ The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)
 
 - **Row-level security on all 12 tables** (21 policies): every row belongs to one signed-in user, enforced by Postgres.
 - **Server-side secrets only:** the Gemini key never reaches the browser; AI replies are treated as untrusted input and validated before use. Google sign-in starts on the server.
-- **Security headers** on every page (nosniff, no framing, strict referrer policy).
+- **Strict Content Security Policy** with a fresh nonce per request: only the app's own scripts run, and injected markup (script tags, event handlers) is blocked. Plus a Permissions-Policy (no camera API, microphone, location or payments), cross-origin window isolation, nosniff, no framing, a strict referrer policy, and HSTS.
 - **GitHub:** a protected `main` (pull requests only, required checks, linear history, no force-push), secret scanning with push protection, CodeQL code scanning, Dependabot alerts and security updates, and GitHub Actions pinned to commit SHAs. See [`SECURITY.md`](SECURITY.md) to report a problem.
 
 ## Quality
@@ -67,6 +67,7 @@ The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)
 - **Pure logic lives in `lib/` with tests;** pages and components stay thin. Streaks, goal status, the weight plan and AI reply validation are all plain functions.
 - **Race, don't wait.** Free AI models are sometimes overloaded, so a slow request gets a backup instead of a long timeout. The race is a small pure function with its own tests, separate from the Google SDK.
 - **The Fitness page loads in two database round trips, enforced by a test.** Two rounds of parallel queries; a test times it against a simulated slow database and fails if a lifting or cardio day needs more.
+- **Exact limits in the database.** The 40-a-day AI limit is one Postgres function call under a per-person lock: one round trip, and two requests at once can't both squeeze past it.
 - **Free tiers by design.** Supabase, Gemini and Vercel free tiers, with a per-person AI limit so one user can't use up the shared quota.
 - **A one-click demo, safely.** "Try the demo" signs in to a shared account on the server (the password never reaches the browser). A Postgres function rebuilds its sample data relative to the visitor's date, at most hourly, and only the demo account can run it. Email sign-up is refused for everyone else, and the AI limit survives resets.
 - **Capped at 25 accounts, on purpose.** DEVELOP is a personal and portfolio app, not built to scale. A Postgres trigger refuses the 26th sign-up (with a lock, so two sign-ups at once can't both slip in), and the login page explains that it's full.
