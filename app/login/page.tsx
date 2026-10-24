@@ -1,4 +1,5 @@
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { MAX_USERS } from "@/lib/authErrors";
 
 export default async function LoginPage({
   searchParams,
@@ -15,11 +16,16 @@ export default async function LoginPage({
         <p className="pt-3 text-muted">Calories, macros, workouts, and cardio in one place.</p>
       </div>
 
-      {error && (
+      {error === "full" ? (
+        <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-muted">
+          DEVELOP is a personal project limited to {MAX_USERS} accounts, and it&apos;s full. New
+          sign-ups are closed.
+        </p>
+      ) : error ? (
         <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-danger">
           Sign-in didn&apos;t work. Please try again.
         </p>
-      )}
+      ) : null}
 
       <GoogleSignInButton />
     </main>
