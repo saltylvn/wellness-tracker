@@ -44,6 +44,7 @@ Next.js (App Router) + TypeScript, Tailwind CSS, Supabase (Postgres, auth, stora
 - `npm run dev`: start the local dev server
 - `npm run build`: production build
 - `npm test`: run unit tests (vitest; pure logic in `lib/`)
+- On GitHub, every PR runs CI (`.github/workflows/ci.yml`: lint, `tsc --noEmit`, tests; about 30 s); it and Vercel's build must pass before merging. Dependabot opens grouped update PRs weekly (`.github/dependabot.yml`); actions are pinned to commit SHAs (required by the repo settings).
 
 ## Roadmap
 0. Setup ✅ (Node, git, project folder)

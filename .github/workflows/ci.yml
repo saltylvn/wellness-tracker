@@ -1,0 +1,38 @@
+# Runs on every pull request (and on main after a merge): installs the packages,
+# then checks the code with the linter, the TypeScript type checker, and the unit
+# tests. "main" requires this to pass before a PR can merge.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only: this workflow never needs to change the repo.
+permissions:
+  contents: read
+
+# A newer push to the same PR cancels the older, now-outdated run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, types and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Actions are pinned to exact commits (the comment shows the version), so a
+      # changed tag can't swap in different code. Dependabot keeps them updated.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: lts/*
+          cache: npm # reuse downloaded packages between runs (faster)
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm test
