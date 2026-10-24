@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isValidDateKey } from "@/lib/dates";
 import { parseNutritionForm } from "@/lib/food";
+import { currentUserId } from "@/lib/actionResult";
 
 export type SavedFoodFormState = { message: string } | null;
 
@@ -24,6 +25,7 @@ export async function updateSavedFood(
   if (typeof id !== "string" || id === "") return { message: "Couldn't save. Please try again." };
 
   const supabase = await createClient();
+  if (!(await currentUserId(supabase))) return { message: "Please sign in again." };
   // Row Level Security means this can only ever change your own saved food.
   const { error } = await supabase.from("saved_foods").update(parsed.values).eq("id", id);
 
@@ -45,6 +47,7 @@ export async function deleteSavedFood(formData: FormData) {
   const id = formData.get("id");
   if (typeof id === "string" && id !== "") {
     const supabase = await createClient();
+    if (!(await currentUserId(supabase))) redirect("/login");
     await supabase.from("saved_foods").delete().eq("id", id);
   }
   revalidatePath("/food/saved");
