@@ -2,7 +2,7 @@
 
 **A wellness tracker for weight, food, lifting and cardio.** An iPhone-first web app (installable PWA) I use every day: log meals by photo or description with AI-estimated calories and macros, follow a weekly lifting and cardio plan, and track weight against a target with a projected goal date.
 
-> **Live:** [wellness-tracker-virid.vercel.app](https://wellness-tracker-virid.vercel.app) (Google sign-in) · **Status:** in daily use
+> **Live:** [wellness-tracker-virid.vercel.app](https://wellness-tracker-virid.vercel.app): tap **Try the demo** to look around with sample data, no sign-up needed · **Status:** in daily use
 
 [![CI](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml)
 
@@ -68,6 +68,7 @@ The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)
 - **Race, don't wait.** Free AI models are sometimes overloaded, so a slow request gets a backup instead of a long timeout. The race is a small pure function with its own tests, separate from the Google SDK.
 - **The Fitness page loads in two database round trips, enforced by a test.** Two rounds of parallel queries; a test times it against a simulated slow database and fails if a lifting or cardio day needs more.
 - **Free tiers by design.** Supabase, Gemini and Vercel free tiers, with a per-person AI limit so one user can't use up the shared quota.
+- **A one-click demo, safely.** "Try the demo" signs in to a shared account on the server (the password never reaches the browser). A Postgres function rebuilds its sample data relative to the visitor's date, at most hourly, and only the demo account can run it. Email sign-up is refused for everyone else, and the AI limit survives resets.
 - **Capped at 25 accounts, on purpose.** DEVELOP is a personal and portfolio app, not built to scale. A Postgres trigger refuses the 26th sign-up (with a lock, so two sign-ups at once can't both slip in), and the login page explains that it's full.
 
 ## Running locally
@@ -80,6 +81,13 @@ Requires Node.js 24 (see [`.nvmrc`](.nvmrc), the version production runs) and a 
 4. `npm run dev` and open http://localhost:3000
 
 `npm test` runs the unit tests; `npm run build` makes a production build.
+
+### Recruiter demo (optional)
+
+1. Run `supabase/migrations/20261025000000_recruiter_demo.sql` in the SQL Editor (after the earlier migrations).
+2. In Supabase **Authentication → Sign In / Providers**, enable **Email** (the database refuses email sign-ups other than the demo's).
+3. In **Authentication → Users → Add user**, create `demo@example.com` with a strong password and **Auto Confirm User** on.
+4. Set `DEMO_EMAIL=demo@example.com` and `DEMO_PASSWORD=…` in `.env.local` and in Vercel (mark the password **Sensitive**), then redeploy. The **Try the demo** button appears once both are set.
 
 ## Roadmap
 
