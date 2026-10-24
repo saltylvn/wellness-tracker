@@ -1,4 +1,6 @@
+import DemoSignInButton from "@/components/DemoSignInButton";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { demoConfigured } from "@/lib/demo";
 import { MAX_USERS } from "@/lib/authErrors";
 
 export default async function LoginPage({
@@ -21,13 +23,20 @@ export default async function LoginPage({
           DEVELOP is a personal project limited to {MAX_USERS} accounts, and it&apos;s full. New
           sign-ups are closed.
         </p>
+      ) : error === "demo" ? (
+        <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-danger">
+          The demo isn&apos;t available right now. Please try again later.
+        </p>
       ) : error ? (
         <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-danger">
           Sign-in didn&apos;t work. Please try again.
         </p>
       ) : null}
 
-      <GoogleSignInButton />
+      <div className="space-y-3">
+        <GoogleSignInButton />
+        {demoConfigured(process.env) && <DemoSignInButton />}
+      </div>
     </main>
   );
 }
