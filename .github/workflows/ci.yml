@@ -1,6 +1,6 @@
 # Runs on every pull request (and on main after a merge): installs the packages,
-# then checks the code with the linter, the TypeScript type checker, and the unit
-# tests. "main" requires this to pass before a PR can merge.
+# audits the production dependencies, then checks the code with the linter, the
+# TypeScript type checker, and the unit tests. "main" requires this to pass before a PR can merge.
 name: CI
 
 on:
@@ -30,9 +30,11 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: lts/*
+          node-version-file: .nvmrc # same Node major as Vercel (24)
           cache: npm # reuse downloaded packages between runs (faster)
       - run: npm ci
+      # Fails on any high or critical advisory in packages that ship to users.
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm test

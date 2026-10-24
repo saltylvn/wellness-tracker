@@ -29,11 +29,11 @@ The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)
 
 | Layer             | Choice                                                                         | Why                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| UI and server     | Next.js 16 (App Router), React 19 Server Components and Server Actions, TypeScript | One codebase; data access and secrets stay on the server                          |
+| UI and server     | Next.js 16 (App Router), React 19 Server Components and Server Actions, TypeScript | One codebase; data access and secrets stay on the server                              |
 | Styling           | Tailwind CSS v4 with named color tokens                                        | Consistent theme; mobile-first with 44px+ tap targets and safe-area insets            |
 | Database and auth | Supabase: Postgres, row-level security, Google sign-in                         | Real relational data; the database itself enforces who can see what                   |
 | AI                | Google Gemini (server-side only), JSON schema output, raced model chain        | Photo and text nutrition estimates on the free tier                                   |
-| Hosting and CI    | Vercel, GitHub Actions, Dependabot                                             | Every pull request is checked; every merge to `main` deploys                          |
+| Hosting and CI    | Vercel (Node 24), GitHub Actions, Dependabot                                   | Every pull request is checked; every merge to `main` deploys                          |
 
 **Data model:** 12 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, tanning, AI request log), each created by a versioned SQL migration in [`supabase/migrations/`](supabase/migrations/).
 
@@ -53,17 +53,25 @@ The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)
 - **Row-level security on all 12 tables** (21 policies): every row belongs to one signed-in user, enforced by Postgres.
 - **Server-side secrets only:** the Gemini key never reaches the browser; AI replies are treated as untrusted input and validated before use. Google sign-in starts on the server.
 - **Security headers** on every page (nosniff, no framing, strict referrer policy).
-- **GitHub:** a protected `main` (pull requests only, required checks, no force-push), secret scanning with push protection, CodeQL code scanning, Dependabot alerts and security updates, and GitHub Actions pinned to commit SHAs.
+- **GitHub:** a protected `main` (pull requests only, required checks, linear history, no force-push), secret scanning with push protection, CodeQL code scanning, Dependabot alerts and security updates, and GitHub Actions pinned to commit SHAs. See [`SECURITY.md`](SECURITY.md) to report a problem.
 
 ## Quality
 
 - **214 automated tests** (Vitest) for the pure logic: streaks, goal and weight-plan math, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), and more.
 - **A performance test** times the Fitness page's data loading against a simulated 50 ms database and fails if a day takes more than 2 round trips.
-- **CI on every pull request** (about 30 seconds): ESLint, TypeScript type check and all tests; plus Vercel's production build.
+- **CI on every pull request** (about 30 seconds): production dependency audit, ESLint, TypeScript type check and all tests; plus Vercel's production build. Both must pass before anything merges.
+
+## Engineering decisions
+
+- **Dates are local calendar days, not UTC timestamps.** A meal logged at 11 pm counts for that day, so daily totals and streaks don't break at midnight.
+- **Pure logic lives in `lib/` with tests;** pages and components stay thin. Streaks, goal status, the weight plan and AI reply validation are all plain functions.
+- **Race, don't wait.** Free AI models are sometimes overloaded, so a slow request gets a backup instead of a long timeout. The race is a small pure function with its own tests, separate from the Google SDK.
+- **The Fitness page loads in two database round trips, enforced by a test.** Two rounds of parallel queries; a test times it against a simulated slow database and fails if a lifting or cardio day needs more.
+- **Free tiers by design.** Supabase, Gemini and Vercel free tiers, with a per-person AI limit so one user can't use up the shared quota.
 
 ## Running locally
 
-Requires Node.js 20+ and a free [Supabase](https://supabase.com) project.
+Requires Node.js 24 (see [`.nvmrc`](.nvmrc), the version production runs) and a free [Supabase](https://supabase.com) project.
 
 1. `npm install`
 2. Copy `.env.example` to `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `GEMINI_API_KEY` (a free key from Google AI Studio).
