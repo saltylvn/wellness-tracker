@@ -68,6 +68,7 @@ The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)
 - **Race, don't wait.** Free AI models are sometimes overloaded, so a slow request gets a backup instead of a long timeout. The race is a small pure function with its own tests, separate from the Google SDK.
 - **The Fitness page loads in two database round trips, enforced by a test.** Two rounds of parallel queries; a test times it against a simulated slow database and fails if a lifting or cardio day needs more.
 - **Free tiers by design.** Supabase, Gemini and Vercel free tiers, with a per-person AI limit so one user can't use up the shared quota.
+- **Capped at 25 accounts, on purpose.** DEVELOP is a personal and portfolio app, not built to scale. A Postgres trigger refuses the 26th sign-up (with a lock, so two sign-ups at once can't both slip in), and the login page explains that it's full.
 
 ## Running locally
 

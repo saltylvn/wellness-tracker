@@ -29,6 +29,7 @@ Next.js (App Router) + TypeScript, Tailwind CSS, Supabase (Postgres, auth, stora
 - The Anthropic API key and Supabase service key live only in `.env.local` (git-ignored). Never expose them to browser code.
 - Call the AI only from the server (`app/api/estimate-food/route.ts`, `app/(tabs)/weight/actions.ts`); validate the JSON reply before using it (`lib/ai/nutrition.ts`, `lib/ai/weightCoach.ts`). Both share one 40-a-day AI limit per user (`lib/ai/dailyLimit.ts`). `GEMINI_API_KEY` lives only in `.env.local` and Vercel (Sensitive).
 - Row-level security on every Supabase table; every table is scoped to the signed-in user.
+- At most 25 accounts (personal/portfolio app, not built to scale): a `before insert` trigger on `auth.users` refuses the 26th (`supabase/migrations/20261024000000_user_cap.sql`); `/auth/callback` maps Supabase's "Database error saving new user" to `/login?error=full` (`lib/authErrors.ts`, `MAX_USERS`, keep in step with the SQL).
 - Dates are stored as the user's local calendar date, not UTC timestamps, so daily totals and streaks don't break at midnight.
 - Keep pure logic (streaks, goal status) in `lib/` with unit tests.
 - Server actions share `lib/actionResult.ts` (the `ActionResult` type, `currentUserId`, `failedSave`); don't repeat the sign-in and error boilerplate. Those lib files use relative imports so vitest can load them.
