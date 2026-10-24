@@ -17,4 +17,8 @@ done
 # Older iPhones also look for this name; keep an identical copy.
 cp public/apple-touch-icon.png public/apple-touch-icon-precomposed.png
 echo "public/apple-touch-icon-precomposed.png (copy)"
+# The GitHub social preview card (upload it in the repo's Settings -> Social preview).
+curl -sf "http://localhost:3000/icon-source/social-preview" -o docs/social-preview.png
+node scripts/strip-png.mjs docs/social-preview.png >/dev/null
+echo "docs/social-preview.png (1280 x 640)"
 echo "Bump ICON_VERSION in lib/iconVersion.ts so phones fetch the new icon."

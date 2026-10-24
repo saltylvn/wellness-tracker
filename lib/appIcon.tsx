@@ -87,3 +87,64 @@ export function renderIcon(size: number) {
     { width: size, height: size },
   );
 }
+
+// The repository's social preview (the card shown when the GitHub link is shared on
+// LinkedIn, Slack, iMessage...). GitHub's recommended size is 1280 x 640. Saved as
+// docs/social-preview.png by `npm run icons`; upload it in the repo's Settings.
+const STACK = ["Next.js 16", "TypeScript", "Supabase", "Postgres RLS", "Gemini AI"];
+
+export function renderSocialPreview() {
+  return new ImageResponse(
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        height: "100%",
+        alignItems: "center",
+        gap: 64,
+        padding: "0 80px",
+        background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BLACK} 100%)`,
+        color: "#ffffff",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          borderRadius: 64,
+          overflow: "hidden",
+          flexShrink: 0,
+          border: "3px solid #3a3a3c", // a hairline edge so the dark icon stands out on the dark card
+        }}
+      >
+        {iconSvg(280)}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", fontSize: 112, letterSpacing: 16, lineHeight: 1 }}>DEVELOP</div>
+        <div style={{ display: "flex", fontSize: 28, letterSpacing: 10, color: "#8e8e93", marginTop: 16 }}>
+          WELLNESS TRACKER
+        </div>
+        <div style={{ display: "flex", fontSize: 36, lineHeight: 1.35, marginTop: 36, maxWidth: 780 }}>
+          AI food logging from photos, lifting and cardio plans, weight goals.
+        </div>
+        <div style={{ display: "flex", gap: 10, marginTop: 36 }}>
+          {STACK.map((item) => (
+            <div
+              key={item}
+              style={{
+                display: "flex",
+                fontSize: 22,
+                padding: "8px 16px",
+                borderRadius: 999,
+                border: `2px solid ${GREEN_BOTTOM}`,
+                color: GREEN_TOP,
+              }}
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>,
+    { width: 1280, height: 640 },
+  );
+}
