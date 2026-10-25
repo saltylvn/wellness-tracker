@@ -1,0 +1,191 @@
+<!doctype html>
+<!-- Source for docs/showcase/develop-fitness@2x.png (1600x1200 page, rendered at 2x). Re-render:
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --force-device-scale-factor=2 --window-size=1600,1200 --screenshot=docs/showcase/develop-fitness@2x.png docs/showcase/develop-fitness.html
+  Phone screens are real screenshots of the live app's demo account (fitness-iphone.png, log-sheet-iphone.png). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DEVELOP · Fitness Tracker</title>
+<style>
+  :root {
+    --card: #161618; --line: #2c2c2e;
+    --text: #f5f5f7; --muted: #9a9aa0; --dim: #6e6e73;
+    --green: #30d158; --green-hi: #5df27a; --green-lo: #1fbf3f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1600px; height: 1200px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(800px 700px at 76% 52%, rgba(48, 209, 88, 0.11), transparent 70%),
+      linear-gradient(180deg, #1c1c1e 0%, #000 100%);
+    color: var(--text);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: grid; grid-template-columns: 820px 1fr; gap: 24px;
+    padding: 46px 48px 36px 56px;
+  }
+  .eyebrow { font-size: 12.5px; letter-spacing: 3px; text-transform: uppercase; color: var(--green); font-weight: 600; margin-bottom: 10px; }
+
+  /* Left column */
+  .left { display: flex; flex-direction: column; gap: 24px; }
+  header { display: flex; align-items: center; gap: 22px; }
+  header img { width: 92px; height: 92px; border-radius: 21px; border: 2px solid #3a3a3c; }
+  h1 { font-size: 56px; font-weight: 300; letter-spacing: 12px; line-height: 1; }
+  .sub { font-size: 14px; letter-spacing: 6px; color: var(--muted); margin-top: 10px; }
+  .lede { font-size: 20px; line-height: 1.42; color: #d8d8dc; }
+  .lede b { color: var(--text); font-weight: 600; }
+
+  .callouts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .callout { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; gap: 11px; }
+  .callout.hero { border-color: var(--green-lo); background: linear-gradient(180deg, rgba(48,209,88,0.09), var(--card)); }
+  .callout .n { flex: 0 0 26px; height: 26px; border-radius: 50%; background: var(--green); color: #000; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .callout h3 { font-size: 16.5px; margin-bottom: 3px; }
+  .callout p { font-size: 14.5px; color: var(--muted); line-height: 1.38; }
+
+  .eng { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; }
+  .eng ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 9px 22px; }
+  .eng li { font-size: 14.5px; color: #d8d8dc; line-height: 1.38; padding-left: 14px; position: relative; }
+  .eng li::before { content: "›"; color: var(--green); position: absolute; left: 0; font-weight: 700; }
+  .eng li b { color: var(--text); }
+
+  .stack { display: grid; grid-template-columns: 112px 1fr; gap: 9px 12px; align-items: center; }
+  .stack .layer { font-size: 13.5px; color: var(--muted); font-weight: 600; text-align: right; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 14px; padding: 4px 11px; border-radius: 999px; border: 1.5px solid var(--green-lo); color: var(--green-hi); }
+  .chip.plain { border-color: var(--line); color: #d8d8dc; }
+
+  footer { margin-top: auto; display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--muted); }
+  .pill { padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line); color: #d8d8dc; white-space: nowrap; }
+  .pill.go { background: var(--green); border-color: var(--green); color: #000; font-weight: 700; }
+
+  /* Phones: --w is the screen width; --k scales the 393pt-wide screenshot to it. */
+  .right { position: relative; }
+  .phone {
+    position: absolute; padding: 12px; border-radius: calc(var(--w) * 0.17);
+    background: linear-gradient(145deg, #3a3a3e, #1a1a1c 40%, #2a2a2d);
+    box-shadow: 0 0 0 2px #4a4a4e, 0 40px 90px rgba(0, 0, 0, 0.8);
+  }
+  .screen {
+    width: var(--w); height: calc(var(--w) * 852 / 393);
+    border-radius: calc(var(--w) * 0.14); overflow: hidden; background: #0a0a0a; position: relative;
+  }
+  .status {
+    position: absolute; inset: 0 0 auto 0; height: calc(var(--w) * 54 / 393); z-index: 2; background: #0a0a0a;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px calc(var(--w) * 0.09) 0 calc(var(--w) * 0.11); font-size: calc(var(--w) * 0.04); font-weight: 600;
+  }
+  .island { position: absolute; z-index: 3; top: calc(var(--w) * 0.028); left: 50%; transform: translateX(-50%); width: 30%; height: calc(var(--w) * 0.085); border-radius: 99px; background: #000; }
+  .icons { display: flex; gap: 6px; align-items: center; }
+  .bars { display: flex; gap: 2px; align-items: flex-end; height: 11px; }
+  .bars i { width: 3px; background: #fff; border-radius: 1px; }
+  .battery { width: 24px; height: 11px; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 4px; padding: 1.5px; }
+  .battery i { display: block; height: 100%; width: 80%; background: #fff; border-radius: 1px; }
+  .shot { position: absolute; left: 0; top: calc(var(--k) * 54px); width: var(--w); }
+  .home { position: absolute; z-index: 2; bottom: 8px; left: 50%; transform: translateX(-50%); width: 36%; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.55); }
+
+  .phone.back { --w: 360px; --k: 0.9160; left: 0; top: 185px; opacity: 0.88; filter: saturate(0.9); }
+  .phone.front { --w: 400px; --k: 1.0178; right: 0; top: 95px; box-shadow: 0 0 0 2px #4a4a4e, 0 50px 110px rgba(0, 0, 0, 0.9), 0 0 120px rgba(48, 209, 88, 0.16); }
+
+  .phone.front .shot { top: calc(var(--k) * 4px); }
+
+  /* Swipe gesture on the Weight wheel. The wheel's selected row sits at x=103, y=641
+     (in the 393pt-wide screenshot), so the marker is placed from those numbers. */
+  .swipe {
+    position: absolute; z-index: 4;
+    left: calc(var(--k) * 38px - 19px); top: calc(var(--k) * 4px + var(--k) * 641px - 92px);
+    width: 38px; height: 184px; border-radius: 19px;
+    border: 2px solid rgba(93, 242, 122, 0.9); background: rgba(48, 209, 88, 0.16);
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px 0;
+    color: var(--green-hi); font-size: 19px; font-weight: 800; line-height: 1;
+    box-shadow: 0 0 24px rgba(48, 209, 88, 0.45);
+  }
+  .swipe .finger { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.85); box-shadow: 0 0 0 6px rgba(255,255,255,0.25); }
+  .swipe-label {
+    position: absolute; z-index: 5; right: calc(100% - 2px); top: calc(12px + var(--k) * 645px - 26px);
+    background: var(--green); color: #000; font-weight: 700; font-size: 15px; line-height: 1.25;
+    padding: 9px 13px; border-radius: 12px; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  }
+  .swipe-label::after { content: ""; position: absolute; right: -8px; top: 50%; transform: translateY(-50%); border: 8px solid transparent; border-left-color: var(--green); border-right: 0; }
+  .swipe-label small { display: block; font-weight: 600; font-size: 12.5px; opacity: 0.75; }
+  .caption { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; color: var(--dim); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="left">
+  <header>
+    <img src="../../public/apple-touch-icon.png" alt="DEVELOP app icon">
+    <div>
+      <h1>DEVELOP</h1>
+      <div class="sub">WELLNESS TRACKER · WEB APPLICATION</div>
+    </div>
+  </header>
+
+  <p class="lede">An <b>iPhone-first, installable web app</b> for lifting, cardio, nutrition and weight, built end to end and in daily use: <b>52 pull requests in 3 weeks</b>. Shown: the <b>Fitness tracker</b> on the live app, with demo data.</p>
+
+  <div>
+    <div class="eyebrow">The fitness tracker</div>
+    <div class="callouts">
+      <div class="callout hero"><div class="n">1</div><div><h3>Swipe to log a set</h3><p>iOS-style scroll wheels: swipe up or down to set the weight (2.5 lb steps) and reps, then one tap adds the set.</p></div></div>
+      <div class="callout hero"><div class="n">2</div><div><h3>Progress at a glance</h3><p>Last time, today's sets and your heaviest lift on every exercise; weight defaults to what you used last.</p></div></div>
+      <div class="callout"><div class="n">3</div><div><h3>Your week, one tap</h3><p>Toggle lift or cardio per day; each tap saves itself, and exercises survive a switch.</p></div></div>
+      <div class="callout"><div class="n">4</div><div><h3>Streak &amp; calendar rings</h3><p>A green ring on every trained day; a planned rest day never breaks the streak.</p></div></div>
+      <div class="callout"><div class="n">5</div><div><h3>Training structure</h3><p>Sauna and stretch checks, supersets with no rest, and 3–5 min rest reminders.</p></div></div>
+      <div class="callout"><div class="n">6</div><div><h3>#1000club &amp; cardio goals</h3><p>Bench + deadlift + squat 3-rep maxes toward 1,000 lb; weekly run, cycle and swim goals.</p></div></div>
+    </div>
+  </div>
+
+  <div class="eng">
+    <div class="eyebrow">Engineering behind it</div>
+    <ul>
+      <li><b>Scroll wheels on native CSS scroll-snap</b> (no JS animation), with memoized rows</li>
+      <li><b>2 database round trips</b> per page, guarded by a performance test</li>
+      <li><b>Server Actions</b> for every write, with sign-in and input checks</li>
+      <li><b>Row-level security</b> on all 13 Postgres tables</li>
+      <li><b>232 automated tests</b>; CI gates every PR in ~30 s</li>
+      <li><b>Strict nonce CSP</b>, CodeQL, secret scanning, protected main</li>
+    </ul>
+  </div>
+
+  <div>
+    <div class="eyebrow">Tools &amp; tech stack</div>
+    <div class="stack">
+      <div class="layer">Frontend</div><div class="chips"><span class="chip">Next.js 16</span><span class="chip">React 19</span><span class="chip">TypeScript</span><span class="chip">Tailwind CSS v4</span><span class="chip plain">PWA</span></div>
+      <div class="layer">Backend &amp; data</div><div class="chips"><span class="chip">Supabase</span><span class="chip">PostgreSQL</span><span class="chip plain">Server Actions</span><span class="chip plain">RLS · RPC</span><span class="chip plain">Google OAuth</span></div>
+      <div class="layer">AI &amp; testing</div><div class="chips"><span class="chip">Google Gemini</span><span class="chip">Vitest</span><span class="chip plain">PGlite</span><span class="chip plain">ESLint</span></div>
+      <div class="layer">DevOps</div><div class="chips"><span class="chip">Vercel</span><span class="chip">GitHub Actions</span><span class="chip plain">CodeQL</span><span class="chip plain">Dependabot</span><span class="chip plain">Claude Code</span></div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="pill go">▶ Try the demo: wellness-tracker-virid.vercel.app</span>
+    <span class="pill">github.com/saltylvn/wellness-tracker</span>
+  </footer>
+</div>
+
+<div class="right">
+  <div class="phone back">
+    <div class="screen">
+      <div class="status"><span>9:41</span><span class="icons"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="battery"><i></i></span></span></div>
+      <div class="island"></div>
+      <img class="shot" src="fitness-iphone.png" alt="Fitness tab: streak, week plan, calendar and Wednesday's leg workout">
+      <div class="home"></div>
+    </div>
+  </div>
+
+  <div class="phone front">
+    <div class="screen">
+      <div class="status"><span>9:41</span><span class="icons"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="battery"><i></i></span></span></div>
+      <div class="island"></div>
+      <img class="shot" src="log-sheet-iphone.png" alt="Log sheet: weight and reps scroll wheels for leg extensions">
+      <div class="swipe"><span>↑</span><span class="finger"></span><span>↓</span></div>
+      <div class="home"></div>
+    </div>
+    <div class="swipe-label">Swipe ↕ to change the weight<small>2.5 lb steps · reps wheel beside it</small></div>
+  </div>
+
+  <div class="caption">Live app · demo data · Fitness tab and the Log sheet</div>
+</div>
+
+</body>
+</html>

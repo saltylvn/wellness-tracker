@@ -6,6 +6,8 @@
 
 [![CI](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml)
 
+![DEVELOP on iPhone: the Fitness tab with a workout streak, weekly plan and calendar, and the Log sheet where you swipe the weight and reps wheels to log a set](docs/showcase/develop-fitness@2x.png)
+
 ## What it does
 
 - **Nutrition:** add food by **photo** or **typed description**, and Google Gemini estimates calories, protein, carbs and fat (always editable before saving). Daily totals against a calorie goal in a ring, macro goals with progress bars, a saved-foods library, and a one-tap water tracker.
@@ -20,12 +22,14 @@
 I built DEVELOP with **Claude Code** as an AI pair programmer, starting as a beginner in web development. I owned the product and the decisions:
 
 - every feature and screen, tested on my own iPhone;
-- small milestones, each one a pull request with tests, reviewed and merged by me (40+ merged PRs);
+- small milestones, each one a pull request with tests, reviewed and merged by me (50+ merged PRs);
 - trade-offs like staying on free tiers, keeping AI calls on the server, and storing dates as local calendar days so streaks don't break at midnight.
 
 The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)), alongside the code they shaped.
 
 ## Architecture
+
+![DEVELOP overview: what it does, how it's built (iPhone PWA → Next.js on Vercel → Supabase Postgres and Google Gemini), engineering highlights, skills and tech stack](docs/showcase/develop-showcase@2x.png)
 
 | Layer             | Choice                                                                         | Why                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
@@ -35,7 +39,7 @@ The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)
 | AI                | Google Gemini (server-side only), JSON schema output, raced model chain        | Photo and text nutrition estimates on the free tier                                   |
 | Hosting and CI    | Vercel (Node 24), GitHub Actions, Dependabot                                   | Every pull request is checked; every merge to `main` deploys                          |
 
-**Data model:** 12 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, tanning, AI request log), each created by a versioned SQL migration in [`supabase/migrations/`](supabase/migrations/).
+**Data model:** 13 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, tanning, AI request log, demo state), each created by a versioned SQL migration in [`supabase/migrations/`](supabase/migrations/).
 
 ## AI features
 
@@ -50,14 +54,14 @@ The working rules for the AI are versioned in the repo ([`CLAUDE.md`](CLAUDE.md)
 
 ## Security
 
-- **Row-level security on all 12 tables** (21 policies): every row belongs to one signed-in user, enforced by Postgres.
+- **Row-level security on all 13 tables** (21 policies): every row belongs to one signed-in user, enforced by Postgres.
 - **Server-side secrets only:** the Gemini key never reaches the browser; AI replies are treated as untrusted input and validated before use. Google sign-in starts on the server.
 - **Strict Content Security Policy** with a fresh nonce per request: only the app's own scripts run, and injected markup (script tags, event handlers) is blocked. Plus a Permissions-Policy (no camera API, microphone, location or payments), cross-origin window isolation, nosniff, no framing, a strict referrer policy, and HSTS.
 - **GitHub:** a protected `main` (pull requests only, required checks, linear history, no force-push), secret scanning with push protection, CodeQL code scanning, Dependabot alerts and security updates, and GitHub Actions pinned to commit SHAs. See [`SECURITY.md`](SECURITY.md) to report a problem.
 
 ## Quality
 
-- **214 automated tests** (Vitest) for the pure logic: streaks, goal and weight-plan math, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), and more.
+- **232 automated tests** (Vitest) for the pure logic: streaks, goal and weight-plan math, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, and more. Database migrations are verified against real Postgres (PGlite).
 - **A performance test** times the Fitness page's data loading against a simulated 50 ms database and fails if a day takes more than 2 round trips.
 - **CI on every pull request** (about 30 seconds): production dependency audit, ESLint, TypeScript type check and all tests; plus Vercel's production build. Both must pass before anything merges.
 
