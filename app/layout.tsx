@@ -37,10 +37,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover", // let the page extend under the notch / home bar
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-  ],
+  themeColor: "#ffffff", // white status bar: the app is always light
 };
 
 // Runs before the page paints. The launch splash should show once each time the app

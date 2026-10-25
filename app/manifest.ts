@@ -10,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "DEVELOP: a wellness tracker for calories, macros, workouts, and cardio.",
     start_url: "/food",
     display: "standalone", // full-screen, like a native app
-    background_color: "#000000", // black behind the icon while the app opens, to match it
-    theme_color: "#000000", // black system bars, to match the icon
+    background_color: "#ffffff", // white while the app opens, to match the app
+    theme_color: "#ffffff", // white system bars, to match the app
     // Plain PNG files in public/ (made by `npm run icons` from lib/appIcon.tsx). Newer iPhones
     // take the home-screen icon from here, so the 180x180 iPhone size comes first.
     icons: [

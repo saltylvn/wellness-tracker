@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
-// The app icon, drawn in code (no image files), styled like iMessage's dark-mode icon:
-// a bold green line graph trending upward on a near-black background, with a dot at each point (what progress looks
+// The app icon, drawn in code (no image files): a bold green line graph trending upward
+// on a white background (to match the always-light app), with a dot at each point (what progress looks
 // like). The last dot is bigger, with a halo, because that's where you are now.
 //
 // This file is the design. The icons the phone actually uses are plain PNG files in public/
@@ -9,7 +9,7 @@ import { ImageResponse } from "next/og";
 // `npm run dev`, then `npm run icons` to redraw them.
 //
 // iPhones let a web app have only ONE home-screen icon (it can't switch between
-// light and dark), so this dark icon is used for the home screen and every
+// light and dark), so this white icon is used for the home screen and every
 // browser tab.
 //
 // Note: the image renderer only allows plain SVG tags inside <svg> (no React
@@ -27,10 +27,14 @@ const POINTS: [number, number][] = [
 
 const LINE = POINTS.map(([x, y]) => `${x},${y}`).join(" ");
 
-// The iMessage dark-mode look: a bold green glyph with a soft top-to-bottom gradient
-// (lighter green to deeper green) on a background that fades from very dark grey to black.
-const GREEN_TOP = "#5df27a";
-const GREEN_BOTTOM = "#1fbf3f";
+// A bold green glyph with a soft top-to-bottom gradient (lighter green to deeper green)
+// on a background that fades from white to a very light grey. The greens are a little
+// deeper than on a dark background so the graph stands out on white.
+const GREEN_TOP = "#34c759"; // Apple's system green, same as the app's accent
+const GREEN_BOTTOM = "#1a9e3a";
+const WHITE = "#ffffff";
+const BG_BOTTOM = "#f2f2f7"; // iOS light grey
+// The social preview card stays dark, so the white icon stands out on it.
 const BG_TOP = "#1c1c1e"; // iOS dark grey
 const BLACK = "#000000";
 
@@ -41,8 +45,8 @@ function iconSvg(size: number) {
     <svg width={size} height={size} viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={BG_TOP} />
-          <stop offset="1" stopColor={BLACK} />
+          <stop offset="0" stopColor={WHITE} />
+          <stop offset="1" stopColor={BG_BOTTOM} />
         </linearGradient>
         {/* userSpaceOnUse: one gradient across the whole icon, so the line and dots match */}
         <linearGradient id="green" gradientUnits="userSpaceOnUse" x1="0" y1="96" x2="0" y2="416">
@@ -63,11 +67,11 @@ function iconSvg(size: number) {
         strokeLinejoin="round"
       />
 
-      {/* a dot at every point; each has a dark center so it reads as a node */}
+      {/* a dot at every point; each has a white center so it reads as a node */}
       {POINTS.slice(0, -1).map(([x, y]) => (
         <g key={`${x}-${y}`}>
           <circle cx={x} cy={y} r="34" fill="url(#green)" />
-          <circle cx={x} cy={y} r="13" fill={BLACK} />
+          <circle cx={x} cy={y} r="13" fill={WHITE} />
         </g>
       ))}
 
@@ -75,7 +79,7 @@ function iconSvg(size: number) {
       <g>
         <circle cx={last[0]} cy={last[1]} r="62" fill={GREEN_TOP} fillOpacity={0.22} />
         <circle cx={last[0]} cy={last[1]} r="44" fill="url(#green)" />
-        <circle cx={last[0]} cy={last[1]} r="17" fill={BLACK} />
+        <circle cx={last[0]} cy={last[1]} r="17" fill={WHITE} />
       </g>
     </svg>
   );
@@ -113,7 +117,7 @@ export function renderSocialPreview() {
           borderRadius: 64,
           overflow: "hidden",
           flexShrink: 0,
-          border: "3px solid #3a3a3c", // a hairline edge so the dark icon stands out on the dark card
+          border: "3px solid #3a3a3c", // a hairline edge around the icon on the dark card
         }}
       >
         {iconSvg(280)}

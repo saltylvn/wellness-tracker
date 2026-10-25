@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 :root {
+  /* The app is always light (white with green), even when the phone is in dark mode.
+     color-scheme tells the browser too, so its own parts (inputs, scroll bars) stay light. */
+  color-scheme: light;
   --background: #ffffff;
   --foreground: #171717;
   --muted: #6b7280;
@@ -23,19 +26,6 @@
   --color-card: var(--card);
   --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --muted: #a1a1aa;
-    --card: #18181b;
-    --border: #27272a;
-    /* Apple uses slightly brighter variants of these in dark mode */
-    --accent: #30d158;
-    --danger: #ff453a;
-  }
 }
 
 /* Keyboard/tap focus outline in the accent color */
