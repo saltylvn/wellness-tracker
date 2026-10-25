@@ -24,6 +24,7 @@ An iPhone-first web app (installable PWA) for body weight, calorie/macro trackin
 Next.js (App Router) + TypeScript, Tailwind CSS, Supabase (Postgres, auth, storage), Google Gemini free tier for AI food estimates (server-side only, via `lib/ai/gemini.ts`, the one swappable provider file), deployed on Vercel.
 
 ## Conventions
+- Always light: white background with the green accent, even when the phone is in dark mode (no `prefers-color-scheme: dark` styles; `color-scheme: light` in `app/globals.css`; white `themeColor` and manifest colors). The app icon stays dark.
 - Text on the bright green accent is always black (`--on-accent` in `app/globals.css`); use `text-on-accent` on `bg-accent`, never `text-white`.
 - Mobile-first: design for ~390px width, safe-area insets, 44px+ tap targets, 16px+ input font size (prevents iOS zoom).
 - The Anthropic API key and Supabase service key live only in `.env.local` (git-ignored). Never expose them to browser code.
