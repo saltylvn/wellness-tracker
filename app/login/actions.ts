@@ -41,5 +41,5 @@ export async function signInAsDemo(formData: FormData) {
   // Rebuilds the sample data relative to today (at most once an hour; see the
   // recruiter_demo migration). If it fails, the demo still opens with what's there.
   await supabase.rpc("reset_demo_data", { p_today: today });
-  redirect(`/food?date=${today}`);
+  redirect(`/workouts?date=${today}`);
 }

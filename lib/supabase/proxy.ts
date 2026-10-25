@@ -43,7 +43,7 @@ export async function updateSession(request: NextRequest, requestHeaders: Record
     return redirectWithCookies(request, response, "/login");
   }
   if (isLoggedIn && pathname === "/login") {
-    return redirectWithCookies(request, response, "/food");
+    return redirectWithCookies(request, response, "/workouts");
   }
   return response;
 }

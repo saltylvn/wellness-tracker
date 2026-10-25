@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "DEVELOP",
     short_name: "DEVELOP",
     description: "DEVELOP: a wellness tracker for calories, macros, workouts, and cardio.",
-    start_url: "/food",
+    start_url: "/workouts", // opens on the Fitness tab
     display: "standalone", // full-screen, like a native app
     background_color: "#ffffff", // white while the app opens, to match the app
     theme_color: "#ffffff", // white system bars, to match the app
