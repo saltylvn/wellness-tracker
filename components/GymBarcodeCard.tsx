@@ -92,27 +92,30 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
     <>
       {barcode ? (
         // Always white behind the bars, so scanners can read it.
-        <section aria-label="Gym check-in barcode" className="rounded-2xl bg-white px-4 pt-5 pb-1 text-center ring-1 ring-border">
+        <section aria-label="Gym check-in barcode" className="rounded-2xl bg-white px-4 pt-3 text-center ring-1 ring-border">
           {svg ? (
             <div
               role="img"
               aria-label={`${FORMAT_LABELS[barcode.format]}: ${barcode.text}`}
               // Centered and not too wide, like the gym's own app, with white space on each side for the scanner.
-              className="mx-auto h-24 w-3/4 [&>svg]:h-full [&>svg]:w-full"
+              className="mx-auto h-16 w-3/4 [&>svg]:h-full [&>svg]:w-full"
               // Drawn on the server by lib/gymBarcodeSvg.ts from a checked value, not from user HTML.
               dangerouslySetInnerHTML={{ __html: svg }}
             />
           ) : (
             <p className="py-4 text-sm text-muted">Couldn&apos;t draw this barcode. Tap Change to add it again.</p>
           )}
-          <p className="mt-2 truncate text-lg font-semibold tracking-wide text-black/70">{barcode.text}</p>
-          <button
-            type="button"
-            onClick={openSheet}
-            className="min-h-11 px-3 text-sm font-medium text-muted active:opacity-70"
-          >
-            Change
-          </button>
+          {/* The number stays centered under the bars; Change sits on the same line, at the right. */}
+          <div className="relative flex min-h-11 items-center justify-center">
+            <p className="truncate px-16 text-lg font-semibold tracking-wide text-black/70">{barcode.text}</p>
+            <button
+              type="button"
+              onClick={openSheet}
+              className="absolute right-0 min-h-11 px-1 text-sm font-medium text-muted active:opacity-70"
+            >
+              Change
+            </button>
+          </div>
         </section>
       ) : (
         <button
