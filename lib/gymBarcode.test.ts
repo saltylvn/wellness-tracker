@@ -1,7 +1,7 @@
 import bwipjs from "bwip-js/node";
 import { describe, expect, it } from "vitest";
 import { GYM_BARCODE_FORMATS, parseGymBarcode, type GymBarcodeFormat } from "./gymBarcode";
-import { decodeGymBarcode, rotateLuminance, toLuminance } from "./gymBarcodeDecode";
+import { decodeGymBarcode, rotateLuminance, shrinkLuminance, toLuminance } from "./gymBarcodeDecode";
 import { gymBarcodeSvg } from "./gymBarcodeSvg";
 
 // Draws a barcode as a brightness picture (255 = white, 0 = black), the way a
@@ -70,6 +70,14 @@ describe("rotateLuminance", () => {
   });
 });
 
+describe("shrinkLuminance", () => {
+  it("averages each block into one pixel", () => {
+    // 4x2 -> 2x1
+    const [out, w, h] = shrinkLuminance(new Uint8ClampedArray([0, 100, 200, 200, 100, 0, 100, 100]), 4, 2, 2);
+    expect([[...out], w, h]).toEqual([[50, 150], 2, 1]);
+  });
+});
+
 describe("decodeGymBarcode", () => {
   const samples: [GymBarcodeFormat, string, string][] = [
     ["code128", "code128", "GYM-0012345"],
@@ -89,6 +97,14 @@ describe("decodeGymBarcode", () => {
       text: "SIDEWAYS1",
       format: "code128",
     });
+  });
+
+  it("reads through speckle (like the noise Safari adds to pictures)", () => {
+    const { pixels, width, height } = picture("code128", "4641827V", 4);
+    let seed = 7;
+    const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const speckled = pixels.map((v) => (random() < 0.5 ? v + Math.round((random() * 2 - 1) * 90) : v));
+    expect(decodeGymBarcode(speckled, width, height)).toEqual({ text: "4641827V", format: "code128" });
   });
 
   it("ignores QR codes", () => {
