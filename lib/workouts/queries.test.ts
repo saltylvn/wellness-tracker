@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadCardioDay, loadFitnessPage, loadLiftDay, loadPlanExercises, loadTanning } from "./queries";
+import { loadCardioDay, loadFitnessPage, loadGymBarcode, loadLiftDay, loadPlanExercises, loadTanning } from "./queries";
 
 // A stand-in for the database: each from("table") call hands back the next prepared
 // answer for that table (in the order the page asks), and any query-builder call chains on.
@@ -121,6 +121,18 @@ describe("loadPlanExercises", () => {
   });
 });
 
+describe("loadGymBarcode", () => {
+  it("returns the saved barcode", async () => {
+    const db = fakeSupabase({ profiles: [{ gym_barcode_text: "0012345", gym_barcode_format: "code128" }] });
+    expect(await loadGymBarcode(db, "u")).toEqual({ text: "0012345", format: "code128" });
+  });
+
+  it("returns null when none is saved, or the profile can't be read", async () => {
+    expect(await loadGymBarcode(fakeSupabase({ profiles: [{ gym_barcode_text: null, gym_barcode_format: null }] }), "u")).toBeNull();
+    expect(await loadGymBarcode(fakeSupabase({ profiles: [null] }), "u")).toBeNull();
+  });
+});
+
 describe("loadFitnessPage round trips", () => {
   // A stand-in database where every query takes 50 ms, like a trip over the network.
   // Queries that run at the same time overlap; ones that wait on each other add up.
@@ -166,6 +178,7 @@ describe("loadFitnessPage round trips", () => {
   it("loads a lifting day in 2 trips", async () => {
     const { page, trips: count } = await trips("2026-10-05"); // Monday
     expect(page.lift?.exercises).toHaveLength(1);
+    expect(page.gymBarcode).toBeNull();
     expect(count).toBe(2);
   });
 
