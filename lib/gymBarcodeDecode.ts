@@ -52,9 +52,36 @@ export function rotateLuminance(pixels: Uint8ClampedArray, width: number, height
 }
 
 /**
+ * Shrinks a brightness picture to 1/factor of its size, each new pixel the average of a
+ * factor x factor block. Averaging smooths out speckle (Safari adds faint random noise to
+ * pictures a website reads, to stop tracking), which can hide a barcode's thin bars.
+ */
+export function shrinkLuminance(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  factor: number,
+): [Uint8ClampedArray, number, number] {
+  const w = Math.floor(width / factor);
+  const h = Math.floor(height / factor);
+  const out = new Uint8ClampedArray(w * h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let sum = 0;
+      for (let dy = 0; dy < factor; dy++) {
+        const row = (y * factor + dy) * width + x * factor;
+        for (let dx = 0; dx < factor; dx++) sum += pixels[row + dx];
+      }
+      out[y * w + x] = Math.round(sum / (factor * factor));
+    }
+  }
+  return [out, w, h];
+}
+
+/**
  * Finds a barcode in a picture (as brightness values, see toLuminance) and returns its
  * text and type, or null if there isn't one it can read. Tries a few ways of telling
- * black from white, then the picture turned sideways.
+ * black from white, then the picture shrunk (smoothing out speckle), then turned sideways.
  */
 export function decodeGymBarcode(pixels: Uint8ClampedArray, width: number, height: number): GymBarcode | null {
   const reader = new MultiFormatReader();
@@ -64,15 +91,23 @@ export function decodeGymBarcode(pixels: Uint8ClampedArray, width: number, heigh
   ]);
   reader.setHints(hints);
 
-  const attempts: [Uint8ClampedArray, number, number][] = [
-    [pixels, width, height],
-    [rotateLuminance(pixels, width, height), height, width],
+  // Built only when needed: most screenshots are read on the first try.
+  const attempts: (() => [Uint8ClampedArray, number, number])[] = [
+    () => [pixels, width, height],
+    () => shrinkLuminance(pixels, width, height, 2),
+    () => shrinkLuminance(pixels, width, height, 3),
+    () => [rotateLuminance(pixels, width, height), height, width],
+    () => {
+      const [small, w, h] = shrinkLuminance(pixels, width, height, 2);
+      return [rotateLuminance(small, w, h), h, w];
+    },
   ];
   const binarizers: ((source: LuminanceSource) => Binarizer)[] = [
     (source) => new HybridBinarizer(source),
     (source) => new GlobalHistogramBinarizer(source),
   ];
-  for (const [data, w, h] of attempts) {
+  for (const attempt of attempts) {
+    const [data, w, h] = attempt();
     for (const makeBinarizer of binarizers) {
       try {
         const result = reader.decodeWithState(new BinaryBitmap(makeBinarizer(new RGBLuminanceSource(data, w, h))));

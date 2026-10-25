@@ -4,11 +4,11 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
 import { deleteGymBarcode, saveGymBarcode } from "@/app/(tabs)/workouts/barcode-actions";
-import { FORMAT_LABELS, type GymBarcode } from "@/lib/gymBarcode";
+import { FORMAT_LABELS, MAX_BARCODE_LENGTH, type GymBarcode } from "@/lib/gymBarcode";
 
-// Bigger screenshots are shrunk to this many pixels on the longest side before reading:
-// plenty for a barcode, and quick to search.
-const MAX_SIDE = 2000;
+// Bigger pictures are shrunk to this many pixels on the longest side before reading.
+// An iPhone screenshot (up to 2796 tall) fits, so it's read at full detail.
+const MAX_SIDE = 2800;
 
 // Turns the picked screenshot into pixels the barcode reader can search.
 async function readPixels(file: File) {
@@ -32,17 +32,22 @@ async function readPixels(file: File) {
 // page (`svg`), so it's there the moment the page opens: hold it up to the gym's scanner.
 // "Change" opens a sheet where you pick a screenshot of the barcode from your gym's app;
 // it's read right here on the phone, and only the barcode's text and type are saved.
+// If a screenshot can't be read, you can type the number printed under the barcode instead.
 export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode | null; svg: string | null }) {
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [reading, setReading] = useState(false);
   const [found, setFound] = useState<GymBarcode | null>(null);
+  const [typing, setTyping] = useState(false); // typing the number instead of using a screenshot
+  const [typed, setTyped] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function openSheet() {
     setFound(null);
+    setTyping(false);
+    setTyped("");
     setError(null);
     setOpen(true);
   }
@@ -61,7 +66,10 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
       ]);
       const result = decodeGymBarcode(toLuminance(rgba, width, height), width, height);
       if (result) setFound(result);
-      else setError("Couldn't find a barcode in that picture. Try a screenshot where the whole barcode shows clearly.");
+      else
+        setError(
+          "Couldn't find a barcode in that picture. Try a screenshot where the whole barcode shows clearly, or type the number instead.",
+        );
     } catch {
       setError("Couldn't open that picture. Try another screenshot.");
     } finally {
@@ -141,7 +149,49 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
           onChange={(event) => onPick(event.target.files?.[0])}
         />
 
-        {found ? (
+        {typing ? (
+          <form
+            className="space-y-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              // Typed numbers are drawn as Code 128, which holds any letters and digits.
+              run(() => saveGymBarcode({ text: typed.trim(), format: "code128" }));
+            }}
+          >
+            <label className="block space-y-1">
+              <span className="text-sm text-muted">The number under your gym&apos;s barcode</span>
+              <input
+                value={typed}
+                onChange={(event) => setTyped(event.target.value)}
+                autoFocus
+                autoCapitalize="characters"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                maxLength={MAX_BARCODE_LENGTH}
+                placeholder="e.g. 4641827V"
+                className="min-h-12 w-full rounded-xl border border-border bg-background px-3 text-base tracking-wide"
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={pending || typed.trim() === ""}
+              className="min-h-14 w-full rounded-xl bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+            >
+              {pending ? "Saving…" : "Save barcode"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTyping(false);
+                setError(null);
+              }}
+              className="min-h-11 w-full rounded-xl text-base font-medium text-accent active:opacity-70"
+            >
+              Use a screenshot instead
+            </button>
+          </form>
+        ) : found ? (
           <div className="space-y-3">
             <div className="rounded-2xl bg-card p-4">
               <p className="text-sm text-muted">Found a {FORMAT_LABELS[found.format]}</p>
@@ -165,14 +215,27 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
             </button>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => fileInput.current?.click()}
-            disabled={reading}
-            className="min-h-14 w-full rounded-xl bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
-          >
-            {reading ? "Reading barcode…" : "Choose screenshot"}
-          </button>
+          <div className="space-y-1">
+            <button
+              type="button"
+              onClick={() => fileInput.current?.click()}
+              disabled={reading}
+              className="min-h-14 w-full rounded-xl bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+            >
+              {reading ? "Reading barcode…" : "Choose screenshot"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTyping(true);
+                setError(null);
+              }}
+              disabled={reading}
+              className="min-h-11 w-full rounded-xl text-base font-medium text-accent active:opacity-70 disabled:opacity-60"
+            >
+              Type the number instead
+            </button>
+          </div>
         )}
 
         {error && (
@@ -181,7 +244,7 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
           </p>
         )}
 
-        {barcode && !found && (
+        {barcode && !found && !typing && (
           <button
             type="button"
             onClick={() => run(() => deleteGymBarcode())}
