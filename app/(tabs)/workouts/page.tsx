@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import CardioLogger from "@/components/CardioLogger";
 import ExtraCheck from "@/components/ExtraCheck";
 import FitnessHeader from "@/components/FitnessHeader";
+import GymBarcodeCard from "@/components/GymBarcodeCard";
 import GoToToday from "@/components/GoToToday";
 import LogExercise from "@/components/LogExercise";
 import ThreeRepMaxes from "@/components/ThreeRepMaxes";
@@ -11,6 +12,7 @@ import TanningLog from "@/components/TanningLog";
 import WeeklyCardioGoals from "@/components/WeeklyCardioGoals";
 import { currentUserId } from "@/lib/actionResult";
 import { formatFullDate, formatWeekday, isValidDateKey } from "@/lib/dates";
+import { gymBarcodeSvg } from "@/lib/gymBarcodeSvg";
 import { createClient } from "@/lib/supabase/server";
 import { connectorAfter, formatRest, formatSetsReps } from "@/lib/workouts/plan";
 import { latestSets } from "@/lib/workouts/history";
@@ -34,11 +36,17 @@ export default async function WorkoutsPage({
 
   // Everything this page reads, in two rounds (see loadFitnessPage).
   // (Don't put key={date} on the cards below: switching days then left stale copies on screen.)
-  const { days, doneDates, today, lift, cardio, tanning } = await loadFitnessPage(supabase, userId, date);
+  const { days, doneDates, today, lift, cardio, tanning, gymBarcode } = await loadFitnessPage(supabase, userId, date);
 
   return (
     <div className="space-y-6">
-      <FitnessHeader date={date} days={days} doneDates={doneDates} />
+      <FitnessHeader
+        date={date}
+        days={days}
+        doneDates={doneDates}
+        // Drawn here on the server, so the barcode is part of the page: nothing extra to load.
+        barcode={<GymBarcodeCard barcode={gymBarcode} svg={gymBarcode ? gymBarcodeSvg(gymBarcode) : null} />}
+      />
 
 
       <section className="space-y-1">

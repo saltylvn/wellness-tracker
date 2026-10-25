@@ -4,6 +4,12 @@ import { ICON_VERSION } from "./iconVersion";
 
 // iPhones take the home-screen icon from the manifest; if they can't use what's listed
 // they show a letter instead of the logo. These checks guard the icon list.
+describe("web app manifest", () => {
+  it("opens on the Fitness tab", () => {
+    expect(manifest().start_url).toBe("/workouts");
+  });
+});
+
 describe("web app manifest icons", () => {
   const icons = manifest().icons ?? [];
 

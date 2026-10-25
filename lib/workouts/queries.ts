@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CardioLogRow } from "../cardio";
 import { weeklyTotals, type WeeklyGoals } from "../cardioGoals";
 import { addDays, isoWeekday, weekDays } from "../dates";
+import { parseGymBarcode, type GymBarcode } from "../gymBarcode";
 import { isTanningDay } from "../tanning";
 import { loadDoneDates } from "./activity";
 import type { HistoryRow } from "./history";
@@ -199,6 +200,16 @@ export async function loadTanning(supabase: SupabaseClient, date: string): Promi
   return { minutes: asNumber(today.data?.minutes), lastMinutes: asNumber(previous.data?.minutes) };
 }
 
+/** Your saved gym check-in barcode, or null (none saved yet, or the SQL step isn't run yet). */
+export async function loadGymBarcode(supabase: SupabaseClient, userId: string): Promise<GymBarcode | null> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("gym_barcode_text, gym_barcode_format")
+    .eq("id", userId)
+    .maybeSingle();
+  return data ? parseGymBarcode({ text: data.gym_barcode_text, format: data.gym_barcode_format }) : null;
+}
+
 export type FitnessPageData = {
   days: WorkoutDay[]; // your weekly plan
   doneDates: string[]; // every day you logged a workout or cardio (streak and green rings)
@@ -206,20 +217,23 @@ export type FitnessPageData = {
   lift: LiftDayData | null;
   cardio: CardioDayData | null;
   tanning: TanningData | null;
+  gymBarcode: GymBarcode | null; // shown at the top of the page
 };
 
 /**
  * Everything the Fitness page reads, in as few trips to the database as possible:
- *   1. your plan, the days you logged, this weekday's exercises, and tanning (Tue/Thu), together;
+ *   1. your plan, the days you logged, this weekday's exercises, tanning (Tue/Thu), and your
+ *      gym barcode, together;
  *   2. then what this kind of day needs (lifting or cardio), together.
  */
 export async function loadFitnessPage(supabase: SupabaseClient, userId: string, date: string): Promise<FitnessPageData> {
   const weekday = isoWeekday(date);
-  const [days, doneDates, planExercises, tanning] = await Promise.all([
+  const [days, doneDates, planExercises, tanning, gymBarcode] = await Promise.all([
     loadWorkoutDays(supabase, userId),
     loadDoneDates(supabase, addDays(date, -400)),
     loadPlanExercises(supabase, weekday),
     isTanningDay(weekday) ? loadTanning(supabase, date) : null,
+    loadGymBarcode(supabase, userId),
   ]);
   const today = days.find((d) => d.weekday === weekday);
 
@@ -240,5 +254,5 @@ export async function loadFitnessPage(supabase: SupabaseClient, userId: string, 
   }
   const cardio = today?.kind === "cardio" ? await loadCardioDay(supabase, userId, date) : null;
 
-  return { days, doneDates, today, lift, cardio, tanning };
+  return { days, doneDates, today, lift, cardio, tanning, gymBarcode };
 }
