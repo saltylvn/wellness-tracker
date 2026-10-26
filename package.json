@@ -14,7 +14,7 @@
     "icons": "sh scripts/make-icons.sh"
   },
   "dependencies": {
-    "@google/genai": "^2.30.0",
+    "@google/genai": "^2.31.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
     "@zxing/library": "^0.23.0",
