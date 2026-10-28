@@ -29,6 +29,28 @@ export function titleAfterChange(kind: DayKind, currentTitle: string): string {
   return currentTitle;
 }
 
+export const MAX_DAY_NAME_LENGTH = 40;
+
+/**
+ * Checks the name you type for a lifting day ("Legs", "Push day"...): extra spaces are
+ * tidied up, and a blank name becomes "Lifting". Too long gives null.
+ */
+export function parseDayName(raw: unknown): string | null {
+  const name = (typeof raw === "string" ? raw : "").replace(/\s+/g, " ").trim();
+  if (name.length > MAX_DAY_NAME_LENGTH) return null;
+  return name === "" ? "Lifting" : name;
+}
+
+/** What to show in the name box: a lifting day's own name, or empty for a generic one. */
+export function editableDayName(title: string): string {
+  return GENERIC_TITLES.has(title) ? "" : title;
+}
+
+/** True for a week that hasn't been planned yet: no lifting or cardio days at all. */
+export function isBlankWeek(days: { kind: DayKind }[]): boolean {
+  return days.every((day) => day.kind === "rest");
+}
+
 /** Sunday (weekday 7) is always a recovery day; it can't be planned. */
 export const PLANNABLE_WEEKDAYS = [1, 2, 3, 4, 5, 6];
 

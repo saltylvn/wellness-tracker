@@ -18,7 +18,7 @@ import { connectorAfter, formatRest, formatSetsReps } from "@/lib/workouts/plan"
 import { latestSets } from "@/lib/workouts/history";
 import { defaultRepsFor, defaultWeightFor } from "@/lib/workouts/logging";
 import { REST_DAY_TITLE } from "@/lib/workouts/defaults";
-import { dayTitle } from "@/lib/workouts/weekSetup";
+import { dayTitle, isBlankWeek } from "@/lib/workouts/weekSetup";
 import { loadFitnessPage } from "@/lib/workouts/queries";
 
 export default async function WorkoutsPage({
@@ -65,7 +65,24 @@ export default async function WorkoutsPage({
         </p>
       )}
 
-      {today?.kind === "rest" && (
+      {/* A new account starts with a blank week: show how to build a plan instead of "Recovery Day". */}
+      {isBlankWeek(days) && (
+        <section className="space-y-3 rounded-2xl bg-card p-5">
+          <p className="text-base font-semibold">Build your weekly plan</p>
+          <ol className="list-decimal space-y-2 pl-5 text-sm text-muted">
+            <li>
+              In <span className="font-medium text-foreground">Your week</span> above, tap the days you lift and the
+              days you do cardio. Days left off are rest days.
+            </li>
+            <li>
+              On each lifting day, tap <span className="font-medium text-foreground">Edit plan</span> to name the
+              workout (like &ldquo;Legs&rdquo; or &ldquo;Push day&rdquo;) and add its exercises.
+            </li>
+          </ol>
+        </section>
+      )}
+
+      {today?.kind === "rest" && !isBlankWeek(days) && (
         <section className="rounded-2xl bg-card p-6 text-center">
           <p className="text-4xl" aria-hidden="true">
             🧘
@@ -100,7 +117,7 @@ export default async function WorkoutsPage({
 
           {lift.exercises.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted">
-              No exercises yet. Tap Edit plan to add some.
+              No exercises yet. Tap Edit plan to name this workout and add your exercises.
             </p>
           ) : (
             lift.exercises.map((exercise, index) => {

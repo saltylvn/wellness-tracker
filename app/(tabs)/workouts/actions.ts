@@ -5,12 +5,13 @@ import { revalidatePath } from "next/cache";
 import { isValidDateKey } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import { parsePlanJson } from "@/lib/workouts/plan";
+import { MAX_DAY_NAME_LENGTH, parseDayName } from "@/lib/workouts/weekSetup";
 import { currentUserId } from "@/lib/actionResult";
 
 export type PlanFormState = { message: string } | null;
 
-// Saves the exercise list for one lifting day: updates the ones you kept
-// (in their new order), adds new ones, and removes the ones you deleted.
+// Saves one lifting day's plan: its name ("Legs", "Push day"...), and its exercise list:
+// updates the ones you kept (in their new order), adds new ones, and removes the ones you deleted.
 export async function saveDayPlan(
   _previous: PlanFormState,
   formData: FormData,
@@ -18,6 +19,8 @@ export async function saveDayPlan(
   const dayId = String(formData.get("day_id") ?? "");
   const date = String(formData.get("date") ?? "");
 
+  const title = parseDayName(formData.get("title"));
+  if (title === null) return { message: `Keep the workout name to ${MAX_DAY_NAME_LENGTH} characters.` };
   const parsed = parsePlanJson(String(formData.get("plan") ?? ""));
   if (!parsed.ok) return { message: parsed.message };
 
@@ -28,10 +31,16 @@ export async function saveDayPlan(
   // Row Level Security hides other people's days, so this only finds yours.
   const { data: day } = await supabase
     .from("workout_days")
-    .select("id, kind")
+    .select("id, kind, title")
     .eq("id", dayId)
     .maybeSingle();
   if (!day || day.kind !== "lift") return { message: "Couldn't find that workout day." };
+
+  // 0. The day's name, if you changed it.
+  if (title !== day.title) {
+    const { error } = await supabase.from("workout_days").update({ title }).eq("id", day.id);
+    if (error) return { message: "Couldn't save. Please try again." };
+  }
 
   const { data: existing } = await supabase
     .from("workout_exercises")

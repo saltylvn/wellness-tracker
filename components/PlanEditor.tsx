@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState, useRef, useState } from "react";
 import { saveDayPlan, type PlanFormState } from "@/app/(tabs)/workouts/actions";
 import type { PlanExercise } from "@/lib/workouts/plan";
+import { MAX_DAY_NAME_LENGTH } from "@/lib/workouts/weekSetup";
 
 type Row = {
   key: string; // only used by React to keep rows straight; not saved
@@ -25,11 +26,13 @@ export default function PlanEditor({
   dayId,
   date,
   title,
+  initialName,
   initial,
 }: {
   dayId: string;
   date: string; // may be empty
-  title: string;
+  title: string; // the day's heading, used in the "Remove…?" question
+  initialName: string; // what's in the name box at first ("" for a day not named yet)
   initial: PlanExercise[];
 }) {
   const nextKey = useRef(0);
@@ -85,6 +88,23 @@ export default function PlanEditor({
       <input type="hidden" name="day_id" value={dayId} />
       <input type="hidden" name="date" value={date} />
       <input type="hidden" name="plan" value={planJson} />
+
+      {/* The day's name ("theme"), shown on the Fitness tab: "Monday · Legs". Blank = "Lifting". */}
+      <div>
+        <label htmlFor="day-name" className="mb-1 block text-sm font-medium text-muted">
+          Workout name
+        </label>
+        <input
+          id="day-name"
+          name="title"
+          type="text"
+          defaultValue={initialName}
+          maxLength={MAX_DAY_NAME_LENGTH}
+          placeholder="e.g. Legs, Push day, Upper body"
+          autoComplete="off"
+          className={inputClass}
+        />
+      </div>
 
       {rows.length === 0 && (
         <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted">

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PLAN } from "./defaults";
+import { STARTING_PLAN } from "./defaults";
 import {
   connectorAfter,
   formatRest,
@@ -8,28 +8,10 @@ import {
   REST_BETWEEN_EXERCISES,
 } from "./plan";
 
-describe("DEFAULT_PLAN", () => {
-  it("covers all seven weekdays exactly once", () => {
-    expect(DEFAULT_PLAN.map((d) => d.weekday)).toEqual([1, 2, 3, 4, 5, 6, 7]);
-  });
-
-  it("matches the weekly schedule", () => {
-    const byDay = Object.fromEntries(DEFAULT_PLAN.map((d) => [d.weekday, d]));
-    expect(byDay[1]).toMatchObject({ kind: "lift", title: "Chest & Back" });
-    expect(byDay[3]).toMatchObject({ kind: "lift", title: "Legs" });
-    expect(byDay[5]).toMatchObject({ kind: "lift", title: "Delts & Arms" });
-    for (const weekday of [2, 4, 6]) expect(byDay[weekday].kind).toBe("cardio");
-    expect(byDay[7]).toMatchObject({ kind: "rest", title: "Recovery Day" });
-  });
-
-  it("only lifting days have exercises, and the supersets are the paired ones", () => {
-    for (const day of DEFAULT_PLAN) {
-      expect(day.exercises.length > 0).toBe(day.kind === "lift");
-    }
-    const supersetted = DEFAULT_PLAN.flatMap((d) =>
-      d.exercises.filter((e) => e.supersetWithNext).map((e) => e.name),
-    );
-    expect(supersetted).toEqual(["Pec deck", "Leg extensions"]);
+describe("STARTING_PLAN", () => {
+  it("is a blank week: all seven days rest, ready for a new user to plan", () => {
+    expect(STARTING_PLAN.map((d) => d.weekday)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    for (const day of STARTING_PLAN) expect(day).toMatchObject({ kind: "rest", title: "Recovery Day" });
   });
 });
 

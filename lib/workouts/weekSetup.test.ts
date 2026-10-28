@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { dayTitle, parseWeekKinds, titleAfterChange, toggleDay } from "./weekSetup";
+import {
+  dayTitle,
+  editableDayName,
+  isBlankWeek,
+  parseDayName,
+  parseWeekKinds,
+  titleAfterChange,
+  toggleDay,
+} from "./weekSetup";
 
 describe("dayTitle", () => {
   it("names cardio and rest days by their kind", () => {
@@ -19,6 +27,34 @@ describe("titleAfterChange", () => {
     expect(titleAfterChange("lift", "Recovery Day")).toBe("Lifting");
     expect(titleAfterChange("cardio", "Legs")).toBe("Legs");
     expect(titleAfterChange("lift", "Legs")).toBe("Legs");
+  });
+});
+
+describe("parseDayName", () => {
+  it("keeps your name, tidying extra spaces", () => {
+    expect(parseDayName("  Push   day ")).toBe("Push day");
+    expect(parseDayName("Chest & Back")).toBe("Chest & Back");
+  });
+
+  it("turns a blank name into 'Lifting' and refuses one that's too long", () => {
+    expect(parseDayName("   ")).toBe("Lifting");
+    expect(parseDayName(undefined)).toBe("Lifting");
+    expect(parseDayName("x".repeat(41))).toBeNull();
+  });
+});
+
+describe("editableDayName", () => {
+  it("shows a real name, and an empty box for a generic one", () => {
+    expect(editableDayName("Legs")).toBe("Legs");
+    expect(editableDayName("Lifting")).toBe("");
+    expect(editableDayName("Recovery Day")).toBe("");
+  });
+});
+
+describe("isBlankWeek", () => {
+  it("is true only when no day is a lifting or cardio day", () => {
+    expect(isBlankWeek([{ kind: "rest" }, { kind: "rest" }])).toBe(true);
+    expect(isBlankWeek([{ kind: "rest" }, { kind: "cardio" }])).toBe(false);
   });
 });
 

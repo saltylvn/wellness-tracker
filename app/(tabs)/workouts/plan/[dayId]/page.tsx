@@ -3,6 +3,7 @@ import PlanEditor from "@/components/PlanEditor";
 import { isValidDateKey } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import type { PlanExercise } from "@/lib/workouts/plan";
+import { dayTitle, editableDayName } from "@/lib/workouts/weekSetup";
 
 export default async function EditPlanPage({
   params,
@@ -33,12 +34,19 @@ export default async function EditPlanPage({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Edit {day.title}</h1>
+        <h1 className="text-2xl font-bold">Edit {dayTitle(day)}</h1>
         <p className="text-sm text-muted">
-          Set the sets and rep range for each exercise. Reorder, add, or remove exercises any time.
+          Name this workout, then add your exercises with their sets and rep range. Change, reorder, or
+          remove them any time.
         </p>
       </div>
-      <PlanEditor dayId={day.id} date={date} title={day.title} initial={(data ?? []) as PlanExercise[]} />
+      <PlanEditor
+        dayId={day.id}
+        date={date}
+        title={dayTitle(day)}
+        initialName={editableDayName(day.title)}
+        initial={(data ?? []) as PlanExercise[]}
+      />
     </div>
   );
 }
