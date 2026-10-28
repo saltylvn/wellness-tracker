@@ -1,36 +1,21 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { DEFAULT_PLAN } from "./defaults";
+import { STARTING_PLAN } from "./defaults";
 import type { WorkoutDay } from "./plan";
 
-// Copies your starting weekly plan into your account. Safe to run twice: days
-// that already exist are skipped, and exercises are only added to days created
-// by THIS call, so a second run (or two requests at once) never duplicates anything.
-export async function ensureDefaultPlan(supabase: SupabaseClient, userId: string): Promise<void> {
-  const { data: created, error } = await supabase
+// Adds your seven (blank) workout days the first time you open the Fitness tab. Safe to
+// run twice: days that already exist are skipped, so a second run (or two requests at
+// once) never duplicates anything or overwrites a plan you've set up.
+export async function ensureStartingPlan(supabase: SupabaseClient, userId: string): Promise<void> {
+  await supabase
     .from("workout_days")
     .upsert(
-      DEFAULT_PLAN.map((d) => ({ user_id: userId, weekday: d.weekday, kind: d.kind, title: d.title })),
+      STARTING_PLAN.map((d) => ({ user_id: userId, weekday: d.weekday, kind: d.kind, title: d.title })),
       { onConflict: "user_id,weekday", ignoreDuplicates: true },
-    )
-    .select("id, weekday");
-
-  if (error || !created || created.length === 0) return;
-
-  const exercises = created.flatMap((day) => {
-    const plan = DEFAULT_PLAN.find((d) => d.weekday === day.weekday);
-    return (plan?.exercises ?? []).map((exercise, index) => ({
-      user_id: userId,
-      day_id: day.id,
-      position: index,
-      name: exercise.name,
-      superset_with_next: Boolean(exercise.supersetWithNext),
-    }));
-  });
-  if (exercises.length > 0) await supabase.from("workout_exercises").insert(exercises);
+    );
 }
 
-// Loads your seven workout days (Mon-Sun), copying in the starting plan first if
-// this is your first visit.
+// Loads your seven workout days (Mon-Sun), adding the blank starting week first if this
+// is your first visit.
 export async function loadWorkoutDays(supabase: SupabaseClient, userId: string): Promise<WorkoutDay[]> {
   const load = async () =>
     ((await supabase.from("workout_days").select("id, weekday, kind, title").order("weekday")).data ??
@@ -38,6 +23,6 @@ export async function loadWorkoutDays(supabase: SupabaseClient, userId: string):
 
   const days = await load();
   if (days.length > 0) return days;
-  await ensureDefaultPlan(supabase, userId);
+  await ensureStartingPlan(supabase, userId);
   return load();
 }

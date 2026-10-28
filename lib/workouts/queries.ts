@@ -237,21 +237,7 @@ export async function loadFitnessPage(supabase: SupabaseClient, userId: string, 
   ]);
   const today = days.find((d) => d.weekday === weekday);
 
-  let lift: LiftDayData | null = null;
-  if (today?.kind === "lift") {
-    // On your very first visit the plan is copied in while step 1 runs, so the exercise list
-    // may have come back empty: look again, by the day's id.
-    let exercises = planExercises;
-    if (exercises.length === 0) {
-      const { data } = await supabase
-        .from("workout_exercises")
-        .select(EXERCISE_FIELDS)
-        .eq("day_id", today.id)
-        .order("position", { ascending: true });
-      exercises = (data ?? []) as PlanExercise[];
-    }
-    lift = await loadLiftDay(supabase, date, exercises);
-  }
+  const lift = today?.kind === "lift" ? await loadLiftDay(supabase, date, planExercises) : null;
   const cardio = today?.kind === "cardio" ? await loadCardioDay(supabase, userId, date) : null;
 
   return { days, doneDates, today, lift, cardio, tanning, gymBarcode };
