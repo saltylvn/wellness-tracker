@@ -2,26 +2,24 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { parseCardioPlan } from "@/lib/cardioPlan";
+import { DATABASE_BEHIND_MESSAGE, isMissingSchemaError } from "@/lib/dbErrors";
 import { createClient } from "@/lib/supabase/server";
 import { afterDayEditPath, parsePlanJson } from "@/lib/workouts/plan";
-import { hasLift, MAX_DAY_NAME_LENGTH, parseDayName } from "@/lib/workouts/weekSetup";
+import { hasCardio, hasLift, MAX_DAY_NAME_LENGTH, parseDayName } from "@/lib/workouts/weekSetup";
 import { currentUserId } from "@/lib/actionResult";
 
 export type PlanFormState = { message: string } | null;
 
-// Saves one lifting day's plan: its name ("Legs", "Push day"...), and its exercise list:
-// updates the ones you kept (in their new order), adds new ones, and removes the ones you deleted.
+// Saves one day's plan. A cardio day (or a lifting and cardio day): which cardio and how far.
+// A lifting day: its name ("Legs", "Push day"...), and its exercise list: updates the ones you
+// kept (in their new order), adds new ones, and removes the ones you deleted.
 export async function saveDayPlan(
   _previous: PlanFormState,
   formData: FormData,
 ): Promise<PlanFormState> {
   const dayId = String(formData.get("day_id") ?? "");
   const date = String(formData.get("date") ?? "");
-
-  const title = parseDayName(formData.get("title"));
-  if (title === null) return { message: `Keep the workout name to ${MAX_DAY_NAME_LENGTH} characters.` };
-  const parsed = parsePlanJson(String(formData.get("plan") ?? ""));
-  if (!parsed.ok) return { message: parsed.message };
 
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
@@ -33,7 +31,33 @@ export async function saveDayPlan(
     .select("id, kind, title")
     .eq("id", dayId)
     .maybeSingle();
-  if (!day || !hasLift(day.kind)) return { message: "Couldn't find that workout day." };
+  if (!day || !(hasLift(day.kind) || hasCardio(day.kind))) return { message: "Couldn't find that workout day." };
+
+  // Check everything first, so nothing is half-saved.
+  const cardio = hasCardio(day.kind) ? parseCardioPlan(formData.get("cardio_kind"), formData.get("cardio_distance")) : null;
+  if (cardio && !cardio.ok) return { message: cardio.message };
+  const lifting = hasLift(day.kind);
+  const title = lifting ? parseDayName(formData.get("title")) : day.title;
+  if (title === null) return { message: `Keep the workout name to ${MAX_DAY_NAME_LENGTH} characters.` };
+  const parsed = lifting ? parsePlanJson(String(formData.get("plan") ?? "")) : null;
+  if (parsed && !parsed.ok) return { message: parsed.message };
+
+  // The cardio plan.
+  if (cardio?.ok) {
+    const { error } = await supabase
+      .from("workout_days")
+      .update({ cardio_plan_kind: cardio.plan?.kind ?? null, cardio_plan_distance: cardio.plan?.distance ?? null })
+      .eq("id", day.id);
+    if (error) {
+      return { message: isMissingSchemaError(error) ? DATABASE_BEHIND_MESSAGE : "Couldn't save. Please try again." };
+    }
+  }
+  if (!parsed?.ok) {
+    // A cardio-only day: nothing else to save.
+    revalidatePath("/workouts");
+    revalidatePath("/workouts/plan");
+    redirect(afterDayEditPath(formData.get("back"), date));
+  }
 
   // 0. The day's name, if you changed it.
   if (title !== day.title) {

@@ -2,16 +2,17 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import WeekSetup from "@/components/WeekSetup";
 import { currentUserId } from "@/lib/actionResult";
+import { formatCardioPlan } from "@/lib/cardioPlan";
 import { isValidDateKey } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import { loadPlanOverview } from "@/lib/workouts/queries";
-import { dayTitle, hasLift, KIND_ICON } from "@/lib/workouts/weekSetup";
+import { dayTitle, hasCardio, hasLift, KIND_ICON } from "@/lib/workouts/weekSetup";
 
 const WEEKDAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 // "Edit plan" for the whole week, in one place: the same Lift / Cardio day toggles as on the
-// Fitness tab, then Monday to Sunday with what each day is. Tapping a lifting day opens its
-// editor (name and exercises), which comes back here when you save.
+// Fitness tab, then Monday to Sunday with what each day is. Tapping a lifting or cardio day
+// opens its editor (name and exercises, and/or the cardio plan), which comes back here when you save.
 export default async function WeekPlanPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const { date: rawDate } = await searchParams;
   const date = rawDate && isValidDateKey(rawDate) ? rawDate : "";
@@ -39,15 +40,20 @@ export default async function WeekPlanPage({ searchParams }: { searchParams: Pro
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-muted">2. Tap a lifting day to name it and add exercises</h2>
+        <h2 className="text-sm font-semibold text-muted">2. Tap a day to plan its exercises or cardio</h2>
         <ul className="divide-y divide-border overflow-hidden rounded-2xl bg-card">
           {days.map((day) => {
             const lift = hasLift(day.kind);
-            const detail = lift
+            const cardio = hasCardio(day.kind);
+            const editable = lift || cardio;
+            const liftDetail = lift
               ? day.exerciseCount === 0
                 ? "No exercises yet"
                 : `${day.exerciseCount} ${day.exerciseCount === 1 ? "exercise" : "exercises"}`
               : null;
+            const cardioDetail = cardio ? (day.cardioPlan ? formatCardioPlan(day.cardioPlan) : "No cardio planned") : null;
+            const detail = [liftDetail, cardioDetail].filter(Boolean).join(" · ") || null;
+            const needsPlan = (lift && day.exerciseCount === 0) || (cardio && !day.cardioPlan);
             const content = (
               <>
                 <span className="w-24 shrink-0 text-sm text-muted">{WEEKDAY_NAMES[day.weekday - 1]}</span>
@@ -56,12 +62,12 @@ export default async function WeekPlanPage({ searchParams }: { searchParams: Pro
                     <span aria-hidden="true">{KIND_ICON[day.kind]}</span> {dayTitle(day)}
                   </span>
                   {detail && (
-                    <span className={`block text-xs ${day.exerciseCount === 0 ? "text-accent" : "text-muted"}`}>
+                    <span className={`block text-xs ${needsPlan ? "text-accent" : "text-muted"}`}>
                       {detail}
                     </span>
                   )}
                 </span>
-                {lift && (
+                {editable && (
                   <span aria-hidden="true" className="text-xl text-muted">
                     ›
                   </span>
@@ -70,7 +76,7 @@ export default async function WeekPlanPage({ searchParams }: { searchParams: Pro
             );
             return (
               <li key={day.id}>
-                {lift ? (
+                {editable ? (
                   <Link
                     href={`/workouts/plan/${day.id}?from=plan${date ? `&date=${date}` : ""}`}
                     className="flex min-h-14 items-center gap-3 px-4 py-2 active:bg-border"

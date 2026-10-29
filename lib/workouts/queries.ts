@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CardioLogRow } from "../cardio";
 import { weeklyTotals, type WeeklyGoals } from "../cardioGoals";
 import { addDays, isoWeekday, weekDays } from "../dates";
+import { planFromRow, type CardioPlan } from "../cardioPlan";
 import { parseGymBarcode, type GymBarcode } from "../gymBarcode";
 import { isTanningDay } from "../tanning";
 import { loadDoneDates } from "./activity";
@@ -200,20 +201,40 @@ export async function loadGymBarcode(supabase: SupabaseClient, userId: string): 
   return data ? parseGymBarcode({ text: data.gym_barcode_text, format: data.gym_barcode_format }) : null;
 }
 
-export type PlanOverviewDay = WorkoutDay & { exerciseCount: number };
+export type PlanOverviewDay = WorkoutDay & { exerciseCount: number; cardioPlan: CardioPlan | null };
 
-/** The week for the Edit plan page: your seven days, each with how many exercises it has. */
+/**
+ * The week for the Edit plan page: your seven days, each with how many exercises it has
+ * and its cardio plan (if any).
+ */
 export async function loadPlanOverview(supabase: SupabaseClient, userId: string): Promise<PlanOverviewDay[]> {
-  const [days, exercises] = await Promise.all([
+  const [days, exercises, plans] = await Promise.all([
     loadWorkoutDays(supabase, userId),
     supabase.from("workout_exercises").select("day_id"),
+    // Read on its own, so the page still works before the cardio plan SQL step is run.
+    supabase.from("workout_days").select("id, cardio_plan_kind, cardio_plan_distance"),
   ]);
   const counts = new Map<string, number>();
   for (const row of exercises.data ?? []) {
     const dayId = row.day_id as string;
     counts.set(dayId, (counts.get(dayId) ?? 0) + 1);
   }
-  return days.map((day) => ({ ...day, exerciseCount: counts.get(day.id) ?? 0 }));
+  const planById = new Map((plans.data ?? []).map((row) => [row.id as string, planFromRow(row)]));
+  return days.map((day) => ({
+    ...day,
+    exerciseCount: counts.get(day.id) ?? 0,
+    cardioPlan: planById.get(day.id) ?? null,
+  }));
+}
+
+/** A weekday's cardio plan, or null (none, or the SQL step for it isn't run yet). */
+export async function loadCardioPlan(supabase: SupabaseClient, weekday: number): Promise<CardioPlan | null> {
+  const { data } = await supabase
+    .from("workout_days")
+    .select("cardio_plan_kind, cardio_plan_distance")
+    .eq("weekday", weekday)
+    .maybeSingle();
+  return planFromRow(data);
 }
 
 export type FitnessPageData = {
@@ -224,22 +245,24 @@ export type FitnessPageData = {
   cardio: CardioDayData | null;
   tanning: TanningData | null;
   gymBarcode: GymBarcode | null; // shown at the top of the page
+  cardioPlan: CardioPlan | null; // this weekday's planned cardio, if any
 };
 
 /**
  * Everything the Fitness page reads, in as few trips to the database as possible:
- *   1. your plan, the days you logged, this weekday's exercises, tanning (Tue/Thu), and your
- *      gym barcode, together;
+ *   1. your plan, the days you logged, this weekday's exercises, tanning (Tue/Thu), your
+ *      gym barcode, and this weekday's cardio plan, together;
  *   2. then what this kind of day needs (lifting or cardio), together.
  */
 export async function loadFitnessPage(supabase: SupabaseClient, userId: string, date: string): Promise<FitnessPageData> {
   const weekday = isoWeekday(date);
-  const [days, doneDates, planExercises, tanning, gymBarcode] = await Promise.all([
+  const [days, doneDates, planExercises, tanning, gymBarcode, cardioPlan] = await Promise.all([
     loadWorkoutDays(supabase, userId),
     loadDoneDates(supabase, addDays(date, -400)),
     loadPlanExercises(supabase, weekday),
     isTanningDay(weekday) ? loadTanning(supabase, date) : null,
     loadGymBarcode(supabase, userId),
+    loadCardioPlan(supabase, weekday),
   ]);
   const today = days.find((d) => d.weekday === weekday);
 
@@ -249,5 +272,5 @@ export async function loadFitnessPage(supabase: SupabaseClient, userId: string, 
     today && hasCardio(today.kind) ? loadCardioDay(supabase, userId, date) : null,
   ]);
 
-  return { days, doneDates, today, lift, cardio, tanning, gymBarcode };
+  return { days, doneDates, today, lift, cardio, tanning, gymBarcode, cardioPlan };
 }
