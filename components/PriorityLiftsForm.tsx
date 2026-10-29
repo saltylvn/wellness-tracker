@@ -46,7 +46,7 @@ export default function PriorityLiftsForm({ picked, choices }: { picked: string[
           </div>
         )}
         <p className="mt-2 text-xs text-muted">
-          Shown as two small boxes at the top of your lifting days, with your best weight for each.
+          Shown as two small boxes at the top of your lifting days, with your PR (heaviest weight) for each.
         </p>
       </fieldset>
 

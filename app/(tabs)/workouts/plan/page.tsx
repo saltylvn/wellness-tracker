@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import BackButton from "@/components/BackButton";
 import WeekSetup from "@/components/WeekSetup";
 import { currentUserId } from "@/lib/actionResult";
 import { formatCardioPlan } from "@/lib/cardioPlan";
@@ -24,7 +25,8 @@ export default async function WeekPlanPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <BackButton fallback={date ? `/workouts?date=${date}` : "/workouts"} />
+      <div className="-mt-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Edit plan</h1>
         <Link
           href={date ? `/workouts?date=${date}` : "/workouts"}
