@@ -6,6 +6,7 @@ import GymBarcodeCard from "@/components/GymBarcodeCard";
 import GoToToday from "@/components/GoToToday";
 import LogExercise from "@/components/LogExercise";
 import PlannedCardio from "@/components/PlannedCardio";
+import PriorityLifts from "@/components/PriorityLifts";
 import TanningLog from "@/components/TanningLog";
 import WeeklyCardioGoals from "@/components/WeeklyCardioGoals";
 import { currentUserId } from "@/lib/actionResult";
@@ -35,7 +36,11 @@ export default async function WorkoutsPage({
 
   // Everything this page reads, in two rounds (see loadFitnessPage).
   // (Don't put key={date} on the cards below: switching days then left stale copies on screen.)
-  const { days, doneDates, today, lift, cardio, tanning, gymBarcode, cardioPlan } = await loadFitnessPage(supabase, userId, date);
+  const { days, doneDates, today, lift, cardio, tanning, gymBarcode, cardioPlan, priorityLifts } = await loadFitnessPage(
+    supabase,
+    userId,
+    date,
+  );
 
   return (
     <div className="space-y-6">
@@ -122,6 +127,8 @@ export default async function WorkoutsPage({
 
       {today && lift && (
         <section className="space-y-3">
+          {/* The lifts you're focusing on (picked in Settings), small and side by side. */}
+          <PriorityLifts lifts={priorityLifts} />
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-muted">{formatWeekday(date)}&apos;s exercises</h3>
             <Link
