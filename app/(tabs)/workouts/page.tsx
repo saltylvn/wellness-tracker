@@ -123,9 +123,6 @@ export default async function WorkoutsPage({
         </>
       )}
 
-      {/* Every day: minutes of sunshine toward your daily target (Settings). */}
-      <SunshineLog date={date} minutes={sunshine.minutes} lastMinutes={sunshine.lastMinutes} goal={sunshine.goal} />
-
       {today && lift && (
         <section className="space-y-3">
           {/* The lifts you're focusing on (picked in Settings), small and side by side. */}
@@ -186,6 +183,9 @@ export default async function WorkoutsPage({
           )}
         </section>
       )}
+
+      {/* Every day, at the very bottom: minutes of sunshine toward your daily target (Settings). */}
+      <SunshineLog date={date} minutes={sunshine.minutes} lastMinutes={sunshine.lastMinutes} goal={sunshine.goal} />
     </div>
   );
 }
