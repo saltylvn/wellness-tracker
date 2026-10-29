@@ -128,17 +128,23 @@ describe("loadPlanExercises", () => {
 });
 
 describe("loadPlanOverview", () => {
-  it("adds each day's exercise count", async () => {
+  it("adds each day's exercise count and cardio plan", async () => {
     const db = fakeSupabase({
-      workout_days: [[
-        { id: "d1", weekday: 1, kind: "lift", title: "Legs" },
-        { id: "d2", weekday: 2, kind: "cardio", title: "Cardio" },
-      ]],
+      workout_days: [
+        [
+          { id: "d1", weekday: 1, kind: "lift", title: "Legs" },
+          { id: "d2", weekday: 2, kind: "cardio", title: "Cardio" },
+        ],
+        [
+          { id: "d1", cardio_plan_kind: null, cardio_plan_distance: null },
+          { id: "d2", cardio_plan_kind: "run", cardio_plan_distance: "3.00" },
+        ],
+      ],
       workout_exercises: [[{ day_id: "d1" }, { day_id: "d1" }, { day_id: "d1" }]],
     });
     expect(await loadPlanOverview(db, "u")).toEqual([
-      { id: "d1", weekday: 1, kind: "lift", title: "Legs", exerciseCount: 3 },
-      { id: "d2", weekday: 2, kind: "cardio", title: "Cardio", exerciseCount: 0 },
+      { id: "d1", weekday: 1, kind: "lift", title: "Legs", exerciseCount: 3, cardioPlan: null },
+      { id: "d2", weekday: 2, kind: "cardio", title: "Cardio", exerciseCount: 0, cardioPlan: { kind: "run", distance: 3 } },
     ]);
   });
 });

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState, useRef, useState } from "react";
 import { saveDayPlan, type PlanFormState } from "@/app/(tabs)/workouts/actions";
+import CardioPlanFields from "@/components/CardioPlanFields";
+import type { CardioPlan } from "@/lib/cardioPlan";
 import { afterDayEditPath, type PlanExercise } from "@/lib/workouts/plan";
 import { MAX_DAY_NAME_LENGTH } from "@/lib/workouts/weekSetup";
 
@@ -29,6 +31,8 @@ export default function PlanEditor({
   initialName,
   back,
   initial,
+  lift = true,
+  cardio,
 }: {
   dayId: string;
   date: string; // may be empty
@@ -36,6 +40,8 @@ export default function PlanEditor({
   initialName: string; // what's in the name box at first ("" for a day not named yet)
   back: "plan" | ""; // "plan" when opened from the week's Edit plan page, to go back there
   initial: PlanExercise[];
+  lift?: boolean; // false for a cardio-only day: no name or exercises
+  cardio?: CardioPlan | null; // present for a cardio day: its plan (null = none yet)
 }) {
   const nextKey = useRef(0);
   const newKey = () => `new-${nextKey.current++}`;
@@ -92,119 +98,125 @@ export default function PlanEditor({
       <input type="hidden" name="back" value={back} />
       <input type="hidden" name="plan" value={planJson} />
 
-      {/* The day's name ("theme"), shown on the Fitness tab: "Monday · Legs". Blank = "Lifting". */}
-      <div>
-        <label htmlFor="day-name" className="mb-1 block text-sm font-medium text-muted">
-          Workout name
-        </label>
-        <input
-          id="day-name"
-          name="title"
-          type="text"
-          defaultValue={initialName}
-          maxLength={MAX_DAY_NAME_LENGTH}
-          placeholder="e.g. Legs, Push day, Upper body"
-          autoComplete="off"
-          className={inputClass}
-        />
-      </div>
+      {cardio !== undefined && <CardioPlanFields initial={cardio} />}
 
-      {rows.length === 0 && (
-        <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted">
-          No exercises yet. Add your first one below.
-        </p>
-      )}
-
-      {rows.map((row, index) => (
-        <fieldset key={row.key} className="space-y-3 rounded-2xl bg-card p-4">
-          <legend className="sr-only">Exercise {index + 1}</legend>
-
+      {lift && (
+        <>
+          {/* The day's name ("theme"), shown on the Fitness tab: "Monday · Legs". Blank = "Lifting". */}
           <div>
-            <label htmlFor={`name-${row.key}`} className="mb-1 block text-sm font-medium text-muted">
-              Exercise {index + 1}
+            <label htmlFor="day-name" className="mb-1 block text-sm font-medium text-muted">
+              Workout name
             </label>
             <input
-              id={`name-${row.key}`}
+              id="day-name"
+              name="title"
               type="text"
-              value={row.name}
-              maxLength={80}
-              placeholder="e.g. Incline press"
-              onChange={(event) => update(index, { name: event.target.value })}
+              defaultValue={initialName}
+              maxLength={MAX_DAY_NAME_LENGTH}
+              placeholder="e.g. Legs, Push day, Upper body"
+              autoComplete="off"
               className={inputClass}
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            {(
-              [
-                ["sets", "Sets", row.sets, "3"],
-                ["repMin", "Min reps", row.repMin, "8"],
-                ["repMax", "Max reps", row.repMax, "12"],
-              ] as const
-            ).map(([field, label, value, placeholder]) => (
-              <div key={field}>
-                <label htmlFor={`${field}-${row.key}`} className="mb-1 block text-xs text-muted">
-                  {label}
+          {rows.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted">
+              No exercises yet. Add your first one below.
+            </p>
+          )}
+
+          {rows.map((row, index) => (
+            <fieldset key={row.key} className="space-y-3 rounded-2xl bg-card p-4">
+              <legend className="sr-only">Exercise {index + 1}</legend>
+
+              <div>
+                <label htmlFor={`name-${row.key}`} className="mb-1 block text-sm font-medium text-muted">
+                  Exercise {index + 1}
                 </label>
                 <input
-                  id={`${field}-${row.key}`}
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={field === "sets" ? 20 : 100}
-                  value={value}
-                  placeholder={placeholder}
-                  onChange={(event) => update(index, { [field]: event.target.value })}
+                  id={`name-${row.key}`}
+                  type="text"
+                  value={row.name}
+                  maxLength={80}
+                  placeholder="e.g. Incline press"
+                  onChange={(event) => update(index, { name: event.target.value })}
                   className={inputClass}
                 />
               </div>
-            ))}
-          </div>
 
-          <label className="flex min-h-11 items-center gap-3">
-            <input
-              type="checkbox"
-              checked={row.supersetWithNext}
-              disabled={index === rows.length - 1}
-              onChange={(event) => update(index, { supersetWithNext: event.target.checked })}
-              className="h-5 w-5 shrink-0 accent-[var(--accent)]"
-            />
-            <span className="text-sm">
-              Superset with the next exercise <span className="text-muted">(no rest between)</span>
-            </span>
-          </label>
+              <div className="grid grid-cols-3 gap-3">
+                {(
+                  [
+                    ["sets", "Sets", row.sets, "3"],
+                    ["repMin", "Min reps", row.repMin, "8"],
+                    ["repMax", "Max reps", row.repMax, "12"],
+                  ] as const
+                ).map(([field, label, value, placeholder]) => (
+                  <div key={field}>
+                    <label htmlFor={`${field}-${row.key}`} className="mb-1 block text-xs text-muted">
+                      {label}
+                    </label>
+                    <input
+                      id={`${field}-${row.key}`}
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={field === "sets" ? 20 : 100}
+                      value={value}
+                      placeholder={placeholder}
+                      onChange={(event) => update(index, { [field]: event.target.value })}
+                      className={inputClass}
+                    />
+                  </div>
+                ))}
+              </div>
 
-          <div className="flex gap-2">
-            <button type="button" onClick={() => move(index, -1)} disabled={index === 0} className={smallButton}>
-              ↑ Up
-            </button>
-            <button
-              type="button"
-              onClick={() => move(index, 1)}
-              disabled={index === rows.length - 1}
-              className={smallButton}
-            >
-              ↓ Down
-            </button>
-            <button type="button" onClick={() => remove(index)} className={`${smallButton} text-danger`}>
-              Remove
-            </button>
-          </div>
-        </fieldset>
-      ))}
+              <label className="flex min-h-11 items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={row.supersetWithNext}
+                  disabled={index === rows.length - 1}
+                  onChange={(event) => update(index, { supersetWithNext: event.target.checked })}
+                  className="h-5 w-5 shrink-0 accent-[var(--accent)]"
+                />
+                <span className="text-sm">
+                  Superset with the next exercise <span className="text-muted">(no rest between)</span>
+                </span>
+              </label>
 
-      <button
-        type="button"
-        onClick={() =>
-          setRows((current) => [
-            ...current,
-            { key: newKey(), name: "", sets: "", repMin: "", repMax: "", supersetWithNext: false },
-          ])
-        }
-        className="min-h-12 w-full rounded-xl border border-dashed border-border text-base font-medium active:opacity-80"
-      >
-        + Add exercise
-      </button>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => move(index, -1)} disabled={index === 0} className={smallButton}>
+                  ↑ Up
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(index, 1)}
+                  disabled={index === rows.length - 1}
+                  className={smallButton}
+                >
+                  ↓ Down
+                </button>
+                <button type="button" onClick={() => remove(index)} className={`${smallButton} text-danger`}>
+                  Remove
+                </button>
+              </div>
+            </fieldset>
+          ))}
+
+          <button
+            type="button"
+            onClick={() =>
+              setRows((current) => [
+                ...current,
+                { key: newKey(), name: "", sets: "", repMin: "", repMax: "", supersetWithNext: false },
+              ])
+            }
+            className="min-h-12 w-full rounded-xl border border-dashed border-border text-base font-medium active:opacity-80"
+          >
+            + Add exercise
+          </button>
+        </>
+      )}
 
       {state && (
         <p role="alert" className="text-sm text-danger">

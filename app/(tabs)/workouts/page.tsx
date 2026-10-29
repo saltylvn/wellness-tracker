@@ -6,9 +6,11 @@ import FitnessHeader from "@/components/FitnessHeader";
 import GymBarcodeCard from "@/components/GymBarcodeCard";
 import GoToToday from "@/components/GoToToday";
 import LogExercise from "@/components/LogExercise";
+import PlannedCardio from "@/components/PlannedCardio";
 import TanningLog from "@/components/TanningLog";
 import WeeklyCardioGoals from "@/components/WeeklyCardioGoals";
 import { currentUserId } from "@/lib/actionResult";
+import { completingLog } from "@/lib/cardioPlan";
 import { formatFullDate, formatWeekday, isValidDateKey } from "@/lib/dates";
 import { gymBarcodeSvg } from "@/lib/gymBarcodeSvg";
 import { createClient } from "@/lib/supabase/server";
@@ -34,7 +36,7 @@ export default async function WorkoutsPage({
 
   // Everything this page reads, in two rounds (see loadFitnessPage).
   // (Don't put key={date} on the cards below: switching days then left stale copies on screen.)
-  const { days, doneDates, today, lift, cardio, tanning, gymBarcode } = await loadFitnessPage(supabase, userId, date);
+  const { days, doneDates, today, lift, cardio, tanning, gymBarcode, cardioPlan } = await loadFitnessPage(supabase, userId, date);
 
   return (
     <div className="space-y-6">
@@ -91,8 +93,16 @@ export default async function WorkoutsPage({
         </section>
       )}
 
-      {cardio && (
+      {cardio && today && (
         <>
+          {/* The cardio you planned for this weekday on Edit plan, with its Completed box. */}
+          <PlannedCardio
+            key={`${date}-${cardioPlan ? completingLog(cardioPlan, cardio.logs) !== null : false}`}
+            date={date}
+            plan={cardioPlan}
+            completed={cardioPlan ? completingLog(cardioPlan, cardio.logs) !== null : false}
+            editHref={`/workouts/plan/${today.id}?date=${date}`}
+          />
           <CardioLogger date={date} logs={cardio.logs} />
           <WeeklyCardioGoals totals={cardio.weekTotals} goals={cardio.weeklyGoals} />
         </>
