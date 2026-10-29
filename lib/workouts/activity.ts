@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Every date (on or after `sinceKey`) on which you logged a workout: either at
 // least one lifting set, or a cardio log. Used for the streak and the green rings
-// on the week strip. Sauna and stretch ticks alone don't count as a workout.
+// on the week strip.
 export async function loadDoneDates(supabase: SupabaseClient, sinceKey: string): Promise<string[]> {
   const [sessions, cardio] = await Promise.all([
     // "!inner" keeps only sessions that have at least one logged set.
