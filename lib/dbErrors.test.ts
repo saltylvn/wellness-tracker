@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DATABASE_BEHIND_MESSAGE, isMissingSchemaError } from "./dbErrors";
+import { DATABASE_BEHIND_MESSAGE, isCheckViolation, isMissingSchemaError } from "./dbErrors";
 
 describe("isMissingSchemaError", () => {
   it("recognizes a missing column or table", () => {
@@ -19,5 +19,13 @@ describe("isMissingSchemaError", () => {
 
   it("has a message that says what to do", () => {
     expect(DATABASE_BEHIND_MESSAGE).toMatch(/SQL/);
+  });
+});
+
+describe("isCheckViolation", () => {
+  it("recognizes a value the database's rules don't allow", () => {
+    expect(isCheckViolation({ code: "23514" })).toBe(true);
+    expect(isCheckViolation({ code: "42703" })).toBe(false);
+    expect(isCheckViolation(null)).toBe(false);
   });
 });
