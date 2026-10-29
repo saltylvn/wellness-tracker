@@ -48,6 +48,8 @@ export default async function SettingsPage() {
     target_weight_lb: targetRow?.target_weight_lb == null ? null : Number(targetRow.target_weight_lb),
     start_weight_lb: startRow?.start_weight_lb == null ? null : Number(startRow.start_weight_lb),
     weight_pace_lb_week: paceRow?.weight_pace_lb_week == null ? null : Number(paceRow.weight_pace_lb_week),
+    daily_sunshine_minutes:
+      fullProfile?.daily_sunshine_minutes == null ? null : Number(fullProfile.daily_sunshine_minutes),
   } as unknown as Goals;
 
   return (

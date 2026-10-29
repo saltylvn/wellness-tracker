@@ -8,7 +8,7 @@ import {
   loadPlanOverview,
   loadPriorityBests,
   loadPriorityNames,
-  loadTanning,
+  loadSunshine,
 } from "./queries";
 
 // A stand-in for the database: each from("table") call hands back the next prepared
@@ -32,16 +32,17 @@ function fakeSupabase(answers: Record<string, unknown[]>) {
   } as never;
 }
 
-describe("loadTanning", () => {
-  it("returns today's minutes and the last earlier session", async () => {
-    const db = fakeSupabase({ tanning_logs: [{ minutes: 12 }, { minutes: 8 }] });
-    expect(await loadTanning(db, "2026-10-06")).toEqual({ minutes: 12, lastMinutes: 8 });
+describe("loadSunshine", () => {
+  it("returns today's minutes, the last earlier day, and the daily target", async () => {
+    const db = fakeSupabase({ tanning_logs: [{ minutes: 12 }, { minutes: 8 }], profiles: [{ daily_sunshine_minutes: 20 }] });
+    expect(await loadSunshine(db, "u", "2026-10-06")).toEqual({ minutes: 12, lastMinutes: 8, goal: 20 });
   });
 
-  it("returns nulls when nothing is logged", async () => {
-    expect(await loadTanning(fakeSupabase({ tanning_logs: [null, null] }), "2026-10-06")).toEqual({
+  it("returns nulls when nothing is logged or set", async () => {
+    expect(await loadSunshine(fakeSupabase({ tanning_logs: [null, null], profiles: [null] }), "u", "2026-10-06")).toEqual({
       minutes: null,
       lastMinutes: null,
+      goal: null,
     });
   });
 });
@@ -236,10 +237,10 @@ describe("loadFitnessPage round trips", () => {
     expect(count).toBe(2);
   });
 
-  it("loads a cardio + tanning day in 2 trips", async () => {
+  it("loads a cardio day (with sunshine) in 2 trips", async () => {
     const { page, trips: count } = await trips("2026-10-06"); // Tuesday
     expect(page.cardio).not.toBeNull();
-    expect(page.tanning).not.toBeNull();
+    expect(page.sunshine).toEqual({ minutes: null, lastMinutes: null, goal: null });
     expect(page.priorityLifts).toEqual([]); // only on lifting days
     expect(count).toBe(2);
   });

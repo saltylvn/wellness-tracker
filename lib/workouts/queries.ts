@@ -5,7 +5,6 @@ import { addDays, isoWeekday, weekDays } from "../dates";
 import { planFromRow, type CardioPlan } from "../cardioPlan";
 import { parseGymBarcode, type GymBarcode } from "../gymBarcode";
 import { priorityNames, type PriorityLift } from "../priorityLifts";
-import { isTanningDay } from "../tanning";
 import { loadDoneDates } from "./activity";
 import type { HistoryRow } from "./history";
 import type { PlanExercise, WorkoutDay } from "./plan";
@@ -173,13 +172,15 @@ export async function loadCardioDay(supabase: SupabaseClient, userId: string, da
   };
 }
 
-export type TanningData = {
+export type SunshineData = {
   minutes: number | null; // saved for this date, if any
-  lastMinutes: number | null; // your most recent earlier session
+  lastMinutes: number | null; // your most recent earlier day
+  goal: number | null; // your daily target from Settings (null = none, or its SQL step isn't run yet)
 };
 
-export async function loadTanning(supabase: SupabaseClient, date: string): Promise<TanningData> {
-  const [today, previous] = await Promise.all([
+/** Today's sunshine, last time's, and your daily target (stored in tanning_logs, its old name). */
+export async function loadSunshine(supabase: SupabaseClient, userId: string, date: string): Promise<SunshineData> {
+  const [today, previous, profile] = await Promise.all([
     supabase.from("tanning_logs").select("minutes").eq("log_date", date).maybeSingle(),
     supabase
       .from("tanning_logs")
@@ -188,8 +189,14 @@ export async function loadTanning(supabase: SupabaseClient, date: string): Promi
       .order("log_date", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    // "*" so this still works before the daily target column exists.
+    supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
   ]);
-  return { minutes: asNumber(today.data?.minutes), lastMinutes: asNumber(previous.data?.minutes) };
+  return {
+    minutes: asNumber(today.data?.minutes),
+    lastMinutes: asNumber(previous.data?.minutes),
+    goal: asNumber(profile.data?.daily_sunshine_minutes),
+  };
 }
 
 /** Your saved gym check-in barcode, or null (none saved yet, or the SQL step isn't run yet). */
@@ -269,7 +276,7 @@ export type FitnessPageData = {
   today: WorkoutDay | undefined; // the plan for this date's weekday
   lift: LiftDayData | null;
   cardio: CardioDayData | null;
-  tanning: TanningData | null;
+  sunshine: SunshineData; // shown every day
   gymBarcode: GymBarcode | null; // shown at the top of the page
   cardioPlan: CardioPlan | null; // this weekday's planned cardio, if any
   priorityLifts: PriorityLift[]; // your priority lifts (lifting days only), with their best weights
@@ -277,17 +284,17 @@ export type FitnessPageData = {
 
 /**
  * Everything the Fitness page reads, in as few trips to the database as possible:
- *   1. your plan, the days you logged, this weekday's exercises, tanning (Tue/Thu), your
+ *   1. your plan, the days you logged, this weekday's exercises, sunshine, your
  *      gym barcode, this weekday's cardio plan, and your priority lifts' names, together;
  *   2. then what this kind of day needs (lifting or cardio, and the priority lifts' bests), together.
  */
 export async function loadFitnessPage(supabase: SupabaseClient, userId: string, date: string): Promise<FitnessPageData> {
   const weekday = isoWeekday(date);
-  const [days, doneDates, planExercises, tanning, gymBarcode, cardioPlan, priority] = await Promise.all([
+  const [days, doneDates, planExercises, sunshine, gymBarcode, cardioPlan, priority] = await Promise.all([
     loadWorkoutDays(supabase, userId),
     loadDoneDates(supabase, addDays(date, -400)),
     loadPlanExercises(supabase, weekday),
-    isTanningDay(weekday) ? loadTanning(supabase, date) : null,
+    loadSunshine(supabase, userId, date),
     loadGymBarcode(supabase, userId),
     loadCardioPlan(supabase, weekday),
     loadPriorityNames(supabase, userId),
@@ -302,5 +309,5 @@ export async function loadFitnessPage(supabase: SupabaseClient, userId: string, 
     liftDay ? loadPriorityBests(supabase, priority) : [],
   ]);
 
-  return { days, doneDates, today, lift, cardio, tanning, gymBarcode, cardioPlan, priorityLifts };
+  return { days, doneDates, today, lift, cardio, sunshine, gymBarcode, cardioPlan, priorityLifts };
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 // A panel that slides up from the bottom of the screen over a dimmed backdrop.
 // Tapping the backdrop or pressing Escape closes it, and the page behind it
-// can't scroll while it's open. Used for logging sets, tanning time and the gym barcode.
+// can't scroll while it's open. Used for logging sets, sunshine minutes and the gym barcode.
 export default function BottomSheet({
   open,
   onClose,

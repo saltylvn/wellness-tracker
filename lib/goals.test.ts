@@ -25,7 +25,9 @@ describe("parseGoalsForm", () => {
         weekly_swim_yards: null,
         target_weight_lb: null,
         start_weight_lb: null,
-        weight_pace_lb_week: null,      },
+        weight_pace_lb_week: null,
+        daily_sunshine_minutes: null,
+      },
     });
   });
 
@@ -45,7 +47,9 @@ describe("parseGoalsForm", () => {
         weekly_swim_yards: null,
         target_weight_lb: null,
         start_weight_lb: null,
-        weight_pace_lb_week: null,      },
+        weight_pace_lb_week: null,
+        daily_sunshine_minutes: null,
+      },
     });
   });
 
@@ -61,7 +65,9 @@ describe("parseGoalsForm", () => {
       weekly_swim_yards: null,
       target_weight_lb: null,
       start_weight_lb: null,
-        weight_pace_lb_week: null,    });
+        weight_pace_lb_week: null,
+        daily_sunshine_minutes: null,
+      });
   });
 
   it("rounds decimals", () => {
@@ -112,7 +118,9 @@ describe("weekly cardio goals", () => {
       weekly_swim_yards: null,
       target_weight_lb: null,
       start_weight_lb: null,
-        weight_pace_lb_week: null,    });
+        weight_pace_lb_week: null,
+      daily_sunshine_minutes: null,
+    });
   });
 
   it("accepts comma decimals and rounds miles to 2 places", () => {
@@ -176,6 +184,16 @@ describe("target weight", () => {
     expect(b.ok && b.values.weight_pace_lb_week).toBeNull();
     for (const bad of ["3", "0", "-1", "fast"]) {
       expect(parseGoalsForm(form({ ...base, weight_pace_lb_week: bad })).ok).toBe(false);
+    }
+  });
+
+  it("reads an optional daily sunshine target in whole minutes", () => {
+    const a = parseGoalsForm(form({ ...base, daily_sunshine_minutes: "20" }));
+    expect(a.ok && a.values.daily_sunshine_minutes).toBe(20);
+    const b = parseGoalsForm(form({ ...base, daily_sunshine_minutes: "" }));
+    expect(b.ok && b.values.daily_sunshine_minutes).toBeNull();
+    for (const bad of ["0", "241", "sunny"]) {
+      expect(parseGoalsForm(form({ ...base, daily_sunshine_minutes: bad })).ok).toBe(false);
     }
   });
 });

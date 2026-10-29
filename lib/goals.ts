@@ -15,6 +15,7 @@ export type Goals = {
   target_weight_lb: number | null;
   start_weight_lb: number | null;
   weight_pace_lb_week: number | null; // your weekly weight pace (one of PACE_CHOICES); null = 2 lb
+  daily_sunshine_minutes: number | null; // daily sunshine target; null = none
 };
 
 export type GoalsResult = { ok: true; values: Goals } | { ok: false; message: string };
@@ -30,6 +31,7 @@ export const GOAL_LIMITS = {
   weekly_swim_yards: { min: 1, max: 100000 },
   target_weight_lb: { min: 70, max: 500 },
   start_weight_lb: { min: 70, max: 500 },
+  daily_sunshine_minutes: { min: 1, max: 240 },
 } as const;
 
 // Blank -> null; a number in range (rounded to `decimals` places) -> that number; anything
@@ -103,6 +105,12 @@ export function parseGoalsForm(formData: FormData): GoalsResult {
     return { ok: false, message: "Pick a weekly pace from the list." };
   }
 
+  const { daily_sunshine_minutes: sunLimits } = GOAL_LIMITS;
+  const sunshine = readGoal(formData.get("daily_sunshine_minutes"), sunLimits.min, sunLimits.max);
+  if (sunshine === "invalid") {
+    return { ok: false, message: "The daily sunshine target must be whole minutes from 1 to 240, or left blank." };
+  }
+
   return {
     ok: true,
     values: {
@@ -114,6 +122,7 @@ export function parseGoalsForm(formData: FormData): GoalsResult {
       target_weight_lb: targetWeight,
       start_weight_lb: startWeight,
       weight_pace_lb_week: pace,
+      daily_sunshine_minutes: sunshine,
     },
   };
 }

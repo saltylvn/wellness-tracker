@@ -33,6 +33,7 @@ export async function saveGoals(_previous: SaveResult, formData: FormData): Prom
 
   revalidatePath("/food");
   revalidatePath("/weight");
+  revalidatePath("/workouts");
   return { ok: true, message: "Saved." };
 }
 
