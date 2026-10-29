@@ -56,9 +56,9 @@ export function formatSet(weight: number, reps: number): string {
   return `${formatWeight(weight)} × ${reps}`;
 }
 
-/** "135 × 10 · 135 × 9 · 130 × 8" */
+/** "135 × 10 + 135 × 9 + 130 × 8" */
 export function summarizeSets(sets: { weight: number; reps: number }[]): string {
-  return sets.map((s) => formatSet(s.weight, s.reps)).join(" · ");
+  return sets.map((s) => formatSet(s.weight, s.reps)).join(" + ");
 }
 
 export type SetInputResult =
