@@ -7,7 +7,7 @@ import GoToToday from "@/components/GoToToday";
 import LogExercise from "@/components/LogExercise";
 import PlannedCardio from "@/components/PlannedCardio";
 import PriorityLifts from "@/components/PriorityLifts";
-import TanningLog from "@/components/TanningLog";
+import SunshineLog from "@/components/SunshineLog";
 import WeeklyCardioGoals from "@/components/WeeklyCardioGoals";
 import { currentUserId } from "@/lib/actionResult";
 import { completingLog } from "@/lib/cardioPlan";
@@ -36,7 +36,7 @@ export default async function WorkoutsPage({
 
   // Everything this page reads, in two rounds (see loadFitnessPage).
   // (Don't put key={date} on the cards below: switching days then left stale copies on screen.)
-  const { days, doneDates, today, lift, cardio, tanning, gymBarcode, cardioPlan, priorityLifts } = await loadFitnessPage(
+  const { days, doneDates, today, lift, cardio, sunshine, gymBarcode, cardioPlan, priorityLifts } = await loadFitnessPage(
     supabase,
     userId,
     date,
@@ -123,7 +123,8 @@ export default async function WorkoutsPage({
         </>
       )}
 
-      {tanning && <TanningLog date={date} minutes={tanning.minutes} lastMinutes={tanning.lastMinutes} />}
+      {/* Every day: minutes of sunshine toward your daily target (Settings). */}
+      <SunshineLog date={date} minutes={sunshine.minutes} lastMinutes={sunshine.lastMinutes} goal={sunshine.goal} />
 
       {today && lift && (
         <section className="space-y-3">

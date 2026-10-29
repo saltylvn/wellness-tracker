@@ -150,6 +150,24 @@ export default function GoalsForm({ goals }: { goals: Goals }) {
         </p>
       </fieldset>
 
+      <div>
+        <label htmlFor="daily_sunshine_minutes" className={labelClass}>
+          Daily sunshine <span className="font-normal">(optional, in minutes)</span>
+        </label>
+        <input
+          id="daily_sunshine_minutes"
+          name="daily_sunshine_minutes"
+          type="text"
+          inputMode="numeric"
+          defaultValue={goals.daily_sunshine_minutes ?? ""}
+          placeholder="e.g. 20"
+          className={inputClass}
+        />
+        <p className="mt-2 text-xs text-muted">
+          Shown on the Fitness tab every day as &ldquo;☀️ Sunshine 10 / 20 min&rdquo;. Leave blank for no target.
+        </p>
+      </div>
+
       <button
         type="submit"
         disabled={pending}
