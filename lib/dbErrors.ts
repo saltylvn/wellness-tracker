@@ -12,3 +12,12 @@ const MISSING_SCHEMA_CODES = ["42703", "42P01", "PGRST204", "PGRST205"];
 export function isMissingSchemaError(error: { code?: string | null } | null | undefined): boolean {
   return Boolean(error?.code && MISSING_SCHEMA_CODES.includes(error.code));
 }
+
+/**
+ * True when the database refused a value its rules (CHECK constraints) don't allow yet.
+ * 23514 = check violation. For example, saving a lifting-and-cardio day before the SQL
+ * step that allows it has been run.
+ */
+export function isCheckViolation(error: { code?: string | null } | null | undefined): boolean {
+  return error?.code === "23514";
+}

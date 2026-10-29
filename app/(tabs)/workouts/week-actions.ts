@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { currentUserId, failedSave, SIGN_IN_AGAIN, type ActionResult } from "@/lib/actionResult";
+import { DATABASE_BEHIND_MESSAGE, isCheckViolation } from "@/lib/dbErrors";
 import { createClient } from "@/lib/supabase/server";
 import { parseWeekKinds, titleAfterChange } from "@/lib/workouts/weekSetup";
 import { loadWorkoutDays } from "@/lib/workouts/seed";
@@ -31,7 +32,11 @@ export async function saveWeekKinds(input: unknown): Promise<ActionResult> {
     }),
   );
   const failed = results.find((result) => result.error);
-  if (failed) return failedSave(failed.error);
+  if (failed) {
+    // A lifting-and-cardio day is refused until its SQL step allows "both": say so plainly.
+    if (isCheckViolation(failed.error)) return { ok: false, message: DATABASE_BEHIND_MESSAGE };
+    return failedSave(failed.error);
+  }
 
   revalidatePath("/workouts");
   return { ok: true };
