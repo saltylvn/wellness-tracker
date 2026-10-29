@@ -144,7 +144,7 @@ describe("loadPlanOverview", () => {
     });
     expect(await loadPlanOverview(db, "u")).toEqual([
       { id: "d1", weekday: 1, kind: "lift", title: "Legs", exerciseCount: 3, cardioPlan: null },
-      { id: "d2", weekday: 2, kind: "cardio", title: "Cardio", exerciseCount: 0, cardioPlan: { kind: "run", distance: 3 } },
+      { id: "d2", weekday: 2, kind: "cardio", title: "Cardio", exerciseCount: 0, cardioPlan: { kind: "run", target: 3, unit: "mi" } },
     ]);
   });
 });
