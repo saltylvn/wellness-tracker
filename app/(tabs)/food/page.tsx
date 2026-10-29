@@ -76,6 +76,7 @@ export default async function FoodPage({
         goal={goal}
         week={weekSummary}
         foodDates={foodDates}
+        calories={<CaloriesCard calories={totals.calories} goal={goal} status={status} />}
         macros={
           <MacrosCard
             macros={[
@@ -86,8 +87,6 @@ export default async function FoodPage({
           />
         }
       />
-
-      <CaloriesCard calories={totals.calories} goal={goal} status={status} />
 
       <WaterTracker date={date} totalOz={waterTotal} />
 

@@ -10,20 +10,22 @@ const arrowClass =
   "flex h-11 w-11 items-center justify-center rounded-full text-2xl text-muted active:bg-card";
 
 // The top of the Nutrition tab, laid out like the Fitness tab: title on the left,
-// "Today / Jump to today" and settings on the right, your streak, the macros card (in the
-// same spot and size as Fitness's "Your week" card), the week strip (green or red ring
-// per day, against your calorie goal), and a small date line.
+// "Today / Jump to today" and settings on the right, your streak, the day's calories card,
+// the macros card, the week strip (green or red ring per day, against your calorie goal),
+// and a small date line.
 export default function NutritionHeader({
   date,
   goal,
   week,
   foodDates,
+  calories,
   macros,
 }: {
   date: string;
   goal: number | null;
   week: WeekDay[];
   foodDates: string[]; // days you logged food, for the streak
+  calories: ReactNode; // the CaloriesCard for this day (above the macros)
   macros: ReactNode; // the MacrosCard for this day
 }) {
   return (
@@ -42,6 +44,8 @@ export default function NutritionHeader({
         label="Food logging streak"
         startHint="Log a meal or snack today to start one."
       />
+
+      {calories}
 
       {macros}
 
