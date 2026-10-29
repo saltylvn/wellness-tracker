@@ -48,10 +48,11 @@ export default async function WorkoutsPage({
 
 
       <section className="space-y-1">
-        <h2 className="text-lg font-semibold">
-          {formatWeekday(date)}
+        {/* The selected day, large and green, so it's easy to see which day you're on. */}
+        <h2 className="text-2xl font-bold">
+          <span className="text-accent">{formatWeekday(date)}</span>
           {today ? (
-            <span className="text-muted"> · {dayTitle(today)}</span>
+            <span className="text-lg font-semibold text-muted"> · {dayTitle(today)}</span>
           ) : null}
         </h2>
         <p className="text-sm text-muted">{formatFullDate(date)}</p>
@@ -102,7 +103,7 @@ export default async function WorkoutsPage({
       {today && lift && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-muted">Today&apos;s exercises</h3>
+            <h3 className="text-sm font-semibold text-muted">{formatWeekday(date)}&apos;s exercises</h3>
             <Link
               href={`/workouts/plan/${today.id}?date=${date}`}
               className="flex min-h-11 items-center text-sm font-medium text-accent active:opacity-70"
