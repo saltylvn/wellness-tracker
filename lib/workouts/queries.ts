@@ -8,6 +8,7 @@ import { loadDoneDates } from "./activity";
 import type { HistoryRow } from "./history";
 import type { PlanExercise, WorkoutDay } from "./plan";
 import { loadWorkoutDays } from "./seed";
+import { hasCardio, hasLift } from "./weekSetup";
 
 // The database reads behind the Fitness page: loadFitnessPage (at the bottom) runs them in
 // two rounds, and each round's queries run at the same time (not one after another), so
@@ -226,8 +227,11 @@ export async function loadFitnessPage(supabase: SupabaseClient, userId: string, 
   ]);
   const today = days.find((d) => d.weekday === weekday);
 
-  const lift = today?.kind === "lift" ? await loadLiftDay(supabase, date, planExercises) : null;
-  const cardio = today?.kind === "cardio" ? await loadCardioDay(supabase, userId, date) : null;
+  // A day with both loads its lifting and cardio data at the same time (still one trip).
+  const [lift, cardio] = await Promise.all([
+    today && hasLift(today.kind) ? loadLiftDay(supabase, date, planExercises) : null,
+    today && hasCardio(today.kind) ? loadCardioDay(supabase, userId, date) : null,
+  ]);
 
   return { days, doneDates, today, lift, cardio, tanning, gymBarcode };
 }

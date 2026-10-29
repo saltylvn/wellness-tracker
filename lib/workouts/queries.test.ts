@@ -138,7 +138,7 @@ describe("loadFitnessPage round trips", () => {
   const days = [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
     id: `d${weekday}`,
     weekday,
-    kind: [1, 3, 5].includes(weekday) ? "lift" : weekday === 7 ? "rest" : "cardio",
+    kind: [1, 3, 5].includes(weekday) ? "lift" : weekday === 6 ? "both" : weekday === 7 ? "rest" : "cardio",
     title: "x",
   }));
   const slowDb = () =>
@@ -177,6 +177,13 @@ describe("loadFitnessPage round trips", () => {
     const { page, trips: count } = await trips("2026-10-05"); // Monday
     expect(page.lift?.exercises).toHaveLength(1);
     expect(page.gymBarcode).toBeNull();
+    expect(count).toBe(2);
+  });
+
+  it("loads a lifting and cardio day in 2 trips", async () => {
+    const { page, trips: count } = await trips("2026-10-10"); // Saturday: both
+    expect(page.lift?.exercises).toHaveLength(1);
+    expect(page.cardio).not.toBeNull();
     expect(count).toBe(2);
   });
 

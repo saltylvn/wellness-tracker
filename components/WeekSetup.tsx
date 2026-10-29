@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { TOP_CARD } from "@/components/cardStyles";
 import { saveWeekKinds } from "@/app/(tabs)/workouts/week-actions";
 import type { DayKind } from "@/lib/workouts/defaults";
-import { PLANNABLE_WEEKDAYS, toggleDay } from "@/lib/workouts/weekSetup";
+import { hasCardio, hasLift, PLANNABLE_WEEKDAYS, toggleDay } from "@/lib/workouts/weekSetup";
 
 const LETTERS = ["M", "T", "W", "TH", "F", "S"]; // Monday to Saturday; Sunday is always recovery
 const NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -17,8 +17,8 @@ const ROWS = [
 const SAVE_DELAY_MS = 600; // wait for a short pause in tapping, then save once
 
 // "Your week" on the Fitness tab: two rows of small day toggles, Lift and Cardio, each on one line.
-// A day turns green when it's on. A day can be one or the other, so turning it on in
-// one row turns it off in the other; a day that's off in both is a rest day.
+// A day turns green when it's on. The rows are separate: a day on in both rows has lifting
+// and cardio; a day that's off in both is a rest day.
 // Changes save by themselves a moment after you stop tapping.
 export default function WeekSetup({ days }: { days: { weekday: number; kind: DayKind }[] }) {
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function WeekSetup({ days }: { days: { weekday: number; kind: Day
           <p className="w-12 shrink-0 text-xs font-semibold text-muted">{row.label}</p>
           <div className="grid flex-1 grid-cols-6 gap-1">
             {LETTERS.map((letter, i) => {
-              const on = kinds[i] === row.kind;
+              const on = row.kind === "lift" ? hasLift(kinds[i]) : hasCardio(kinds[i]);
               return (
                 // The button is taller than the small square inside it, so it's still easy to tap.
                 <button

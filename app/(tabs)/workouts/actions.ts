@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { isValidDateKey } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import { parsePlanJson } from "@/lib/workouts/plan";
-import { MAX_DAY_NAME_LENGTH, parseDayName } from "@/lib/workouts/weekSetup";
+import { hasLift, MAX_DAY_NAME_LENGTH, parseDayName } from "@/lib/workouts/weekSetup";
 import { currentUserId } from "@/lib/actionResult";
 
 export type PlanFormState = { message: string } | null;
@@ -34,7 +34,7 @@ export async function saveDayPlan(
     .select("id, kind, title")
     .eq("id", dayId)
     .maybeSingle();
-  if (!day || day.kind !== "lift") return { message: "Couldn't find that workout day." };
+  if (!day || !hasLift(day.kind)) return { message: "Couldn't find that workout day." };
 
   // 0. The day's name, if you changed it.
   if (title !== day.title) {

@@ -6,12 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { parseWeekKinds, titleAfterChange } from "@/lib/workouts/weekSetup";
 import { loadWorkoutDays } from "@/lib/workouts/seed";
 
-// Saves which weekdays are lifting, cardio, or rest days. Only the days you changed are
+// Saves which weekdays are lifting, cardio, both, or rest days. Only the days you changed are
 // updated; each day keeps its exercises, so switching a day back to lifting restores them.
 export async function saveWeekKinds(input: unknown): Promise<ActionResult> {
-  // Never trust the browser: all seven days must be there, each lift, cardio, or rest.
+  // Never trust the browser: all seven days must be there, each lift, cardio, both, or rest.
   const week = parseWeekKinds(input);
-  if (!week) return { ok: false, message: "Pick lifting, cardio, or rest for every day." };
+  if (!week) return { ok: false, message: "Pick lifting, cardio, both, or rest for every day." };
 
   const supabase = await createClient();
   const userId = await currentUserId(supabase);

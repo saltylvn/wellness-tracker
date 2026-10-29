@@ -58,7 +58,11 @@ export default function WorkoutWeekStrip({
               >
                 {formatDayNumber(day.dateKey)}
               </span>
-              <span className="text-base leading-none" aria-hidden="true">
+              {/* A day with both shows both icons, a little smaller so they fit. */}
+              <span
+                className={`flex h-4 items-center leading-none ${day.kind === "both" ? "text-[11px] tracking-tighter" : "text-base"}`}
+                aria-hidden="true"
+              >
                 {day.kind ? KIND_ICON[day.kind] : ""}
               </span>
             </span>

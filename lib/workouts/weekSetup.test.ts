@@ -19,6 +19,11 @@ describe("dayTitle", () => {
     expect(dayTitle({ kind: "lift", title: "Legs" })).toBe("Legs");
     expect(dayTitle({ kind: "lift", title: "Cardio" })).toBe("Lifting");
   });
+
+  it("adds '+ Cardio' to a day with both", () => {
+    expect(dayTitle({ kind: "both", title: "Legs" })).toBe("Legs + Cardio");
+    expect(dayTitle({ kind: "both", title: "Lifting" })).toBe("Lifting + Cardio");
+  });
 });
 
 describe("titleAfterChange", () => {
@@ -80,12 +85,22 @@ describe("parseWeekKinds", () => {
 describe("toggleDay", () => {
   const week = ["lift", "cardio", "rest"] as const;
 
-  it("turns a day on, moving it out of the other row", () => {
+  it("turns a rest day on in either row", () => {
     expect(toggleDay([...week], 2, "lift")).toEqual(["lift", "cardio", "lift"]);
-    expect(toggleDay([...week], 0, "cardio")).toEqual(["cardio", "cardio", "rest"]);
+    expect(toggleDay([...week], 2, "cardio")).toEqual(["lift", "cardio", "cardio"]);
   });
 
-  it("turns a day that's already on off (rest)", () => {
+  it("turning on the other row makes a day both", () => {
+    expect(toggleDay([...week], 0, "cardio")).toEqual(["both", "cardio", "rest"]);
+    expect(toggleDay([...week], 1, "lift")).toEqual(["lift", "both", "rest"]);
+  });
+
+  it("turning one row off leaves the other", () => {
+    expect(toggleDay(["both"], 0, "lift")).toEqual(["cardio"]);
+    expect(toggleDay(["both"], 0, "cardio")).toEqual(["lift"]);
+  });
+
+  it("turns a day that's on in one row only off (rest)", () => {
     expect(toggleDay([...week], 0, "lift")).toEqual(["rest", "cardio", "rest"]);
   });
 });
