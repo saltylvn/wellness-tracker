@@ -6,6 +6,7 @@ import TodayPill from "@/components/TodayPill";
 import WeighInCard from "@/components/WeighInCard";
 import WeightChart from "@/components/WeightChart";
 import WeightProgress from "@/components/WeightProgress";
+import WeightStreakBadge from "@/components/WeightStreakBadge";
 import { currentUserId } from "@/lib/actionResult";
 import { DATABASE_BEHIND_MESSAGE } from "@/lib/dbErrors";
 import { formatFullDate, formatWeekday, isValidDateKey } from "@/lib/dates";
@@ -57,6 +58,9 @@ export default async function WeightPage({
           <span className="font-semibold text-foreground">{formatWeekday(date)}</span> · {formatFullDate(date)}
         </p>
       </header>
+
+      {/* Weeks in a row you lost at least 1 lb, from your weigh-ins. */}
+      <WeightStreakBadge logs={data.logs} />
 
       {data.databaseBehind && (
         <p role="alert" className="rounded-2xl border border-danger p-4 text-sm text-danger">
