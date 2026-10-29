@@ -4,6 +4,7 @@ import { weeklyTotals, type WeeklyGoals } from "../cardioGoals";
 import { addDays, isoWeekday, weekDays } from "../dates";
 import { planFromRow, type CardioPlan } from "../cardioPlan";
 import { parseGymBarcode, type GymBarcode } from "../gymBarcode";
+import { priorityNames, type PriorityLift } from "../priorityLifts";
 import { isTanningDay } from "../tanning";
 import { loadDoneDates } from "./activity";
 import type { HistoryRow } from "./history";
@@ -201,6 +202,30 @@ export async function loadGymBarcode(supabase: SupabaseClient, userId: string): 
   return data ? parseGymBarcode({ text: data.gym_barcode_text, format: data.gym_barcode_format }) : null;
 }
 
+/** Your priority lifts' names from Settings ([] if none, or the SQL step isn't run yet). */
+export async function loadPriorityNames(supabase: SupabaseClient, userId: string): Promise<string[]> {
+  // "*" so this still works before the priority lift columns exist.
+  const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  return priorityNames(data);
+}
+
+/** Each priority lift with the heaviest weight you've ever logged for it (matched by name). */
+export async function loadPriorityBests(supabase: SupabaseClient, names: string[]): Promise<PriorityLift[]> {
+  return Promise.all(
+    names.map(async (name) => {
+      const { data } = await supabase
+        .from("workout_sets")
+        .select("weight")
+        .eq("exercise_name", name)
+        .not("weight", "is", null)
+        .order("weight", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return { name, best: asNumber(data?.weight) };
+    }),
+  );
+}
+
 export type PlanOverviewDay = WorkoutDay & { exerciseCount: number; cardioPlan: CardioPlan | null };
 
 /**
@@ -247,31 +272,35 @@ export type FitnessPageData = {
   tanning: TanningData | null;
   gymBarcode: GymBarcode | null; // shown at the top of the page
   cardioPlan: CardioPlan | null; // this weekday's planned cardio, if any
+  priorityLifts: PriorityLift[]; // your priority lifts (lifting days only), with their best weights
 };
 
 /**
  * Everything the Fitness page reads, in as few trips to the database as possible:
  *   1. your plan, the days you logged, this weekday's exercises, tanning (Tue/Thu), your
- *      gym barcode, and this weekday's cardio plan, together;
- *   2. then what this kind of day needs (lifting or cardio), together.
+ *      gym barcode, this weekday's cardio plan, and your priority lifts' names, together;
+ *   2. then what this kind of day needs (lifting or cardio, and the priority lifts' bests), together.
  */
 export async function loadFitnessPage(supabase: SupabaseClient, userId: string, date: string): Promise<FitnessPageData> {
   const weekday = isoWeekday(date);
-  const [days, doneDates, planExercises, tanning, gymBarcode, cardioPlan] = await Promise.all([
+  const [days, doneDates, planExercises, tanning, gymBarcode, cardioPlan, priority] = await Promise.all([
     loadWorkoutDays(supabase, userId),
     loadDoneDates(supabase, addDays(date, -400)),
     loadPlanExercises(supabase, weekday),
     isTanningDay(weekday) ? loadTanning(supabase, date) : null,
     loadGymBarcode(supabase, userId),
     loadCardioPlan(supabase, weekday),
+    loadPriorityNames(supabase, userId),
   ]);
   const today = days.find((d) => d.weekday === weekday);
 
   // A day with both loads its lifting and cardio data at the same time (still one trip).
-  const [lift, cardio] = await Promise.all([
-    today && hasLift(today.kind) ? loadLiftDay(supabase, date, planExercises) : null,
+  const liftDay = Boolean(today && hasLift(today.kind));
+  const [lift, cardio, priorityLifts] = await Promise.all([
+    liftDay ? loadLiftDay(supabase, date, planExercises) : null,
     today && hasCardio(today.kind) ? loadCardioDay(supabase, userId, date) : null,
+    liftDay ? loadPriorityBests(supabase, priority) : [],
   ]);
 
-  return { days, doneDates, today, lift, cardio, tanning, gymBarcode, cardioPlan };
+  return { days, doneDates, today, lift, cardio, tanning, gymBarcode, cardioPlan, priorityLifts };
 }

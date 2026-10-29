@@ -6,6 +6,8 @@ import {
   loadLiftDay,
   loadPlanExercises,
   loadPlanOverview,
+  loadPriorityBests,
+  loadPriorityNames,
   loadTanning,
 } from "./queries";
 
@@ -161,6 +163,20 @@ describe("loadGymBarcode", () => {
   });
 });
 
+describe("priority lifts", () => {
+  it("reads the saved names, and each one's heaviest weight", async () => {
+    const db = fakeSupabase({ profiles: [{ priority_lift_1: "Squats", priority_lift_2: "Deadlift" }] });
+    expect(await loadPriorityNames(db, "u")).toEqual(["Squats", "Deadlift"]);
+    expect(await loadPriorityNames(fakeSupabase({ profiles: [null] }), "u")).toEqual([]);
+
+    const sets = fakeSupabase({ workout_sets: [{ weight: "225" }, null] });
+    expect(await loadPriorityBests(sets, ["Squats", "Deadlift"])).toEqual([
+      { name: "Squats", best: 225 },
+      { name: "Deadlift", best: null },
+    ]);
+  });
+});
+
 describe("loadFitnessPage round trips", () => {
   // A stand-in database where every query takes 50 ms, like a trip over the network.
   // Queries that run at the same time overlap; ones that wait on each other add up.
@@ -180,7 +196,9 @@ describe("loadFitnessPage round trips", () => {
             ? days
             : table === "workout_exercises"
               ? [{ id: "e1", name: "Squat", target_sets: 3, rep_min: 5, rep_max: 8, superset_with_next: false }]
-              : [];
+              : table === "profiles"
+                ? [{ priority_lift_1: "Squat", priority_lift_2: null }]
+                : [];
         const chain: unknown = new Proxy(
           {},
           {
@@ -207,6 +225,7 @@ describe("loadFitnessPage round trips", () => {
     const { page, trips: count } = await trips("2026-10-05"); // Monday
     expect(page.lift?.exercises).toHaveLength(1);
     expect(page.gymBarcode).toBeNull();
+    expect(page.priorityLifts.map((p) => p.name)).toEqual(["Squat"]);
     expect(count).toBe(2);
   });
 
@@ -221,6 +240,7 @@ describe("loadFitnessPage round trips", () => {
     const { page, trips: count } = await trips("2026-10-06"); // Tuesday
     expect(page.cardio).not.toBeNull();
     expect(page.tanning).not.toBeNull();
+    expect(page.priorityLifts).toEqual([]); // only on lifting days
     expect(count).toBe(2);
   });
 });
