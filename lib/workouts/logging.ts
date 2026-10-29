@@ -18,6 +18,20 @@ export const WEIGHT_OPTIONS: number[] = Array.from(
 // 1, 2, ... 50
 export const REP_OPTIONS: number[] = Array.from({ length: REPS_MAX }, (_, i) => i + 1);
 
+// Timed sets (planks, wall sits...): a minutes wheel (0-30) and a seconds wheel (0-55, in 5s).
+export const MAX_SET_SECONDS = 7200; // what the database allows (2 hours)
+export const DEFAULT_SECONDS = 60;
+export const MINUTE_OPTIONS: number[] = Array.from({ length: 31 }, (_, i) => i);
+export const SECOND_OPTIONS: number[] = Array.from({ length: 12 }, (_, i) => i * 5);
+
+/**
+ * One logged set: either weight × reps, or a time (seconds). A timed set has `seconds`;
+ * a weight set has `weight` and `reps`.
+ */
+export type LoggedSet = { weight: number | null; reps: number | null; seconds: number | null };
+
+export const isTimed = (set: LoggedSet): boolean => set.seconds !== null;
+
 /** "Lateral raises (dumbbell)" -> true. Also catches the common "dumbell" typo. */
 export function isDumbbell(name: string): boolean {
   return /dumb{1,2}ell/i.test(name);
@@ -51,14 +65,29 @@ export function formatWeight(weight: number): string {
   return Number.isInteger(weight) ? String(weight) : weight.toFixed(1);
 }
 
-/** "135 × 10" */
-export function formatSet(weight: number, reps: number): string {
-  return `${formatWeight(weight)} × ${reps}`;
+/** 45 -> "45 sec", 90 -> "1:30", 600 -> "10:00" */
+export function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds} sec`;
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+/** "135 × 10" for a weight set, "1:30" for a timed one. */
+export function formatSet(set: LoggedSet): string {
+  if (set.seconds !== null) return formatDuration(set.seconds);
+  return `${formatWeight(set.weight ?? 0)} × ${set.reps ?? 0}`;
 }
 
 /** "135 × 10 + 135 × 9 + 130 × 8" */
-export function summarizeSets(sets: { weight: number; reps: number }[]): string {
-  return sets.map((s) => formatSet(s.weight, s.reps)).join(" + ");
+export function summarizeSets(sets: LoggedSet[]): string {
+  return sets.map(formatSet).join(" + ");
+}
+
+/** Where the time wheels start: your last time for this exercise, else 1 minute (snapped to 5s). */
+export function defaultSecondsFor(lastSeconds?: number | null): number {
+  const start = lastSeconds ?? DEFAULT_SECONDS;
+  const maxOnWheels = MINUTE_OPTIONS.at(-1)! * 60 + SECOND_OPTIONS.at(-1)!;
+  return Math.min(maxOnWheels, Math.max(5, Math.round(start / 5) * 5));
 }
 
 export type SetInputResult =
@@ -74,4 +103,14 @@ export function validateSetInput(weight: unknown, reps: unknown): SetInputResult
     return { ok: false, message: "Reps must be a whole number from 1 to 1,000." };
   }
   return { ok: true, weight: Math.round(weight * 100) / 100, reps };
+}
+
+export type TimeInputResult = { ok: true; seconds: number } | { ok: false; message: string };
+
+// The same, for a timed set: a whole number of seconds, 1 second to 2 hours.
+export function validateTimeInput(seconds: unknown): TimeInputResult {
+  if (typeof seconds !== "number" || !Number.isInteger(seconds) || seconds < 1 || seconds > MAX_SET_SECONDS) {
+    return { ok: false, message: "Pick a time from 5 seconds to 2 hours." };
+  }
+  return { ok: true, seconds };
 }

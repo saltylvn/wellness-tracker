@@ -1,4 +1,5 @@
 // Picks "last time's" numbers for an exercise out of your past sets.
+import type { LoggedSet } from "./logging";
 
 export type HistoryRow = {
   exercise_id: string | null;
@@ -6,14 +7,13 @@ export type HistoryRow = {
   set_number: number;
   weight: number | null;
   reps: number | null;
+  seconds: number | null; // set for a timed set (then weight and reps are empty)
 };
 
-export type LoggedSet = { weight: number; reps: number };
-
-/** The sets from the most recent day you did this exercise, in set order. */
+/** The sets from the most recent day you did this exercise, in set order (weight or timed). */
 export function latestSets(rows: HistoryRow[], exerciseId: string): LoggedSet[] {
   const mine = rows.filter(
-    (r) => r.exercise_id === exerciseId && r.weight !== null && r.reps !== null,
+    (r) => r.exercise_id === exerciseId && (r.seconds !== null || (r.weight !== null && r.reps !== null)),
   );
   if (mine.length === 0) return [];
 
@@ -21,5 +21,5 @@ export function latestSets(rows: HistoryRow[], exerciseId: string): LoggedSet[] 
   return mine
     .filter((r) => r.session_date === latestDate)
     .sort((a, b) => a.set_number - b.set_number)
-    .map((r) => ({ weight: Number(r.weight), reps: Number(r.reps) }));
+    .map(({ weight, reps, seconds }) => ({ weight, reps, seconds }));
 }

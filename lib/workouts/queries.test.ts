@@ -74,7 +74,10 @@ describe("loadLiftDay", () => {
     const db = fakeSupabase({
       workout_sessions: [
         {
-          workout_sets: [{ id: "s1", exercise_id: "e1", set_number: 1, weight: "315", reps: 3 }],
+          workout_sets: [
+            { id: "s1", exercise_id: "e1", set_number: 1, weight: "315", reps: 3, duration_seconds: null },
+            { id: "s2", exercise_id: "e1", set_number: 2, weight: null, reps: null, duration_seconds: 60 },
+          ],
         },
       ],
       // Calls in order: the one exercise's best, then history.
@@ -85,10 +88,13 @@ describe("loadLiftDay", () => {
     });
     const lift = await loadLiftDay(db, "2026-10-06", [deadlift]);
     expect(lift.exercises).toEqual([deadlift]);
-    expect(lift.todaySets).toEqual([{ id: "s1", exercise_id: "e1", set_number: 1, weight: 315, reps: 3 }]);
+    expect(lift.todaySets).toEqual([
+      { id: "s1", exercise_id: "e1", set_number: 1, weight: 315, reps: 3, seconds: null },
+      { id: "s2", exercise_id: "e1", set_number: 2, weight: null, reps: null, seconds: 60 },
+    ]);
     expect(lift.bestById.get("e1")).toBe(335);
     expect(lift.history).toEqual([
-      { exercise_id: "e1", session_date: "2026-09-29", set_number: 1, weight: 305, reps: 5 },
+      { exercise_id: "e1", session_date: "2026-09-29", set_number: 1, weight: 305, reps: 5, seconds: null },
     ]);
   });
 

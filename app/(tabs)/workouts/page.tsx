@@ -14,7 +14,7 @@ import { gymBarcodeSvg } from "@/lib/gymBarcodeSvg";
 import { createClient } from "@/lib/supabase/server";
 import { connectorAfter, formatRest, formatSetsReps } from "@/lib/workouts/plan";
 import { latestSets } from "@/lib/workouts/history";
-import { defaultRepsFor, defaultWeightFor } from "@/lib/workouts/logging";
+import { defaultRepsFor, defaultSecondsFor, defaultWeightFor, isTimed } from "@/lib/workouts/logging";
 import { REST_DAY_TITLE } from "@/lib/workouts/defaults";
 import { dayTitle, isBlankWeek } from "@/lib/workouts/weekSetup";
 import { loadFitnessPage } from "@/lib/workouts/queries";
@@ -124,17 +124,22 @@ export default async function WorkoutsPage({
                 .sort((a, b) => a.set_number - b.set_number);
               const lastTime = latestSets(lift.history, exercise.id);
               // The wheels start where you left off: your last set today, else last workout's first set.
+              // The Weight / Time switch starts on whichever kind that set was (Weight if none).
               const seed = mySets.at(-1) ?? lastTime[0];
+              const weightSeed = [...mySets].reverse().find((s) => !isTimed(s)) ?? lastTime.find((s) => !isTimed(s));
+              const timeSeed = [...mySets].reverse().find(isTimed) ?? lastTime.find(isTimed);
               return (
                 <Fragment key={exercise.id}>
                   <LogExercise
                     exercise={{ id: exercise.id, name: exercise.name, target }}
                     date={date}
-                    todaySets={mySets.map((set) => ({ id: set.id, weight: set.weight, reps: set.reps }))}
+                    todaySets={mySets.map(({ id, weight, reps, seconds }) => ({ id, weight, reps, seconds }))}
                     lastTime={lastTime}
                     bestWeight={lift.bestById.get(exercise.id) ?? null}
-                    initialWeight={defaultWeightFor(exercise.name, seed?.weight)}
-                    initialReps={defaultRepsFor(exercise.rep_max, seed?.reps)}
+                    initialMode={seed && isTimed(seed) ? "time" : "weight"}
+                    initialWeight={defaultWeightFor(exercise.name, weightSeed?.weight)}
+                    initialReps={defaultRepsFor(exercise.rep_max, weightSeed?.reps)}
+                    initialSeconds={defaultSecondsFor(timeSeed?.seconds)}
                   />
                   {connector === "superset" && (
                     <p className="flex items-center justify-center gap-1.5 py-0.5 text-sm font-semibold text-accent">

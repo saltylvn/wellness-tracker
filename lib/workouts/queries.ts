@@ -17,7 +17,15 @@ import { loadWorkoutDays } from "./seed";
 const asNumber = (value: unknown): number | null =>
   value === null || value === undefined ? null : Number(value);
 
-export type TodaySet = { id: string; exercise_id: string | null; set_number: number; weight: number; reps: number };
+// A set logged on this date: weight × reps, or a time (seconds) for a timed set.
+export type TodaySet = {
+  id: string;
+  exercise_id: string | null;
+  set_number: number;
+  weight: number | null;
+  reps: number | null;
+  seconds: number | null;
+};
 
 export type LiftDayData = {
   exercises: PlanExercise[];
@@ -56,7 +64,7 @@ export async function loadLiftDay(supabase: SupabaseClient, date: string, exerci
     // Today's session: every set logged so far.
     supabase
       .from("workout_sessions")
-      .select("workout_sets(id, exercise_id, set_number, weight, reps)")
+      .select("workout_sets(id, exercise_id, set_number, weight, reps, duration_seconds)")
       .eq("session_date", date)
       .maybeSingle(),
     // The heaviest weight ever logged for each exercise (any date), for the quick-reference line.
@@ -78,7 +86,7 @@ export async function loadLiftDay(supabase: SupabaseClient, date: string, exerci
       ? null
       : supabase
           .from("workout_sets")
-          .select("exercise_id, set_number, weight, reps, workout_sessions!inner(session_date)")
+          .select("exercise_id, set_number, weight, reps, duration_seconds, workout_sessions!inner(session_date)")
           .in("exercise_id", ids)
           .lt("workout_sessions.session_date", date)
           .order("created_at", { ascending: false })
@@ -86,10 +94,13 @@ export async function loadLiftDay(supabase: SupabaseClient, date: string, exerci
   ]);
 
   const session = sessionResult.data;
-  const todaySets = ((session?.workout_sets ?? []) as TodaySet[]).map((set) => ({
-    ...set,
-    weight: Number(set.weight),
-    reps: Number(set.reps),
+  const todaySets: TodaySet[] = (session?.workout_sets ?? []).map((set: Record<string, unknown>) => ({
+    id: set.id as string,
+    exercise_id: set.exercise_id as string | null,
+    set_number: set.set_number as number,
+    weight: asNumber(set.weight),
+    reps: asNumber(set.reps),
+    seconds: asNumber(set.duration_seconds),
   }));
   const history: HistoryRow[] = (past?.data ?? []).map((row) => {
     // The joined session comes back as one object (or a one-item list).
@@ -101,6 +112,7 @@ export async function loadLiftDay(supabase: SupabaseClient, date: string, exerci
       set_number: row.set_number as number,
       weight: asNumber(row.weight),
       reps: asNumber(row.reps),
+      seconds: asNumber(row.duration_seconds),
     };
   });
 
