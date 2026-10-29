@@ -7,7 +7,7 @@ import type { WeighIn } from "./weightPlan";
 // too, so the page and the AI plan always work from the same numbers.
 
 export type SavedPlan = {
-  pace: number | null; // lb per week, as last suggested
+  pace: number | null; // your weekly pace from Settings (lb per week), null = the default 2
   note: string | null;
   source: "ai" | "auto" | null;
   key: string | null; // the numbers it was worked out for (see coachKey)

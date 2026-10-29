@@ -24,7 +24,8 @@ describe("parseGoalsForm", () => {
         weekly_cycle_miles: null,
         weekly_swim_yards: null,
         target_weight_lb: null,
-        start_weight_lb: null,      },
+        start_weight_lb: null,
+        weight_pace_lb_week: null,      },
     });
   });
 
@@ -43,7 +44,8 @@ describe("parseGoalsForm", () => {
         weekly_cycle_miles: null,
         weekly_swim_yards: null,
         target_weight_lb: null,
-        start_weight_lb: null,      },
+        start_weight_lb: null,
+        weight_pace_lb_week: null,      },
     });
   });
 
@@ -58,7 +60,8 @@ describe("parseGoalsForm", () => {
       weekly_cycle_miles: null,
       weekly_swim_yards: null,
       target_weight_lb: null,
-      start_weight_lb: null,    });
+      start_weight_lb: null,
+        weight_pace_lb_week: null,    });
   });
 
   it("rounds decimals", () => {
@@ -108,7 +111,8 @@ describe("weekly cardio goals", () => {
       weekly_cycle_miles: null,
       weekly_swim_yards: null,
       target_weight_lb: null,
-      start_weight_lb: null,    });
+      start_weight_lb: null,
+        weight_pace_lb_week: null,    });
   });
 
   it("accepts comma decimals and rounds miles to 2 places", () => {
@@ -163,5 +167,15 @@ describe("target weight", () => {
     const b = parseGoalsForm(form({ ...base, start_weight_lb: "" }));
     expect(b.ok && b.values.start_weight_lb).toBeNull();
     expect(parseGoalsForm(form({ ...base, start_weight_lb: "600" })).ok).toBe(false);
+  });
+
+  it("reads the weekly pace from the list, and refuses anything else", () => {
+    const a = parseGoalsForm(form({ ...base, weight_pace_lb_week: "1.5" }));
+    expect(a.ok && a.values.weight_pace_lb_week).toBe(1.5);
+    const b = parseGoalsForm(form({ ...base, weight_pace_lb_week: "" }));
+    expect(b.ok && b.values.weight_pace_lb_week).toBeNull();
+    for (const bad of ["3", "0", "-1", "fast"]) {
+      expect(parseGoalsForm(form({ ...base, weight_pace_lb_week: bad })).ok).toBe(false);
+    }
   });
 });

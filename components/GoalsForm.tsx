@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { saveGoals, type SaveResult } from "@/app/(tabs)/settings/actions";
 import type { Goals } from "@/lib/goals";
+import { chosenPace, PACE_CHOICES } from "@/lib/weightPlan";
 
 // text-base = 16px: smaller text makes iPhone Safari zoom in when you tap a field.
 const inputClass =
@@ -126,8 +127,26 @@ export default function GoalsForm({ goals }: { goals: Goals }) {
             </div>
           ))}
         </div>
+        <div className="mt-3">
+          <label htmlFor="weight_pace_lb_week" className="mb-1 block text-xs text-muted">
+            Weekly pace
+          </label>
+          <select
+            id="weight_pace_lb_week"
+            name="weight_pace_lb_week"
+            defaultValue={String(chosenPace(goals.weight_pace_lb_week))}
+            className={inputClass}
+          >
+            {PACE_CHOICES.map((pace) => (
+              <option key={pace} value={pace}>
+                {pace} lb per week
+              </option>
+            ))}
+          </select>
+        </div>
         <p className="mt-2 text-xs text-muted">
-          Used on the Weight tab. Leave the starting weight blank to use your first weigh-in.
+          Used on the Weight tab for your lb per week, weeks to go and goal date. Leave the starting weight
+          blank to use your first weigh-in. Gaining is capped at 1 lb per week.
         </p>
       </fieldset>
 

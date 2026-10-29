@@ -3,8 +3,16 @@
 // worked out here, so it's always exact (the AI only writes the one-line coaching note:
 // lib/ai/weightCoach.ts). Pure functions, no database, so they're easy to test.
 
-/** Your chosen pace: 2 lb a week toward your target. */
+/** The weekly pace when you haven't chosen one in Settings: 2 lb a week toward your target. */
 export const WEEKLY_PACE_LB = 2;
+
+/** The weekly paces you can choose in Settings (lb per week). */
+export const PACE_CHOICES = [0.5, 1, 1.5, 2] as const;
+
+/** Your chosen pace (saved in Settings), or 2 lb a week if you haven't picked one. */
+export function chosenPace(saved: number | null | undefined): number {
+  return saved !== null && saved !== undefined && Number.isFinite(saved) && saved > 0 ? saved : WEEKLY_PACE_LB;
+}
 
 import { addDays, daysBetween } from "./dates";
 

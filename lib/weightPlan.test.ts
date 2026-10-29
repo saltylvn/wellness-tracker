@@ -8,6 +8,7 @@ import {
   recentTrend,
   resolveStart,
   WEEKLY_PACE_LB,
+  chosenPace,
 } from "./weightPlan";
 
 describe("goalDirection", () => {
@@ -114,10 +115,21 @@ describe("planSummary", () => {
   });
 });
 
+describe("chosenPace", () => {
+  it("uses your saved pace, or 2 lb a week if none", () => {
+    expect(chosenPace(1)).toBe(1);
+    expect(chosenPace(0.5)).toBe(0.5);
+    expect(chosenPace(null)).toBe(2);
+    expect(chosenPace(undefined)).toBe(2);
+    expect(chosenPace(0)).toBe(2);
+  });
+});
+
 describe("coachKey", () => {
   it("changes when any of the three numbers changes", () => {
     expect(coachKey(200, 190.5, 180)).toBe("200.0|190.5|180.0|2.0");
     expect(coachKey(200, 190.4, 180)).not.toBe(coachKey(200, 190.5, 180));
+    expect(coachKey(200, 190.5, 180, 1)).toBe("200.0|190.5|180.0|1.0"); // a new pace asks again
   });
 });
 
