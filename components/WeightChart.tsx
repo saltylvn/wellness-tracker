@@ -10,8 +10,8 @@ import type { WeighIn } from "@/lib/weightPlan";
 // to the target on the goal date). Touch or drag across it to see each weigh-in.
 
 const W = 340; // drawing size; the SVG scales to the card's width
-const H = 115;
-const PAD = { top: 14, right: 12, bottom: 22, left: 34 };
+const H = 78; // kept short so the weigh-in card below stays high on the screen
+const PAD = { top: 10, right: 12, bottom: 20, left: 34 };
 
 const shortDate = (key: string) => `${formatShortMonth(key)} ${formatDayNumber(key)}`;
 

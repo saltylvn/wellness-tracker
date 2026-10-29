@@ -38,7 +38,7 @@ export default function WeightProgress({
   const percent = Math.round(plan.progress * 100);
 
   return (
-    <section aria-label="Goal progress" className="space-y-3 rounded-2xl bg-card p-4">
+    <section aria-label="Goal progress" className="space-y-2 rounded-2xl bg-card p-4 pb-1">
       <div className="grid grid-cols-3 text-center">
         {(
           [
@@ -107,23 +107,27 @@ export default function WeightProgress({
               <span aria-hidden="true">✨</span> {note}
             </p>
           ) : null}
-          {trend !== null && (
-            <p className="text-xs text-muted tabular-nums">
-              Last 4 weeks: {signed(trend)} lb/week
-              {plan.pace !== null &&
-                ` · ${
-                  (plan.direction === "lose" ? -trend : trend) >= plan.pace ? "on pace 👍" : "a bit behind the pace"
-                }`}
-            </p>
-          )}
         </div>
       )}
 
-      <p className="text-right">
-        <Link href="/settings" className="inline-flex min-h-11 items-center text-sm font-medium text-accent active:opacity-70">
-          Change start or target
+      {/* Your recent trend and the Settings link share one line, to keep the card short. */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="min-w-0 text-xs text-muted tabular-nums">
+          {plan.direction !== "done" && trend !== null && (
+            <>
+              Last 4 weeks: {signed(trend)} lb/week
+              {plan.pace !== null &&
+                ` · ${(plan.direction === "lose" ? -trend : trend) >= plan.pace ? "on pace 👍" : "behind pace"}`}
+            </>
+          )}
+        </p>
+        <Link
+          href="/settings"
+          className="flex min-h-11 shrink-0 items-center text-sm font-medium text-accent active:opacity-70"
+        >
+          Edit goal
         </Link>
-      </p>
+      </div>
     </section>
   );
 }
