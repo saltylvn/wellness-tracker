@@ -6,7 +6,7 @@ import { takeAiRequest } from "@/lib/ai/dailyLimit";
 import { writeWeightCoachNote } from "@/lib/ai/gemini";
 import { daysBetween, isValidDateKey } from "@/lib/dates";
 import { parseWeight } from "@/lib/weight";
-import { clampPace, coachKey, goalDirection, goalNumbers, recentTrend, WEEKLY_PACE_LB } from "@/lib/weightPlan";
+import { chosenPace, clampPace, coachKey, goalDirection, goalNumbers, recentTrend } from "@/lib/weightPlan";
 import { loadWeightData } from "@/lib/weightQueries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,8 +44,8 @@ export async function deleteWeight(date: string): Promise<ActionResult> {
 
 /**
  * Brings the AI coaching note up to date. The Weight tab calls this by itself when your
- * numbers have changed since the last note (a new weigh-in, start or target). The pace
- * is always your chosen WEEKLY_PACE_LB; if the AI is busy or you're over today's AI
+ * numbers have changed since the last note (a new weigh-in, start, target or weekly pace).
+ * The pace is the one you chose in Settings (2 lb if none); if the AI is busy or you're over today's AI
  * limit, the note is simply left empty until your next weigh-in.
  */
 export async function refreshWeightPlan(today: string): Promise<ActionResult> {
@@ -61,10 +61,11 @@ export async function refreshWeightPlan(today: string): Promise<ActionResult> {
   const direction = goalDirection(numbers.current, numbers.target);
   if (direction === "done") return { ok: true }; // at your target: no note needed
 
-  const key = coachKey(numbers.start, numbers.current, numbers.target);
+  const chosen = chosenPace(data.plan.pace);
+  const key = coachKey(numbers.start, numbers.current, numbers.target, chosen);
   if (data.plan.key === key) return { ok: true }; // already up to date
 
-  const pace = clampPace(WEEKLY_PACE_LB, direction);
+  const pace = clampPace(chosen, direction);
   const note = (await takeAiRequest(supabase, userId))
     ? await writeWeightCoachNote({
         ...numbers,
@@ -78,7 +79,6 @@ export async function refreshWeightPlan(today: string): Promise<ActionResult> {
   const { error } = await supabase
     .from("profiles")
     .update({
-      weight_pace_lb_week: pace,
       weight_coach_note: note,
       weight_coach_source: note ? "ai" : "auto",
       weight_coach_key: key,

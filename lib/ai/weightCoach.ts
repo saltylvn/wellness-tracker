@@ -1,5 +1,5 @@
 // What we ask the AI about your weight goal, and how we check what it sends back.
-// Your weekly pace is your own choice (WEEKLY_PACE_LB in lib/weightPlan.ts), and the app
+// Your weekly pace is your own choice (Settings; `chosenPace` in lib/weightPlan.ts), and the app
 // does the weeks-to-goal math itself. The AI only writes one short line of coaching.
 
 import type { Direction } from "../weightPlan";

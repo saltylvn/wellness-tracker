@@ -17,9 +17,10 @@ export default async function SettingsPage() {
     .maybeSingle();
 
   // The weight goal is read on its own, so Settings still loads if its database steps aren't run yet.
-  const [{ data: targetRow }, { data: startRow }] = await Promise.all([
+  const [{ data: targetRow }, { data: startRow }, { data: paceRow }] = await Promise.all([
     supabase.from("profiles").select("target_weight_lb").eq("id", userId ?? "").maybeSingle(),
     supabase.from("profiles").select("start_weight_lb").eq("id", userId ?? "").maybeSingle(),
+    supabase.from("profiles").select("weight_pace_lb_week").eq("id", userId ?? "").maybeSingle(),
   ]);
 
   // Before you've saved anything, the calorie goal is blank (null).
@@ -35,6 +36,7 @@ export default async function SettingsPage() {
     }),
     target_weight_lb: targetRow?.target_weight_lb == null ? null : Number(targetRow.target_weight_lb),
     start_weight_lb: startRow?.start_weight_lb == null ? null : Number(startRow.start_weight_lb),
+    weight_pace_lb_week: paceRow?.weight_pace_lb_week == null ? null : Number(paceRow.weight_pace_lb_week),
   } as unknown as Goals;
 
   return (
