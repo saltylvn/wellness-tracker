@@ -18,7 +18,7 @@ export default function PlannedCardio({
   date: string;
   plan: CardioPlan | null;
   completed: boolean; // a log of the planned kind is already there for this day
-  editHref: string; // this day's editor on Edit plan
+  editHref: string; // this day's editor on Edit plan (for the "Plan this day's cardio" link)
 }) {
   const router = useRouter();
   const [checked, setChecked] = useState(completed);
@@ -56,12 +56,7 @@ export default function PlannedCardio({
     <section aria-label="Planned cardio" className="rounded-2xl bg-card px-4 py-3">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-muted">
-            Planned ·{" "}
-            <Link href={editHref} className="text-accent active:opacity-70">
-              Edit
-            </Link>
-          </p>
+          <p className="text-xs font-medium text-muted">Planned</p>
           <p className={`text-lg font-semibold ${checked ? "text-accent" : ""}`}>{formatCardioPlan(plan)}</p>
         </div>
         <label className="flex min-h-11 shrink-0 items-center gap-2 text-sm font-medium">

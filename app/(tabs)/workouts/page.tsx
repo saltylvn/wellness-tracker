@@ -94,14 +94,26 @@ export default async function WorkoutsPage({
 
       {cardio && today && (
         <>
-          {/* The cardio you planned for this weekday on Edit plan, with its Completed box. */}
-          <PlannedCardio
-            key={`${date}-${cardioPlan ? completingLog(cardioPlan, cardio.logs) !== null : false}`}
-            date={date}
-            plan={cardioPlan}
-            completed={cardioPlan ? completingLog(cardioPlan, cardio.logs) !== null : false}
-            editHref={`/workouts/plan/${today.id}?date=${date}`}
-          />
+          {/* The cardio you planned for this weekday on Edit plan, with its Completed box. The
+              heading row matches the exercises one below: day on the left, Edit plan on the right. */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-muted">{formatWeekday(date)}&apos;s cardio</h3>
+              <Link
+                href={`/workouts/plan/${today.id}?date=${date}`}
+                className="flex min-h-11 items-center text-sm font-medium text-accent active:opacity-70"
+              >
+                Edit plan
+              </Link>
+            </div>
+            <PlannedCardio
+              key={`${date}-${cardioPlan ? completingLog(cardioPlan, cardio.logs) !== null : false}`}
+              date={date}
+              plan={cardioPlan}
+              completed={cardioPlan ? completingLog(cardioPlan, cardio.logs) !== null : false}
+              editHref={`/workouts/plan/${today.id}?date=${date}`}
+            />
+          </section>
           <WeeklyCardioGoals totals={cardio.weekTotals} goals={cardio.weeklyGoals} />
         </>
       )}
