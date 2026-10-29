@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import BackButton from "@/components/BackButton";
 import GoalsForm from "@/components/GoalsForm";
 import PriorityLiftsForm from "@/components/PriorityLiftsForm";
 import { priorityChoices, priorityNames } from "@/lib/priorityLifts";
@@ -54,7 +55,10 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <div>
+        <BackButton fallback="/workouts" />
+        <h1 className="text-2xl font-bold">Settings</h1>
+      </div>
 
       <section className="rounded-2xl bg-card p-4">
         <GoalsForm goals={goals} />

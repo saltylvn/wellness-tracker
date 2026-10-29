@@ -2,7 +2,7 @@ import { formatWeight } from "@/lib/workouts/logging";
 import type { PriorityLift } from "@/lib/priorityLifts";
 
 // Two small, quiet boxes side by side at the top of a lifting day: the lifts you're focusing
-// on (picked in Settings), each with the heaviest weight you've logged for it.
+// on (picked in Settings), each with your PR (the heaviest weight you've logged for it).
 export default function PriorityLifts({ lifts }: { lifts: PriorityLift[] }) {
   if (lifts.length === 0) return null;
   return (
@@ -12,7 +12,7 @@ export default function PriorityLifts({ lifts }: { lifts: PriorityLift[] }) {
           <p className="text-[11px] font-medium uppercase tracking-wide text-muted">★ Priority</p>
           <p className="truncate text-sm font-semibold">{lift.name}</p>
           <p className="text-xs text-muted">
-            {lift.best === null ? "No weight logged yet" : `Best ${formatWeight(lift.best)} lb`}
+            {lift.best === null ? "No weight logged yet" : `PR ${formatWeight(lift.best)} lb`}
           </p>
         </div>
       ))}

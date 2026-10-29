@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
+import BackButton from "@/components/BackButton";
 import PlanEditor from "@/components/PlanEditor";
 import { planFromRow } from "@/lib/cardioPlan";
 import { isValidDateKey } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
-import type { PlanExercise } from "@/lib/workouts/plan";
+import { afterDayEditPath, type PlanExercise } from "@/lib/workouts/plan";
 import { dayTitle, editableDayName, hasCardio, hasLift, liftName } from "@/lib/workouts/weekSetup";
 
 export default async function EditPlanPage({
@@ -42,6 +43,7 @@ export default async function EditPlanPage({
   return (
     <div className="space-y-4">
       <div>
+        <BackButton fallback={afterDayEditPath(from, date)} />
         <h1 className="text-2xl font-bold">Edit {dayTitle(day)}</h1>
         <p className="text-sm text-muted">
           {cardio && "Pick the cardio you'll do and how far. On the day, tick Completed to log it. "}
