@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useToday } from "@/components/useToday";
 
-// Three tabs, left to right: Weight, Fitness (lifting, cardio, sauna and stretch, all on
+// Three tabs, left to right: Weight, Fitness (lifting and cardio, all on
 // the calendar), and Nutrition.
 const tabs = [
   { href: "/weight", matches: ["/weight"], label: "Weight", icon: "⚖️" },

@@ -70,30 +70,22 @@ describe("loadCardioDay", () => {
 describe("loadLiftDay", () => {
   const deadlift = { id: "e1", name: "Deadlift", target_sets: 3, rep_min: 3, rep_max: 5, superset_with_next: false };
 
-  it("gathers today's sets, ticks, bests, history, and 3-rep maxes", async () => {
+  it("gathers today's sets, bests, and history", async () => {
     const db = fakeSupabase({
       workout_sessions: [
         {
-          sauna_done: true,
-          stretch_done: false,
           workout_sets: [{ id: "s1", exercise_id: "e1", set_number: 1, weight: "315", reps: 3 }],
         },
       ],
-      // Calls in order: three 3-rep max lifts, then the one exercise's best, then history.
+      // Calls in order: the one exercise's best, then history.
       workout_sets: [
-        { weight: "185" }, // bench 3RM
-        { weight: "315" }, // deadlift 3RM
-        null, // squat: nothing logged
         { weight: "335" }, // best weight for e1
         [{ exercise_id: "e1", set_number: 1, weight: "305", reps: 5, workout_sessions: { session_date: "2026-09-29" } }],
       ],
     });
     const lift = await loadLiftDay(db, "2026-10-06", [deadlift]);
     expect(lift.exercises).toEqual([deadlift]);
-    expect(lift.saunaDone).toBe(true);
-    expect(lift.stretchDone).toBe(false);
     expect(lift.todaySets).toEqual([{ id: "s1", exercise_id: "e1", set_number: 1, weight: 315, reps: 3 }]);
-    expect(lift.threeRepMaxes).toEqual([185, 315, null]);
     expect(lift.bestById.get("e1")).toBe(335);
     expect(lift.history).toEqual([
       { exercise_id: "e1", session_date: "2026-09-29", set_number: 1, weight: 305, reps: 5 },
@@ -101,9 +93,9 @@ describe("loadLiftDay", () => {
   });
 
   it("skips the per-exercise lookups when the day has no exercises", async () => {
-    const db = fakeSupabase({ workout_sessions: [null], workout_sets: [null, null, null] });
+    const db = fakeSupabase({ workout_sessions: [null], workout_sets: [] });
     const lift = await loadLiftDay(db, "2026-10-06", []);
-    expect(lift).toMatchObject({ exercises: [], todaySets: [], history: [], saunaDone: false, stretchDone: false });
+    expect(lift).toMatchObject({ exercises: [], todaySets: [], history: [] });
     expect(lift.bestById.size).toBe(0);
   });
 });

@@ -2,12 +2,10 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import CardioLogger from "@/components/CardioLogger";
-import ExtraCheck from "@/components/ExtraCheck";
 import FitnessHeader from "@/components/FitnessHeader";
 import GymBarcodeCard from "@/components/GymBarcodeCard";
 import GoToToday from "@/components/GoToToday";
 import LogExercise from "@/components/LogExercise";
-import ThreeRepMaxes from "@/components/ThreeRepMaxes";
 import TanningLog from "@/components/TanningLog";
 import WeeklyCardioGoals from "@/components/WeeklyCardioGoals";
 import { currentUserId } from "@/lib/actionResult";
@@ -113,8 +111,6 @@ export default async function WorkoutsPage({
             </Link>
           </div>
 
-          <ExtraCheck kind="sauna" date={date} dayId={today.id} done={lift.saunaDone} />
-
           {lift.exercises.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted">
               No exercises yet. Tap Edit plan to name this workout and add your exercises.
@@ -154,13 +150,8 @@ export default async function WorkoutsPage({
               );
             })
           )}
-
-          <ExtraCheck kind="stretch" date={date} dayId={today.id} done={lift.stretchDone} />
         </section>
       )}
-
-      {/* The #1000club card sits at the bottom of lifting days, after the workout. */}
-      {lift && <ThreeRepMaxes maxes={lift.threeRepMaxes} />}
     </div>
   );
 }

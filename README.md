@@ -12,7 +12,7 @@
 
 - **Nutrition:** add food by **photo** or **typed description**, and Google Gemini estimates calories, protein, carbs and fat (always editable before saving). Daily totals against a calorie goal in a ring, macro goals with progress bars, a saved-foods library, and a one-tap water tracker.
 - **Fitness:** a week calendar drives the page. You choose which days are lifting and which are cardio.
-  - **Lifting days:** your own exercise list with sets and rep ranges, supersets, rest reminders, iOS-style scroll wheels to log weight and reps, and last time / today / heaviest on each exercise. A **#1000club** card totals bench, deadlift and squat 3-rep maxes toward 1,000 lb.
+  - **Lifting days:** your own exercise list with sets and rep ranges, supersets, rest reminders, iOS-style scroll wheels to log weight and reps, and last time / today / heaviest on each exercise.
   - **Cardio days:** run, cycle and swim with distance and time, plus weekly distance goals with progress bars.
 - **Weight:** a daily weigh-in on scroll wheels, start / current / target with a progress bar, a chart with the target line and a projection, weeks to go and a goal date at a fixed weekly pace. Gemini adds a one-line coaching note.
 - **Streaks:** consecutive-day streaks for food and for workouts (a planned rest day doesn't break it), with best-streak and milestone celebrations.

@@ -6,7 +6,6 @@ import { parseGymBarcode, type GymBarcode } from "../gymBarcode";
 import { isTanningDay } from "../tanning";
 import { loadDoneDates } from "./activity";
 import type { HistoryRow } from "./history";
-import { MIN_REPS_FOR_MAX, THREE_REP_MAX_LIFTS } from "./maxes";
 import type { PlanExercise, WorkoutDay } from "./plan";
 import { loadWorkoutDays } from "./seed";
 
@@ -22,12 +21,9 @@ export type TodaySet = { id: string; exercise_id: string | null; set_number: num
 
 export type LiftDayData = {
   exercises: PlanExercise[];
-  saunaDone: boolean;
-  stretchDone: boolean;
   todaySets: TodaySet[]; // sets already logged on this date
   history: HistoryRow[]; // sets from earlier workouts ("last time")
   bestById: Map<string, number | null>; // heaviest weight ever logged for each exercise
-  threeRepMaxes: (number | null)[]; // in the order of THREE_REP_MAX_LIFTS
 };
 
 const EXERCISE_FIELDS = "id, name, target_sets, rep_min, rep_max, superset_with_next";
@@ -56,29 +52,13 @@ export async function loadPlanExercises(supabase: SupabaseClient, weekday: numbe
 /** Everything a lifting day shows besides the exercise list, all fetched at the same time. */
 export async function loadLiftDay(supabase: SupabaseClient, date: string, exercises: PlanExercise[]): Promise<LiftDayData> {
   const ids = exercises.map((e) => e.id);
-  const [sessionResult, threeRepMaxes, bests, past] = await Promise.all([
-    // Today's session: the sauna and stretch ticks, plus every set logged so far.
+  const [sessionResult, bests, past] = await Promise.all([
+    // Today's session: every set logged so far.
     supabase
       .from("workout_sessions")
-      .select("sauna_done, stretch_done, workout_sets(id, exercise_id, set_number, weight, reps)")
+      .select("workout_sets(id, exercise_id, set_number, weight, reps)")
       .eq("session_date", date)
       .maybeSingle(),
-    // For each 3-rep max lift: the heaviest weight logged for 3+ reps (any date).
-    Promise.all(
-      THREE_REP_MAX_LIFTS.map(async (lift) => {
-        const { data } = await supabase
-          .from("workout_sets")
-          .select("weight")
-          // Same name (no wildcards), any capitalization, singular or plural.
-          .or(lift.exerciseNames.map((name) => `exercise_name.ilike.${name}`).join(","))
-          .gte("reps", MIN_REPS_FOR_MAX)
-          .not("weight", "is", null)
-          .order("weight", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        return data ? Number(data.weight) : null;
-      }),
-    ),
     // The heaviest weight ever logged for each exercise (any date), for the quick-reference line.
     Promise.all(
       ids.map(async (id) => {
@@ -126,12 +106,9 @@ export async function loadLiftDay(supabase: SupabaseClient, date: string, exerci
 
   return {
     exercises,
-    saunaDone: Boolean(session?.sauna_done),
-    stretchDone: Boolean(session?.stretch_done),
     todaySets,
     history,
     bestById: new Map(bests),
-    threeRepMaxes,
   };
 }
 

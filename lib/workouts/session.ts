@@ -1,14 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// Extra things recorded on a workout day besides the sets themselves.
-export type SessionFields = {
-  sauna_done?: boolean;
-  stretch_done?: boolean;
-};
-
 // Makes sure there is a workout session for this date (one per date, enforced by
-// the database) and optionally updates its sauna / stretch ticks. Only the fields
-// you pass are changed. On failure, `error` is what the database said (hand it to
+// the database), so logged sets have one to belong to. On failure, `error` is what the database said (hand it to
 // failedSave() to tell a missing SQL step apart from an ordinary failure).
 export type UpsertSessionResult =
   | { ok: true; id: string }
@@ -19,12 +12,11 @@ export async function upsertSession(
   userId: string,
   date: string,
   day: { id: string; title: string },
-  fields: SessionFields = {},
 ): Promise<UpsertSessionResult> {
   const { data, error } = await supabase
     .from("workout_sessions")
     .upsert(
-      { user_id: userId, session_date: date, day_id: day.id, title: day.title, ...fields },
+      { user_id: userId, session_date: date, day_id: day.id, title: day.title },
       { onConflict: "user_id,session_date" },
     )
     .select("id")
