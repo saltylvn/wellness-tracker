@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { latestSets, type HistoryRow } from "./history";
 import {
   defaultRepsFor,
+  defaultSecondsFor,
   defaultWeightFor,
+  formatDuration,
   formatSet,
   formatWeight,
   isDumbbell,
@@ -10,6 +12,7 @@ import {
   snapWeight,
   summarizeSets,
   validateSetInput,
+  validateTimeInput,
   WEIGHT_OPTIONS,
 } from "./logging";
 
@@ -84,11 +87,46 @@ describe("formatting", () => {
   it("formats weights and sets", () => {
     expect(formatWeight(100)).toBe("100");
     expect(formatWeight(102.5)).toBe("102.5");
-    expect(formatSet(135, 10)).toBe("135 × 10");
-    expect(summarizeSets([{ weight: 135, reps: 10 }, { weight: 132.5, reps: 8 }])).toBe(
-      "135 × 10 + 132.5 × 8",
-    );
+    expect(formatSet({ weight: 135, reps: 10, seconds: null })).toBe("135 × 10");
+    expect(
+      summarizeSets([
+        { weight: 135, reps: 10, seconds: null },
+        { weight: 132.5, reps: 8, seconds: null },
+      ]),
+    ).toBe("135 × 10 + 132.5 × 8");
     expect(summarizeSets([])).toBe("");
+  });
+
+  it("formats timed sets", () => {
+    expect(formatDuration(45)).toBe("45 sec");
+    expect(formatDuration(90)).toBe("1:30");
+    expect(formatDuration(605)).toBe("10:05");
+    expect(formatSet({ weight: null, reps: null, seconds: 60 })).toBe("1:00");
+    expect(
+      summarizeSets([
+        { weight: null, reps: null, seconds: 45 },
+        { weight: 135, reps: 10, seconds: null },
+      ]),
+    ).toBe("45 sec + 135 × 10");
+  });
+});
+
+describe("defaultSecondsFor", () => {
+  it("starts at your last time, else 1 minute, on a 5-second step", () => {
+    expect(defaultSecondsFor(90)).toBe(90);
+    expect(defaultSecondsFor(47)).toBe(45);
+    expect(defaultSecondsFor(null)).toBe(60);
+    expect(defaultSecondsFor(undefined)).toBe(60);
+    expect(defaultSecondsFor(99999)).toBe(30 * 60 + 55);
+  });
+});
+
+describe("validateTimeInput", () => {
+  it("accepts 1 second to 2 hours, whole seconds only", () => {
+    expect(validateTimeInput(90)).toEqual({ ok: true, seconds: 90 });
+    for (const bad of [0, -5, 1.5, 7201, NaN, "60", null, undefined]) {
+      expect(validateTimeInput(bad).ok).toBe(false);
+    }
   });
 });
 
@@ -114,24 +152,24 @@ describe("validateSetInput", () => {
 
 describe("latestSets", () => {
   const rows: HistoryRow[] = [
-    { exercise_id: "a", session_date: "2026-10-05", set_number: 1, weight: 100, reps: 10 },
-    { exercise_id: "a", session_date: "2026-10-05", set_number: 2, weight: 100, reps: 9 },
-    { exercise_id: "a", session_date: "2026-09-28", set_number: 1, weight: 95, reps: 10 },
-    { exercise_id: "b", session_date: "2026-10-05", set_number: 1, weight: 50, reps: 12 },
-    { exercise_id: null, session_date: "2026-10-05", set_number: 1, weight: 10, reps: 10 },
+    { exercise_id: "a", session_date: "2026-10-05", set_number: 1, weight: 100, reps: 10, seconds: null },
+    { exercise_id: "a", session_date: "2026-10-05", set_number: 2, weight: 100, reps: 9, seconds: null },
+    { exercise_id: "a", session_date: "2026-09-28", set_number: 1, weight: 95, reps: 10, seconds: null },
+    { exercise_id: "b", session_date: "2026-10-05", set_number: 1, weight: 50, reps: 12, seconds: null },
+    { exercise_id: null, session_date: "2026-10-05", set_number: 1, weight: 10, reps: 10, seconds: null },
   ];
 
   it("returns the most recent day's sets in set order", () => {
     expect(latestSets(rows, "a")).toEqual([
-      { weight: 100, reps: 10 },
-      { weight: 100, reps: 9 },
+      { weight: 100, reps: 10, seconds: null },
+      { weight: 100, reps: 9, seconds: null },
     ]);
   });
 
   it("works when rows arrive out of order", () => {
     expect(latestSets([...rows].reverse(), "a")).toEqual([
-      { weight: 100, reps: 10 },
-      { weight: 100, reps: 9 },
+      { weight: 100, reps: 10, seconds: null },
+      { weight: 100, reps: 9, seconds: null },
     ]);
   });
 
@@ -140,11 +178,22 @@ describe("latestSets", () => {
     expect(latestSets([], "a")).toEqual([]);
   });
 
+  it("includes timed sets", () => {
+    const timed: HistoryRow[] = [
+      { exercise_id: "p", session_date: "2026-10-05", set_number: 2, weight: null, reps: null, seconds: 45 },
+      { exercise_id: "p", session_date: "2026-10-05", set_number: 1, weight: null, reps: null, seconds: 60 },
+    ];
+    expect(latestSets(timed, "p")).toEqual([
+      { weight: null, reps: null, seconds: 60 },
+      { weight: null, reps: null, seconds: 45 },
+    ]);
+  });
+
   it("ignores sets with missing weight or reps", () => {
     const partial: HistoryRow[] = [
-      { exercise_id: "a", session_date: "2026-10-06", set_number: 1, weight: null, reps: 10 },
-      { exercise_id: "a", session_date: "2026-10-05", set_number: 1, weight: 100, reps: 10 },
+      { exercise_id: "a", session_date: "2026-10-06", set_number: 1, weight: null, reps: 10, seconds: null },
+      { exercise_id: "a", session_date: "2026-10-05", set_number: 1, weight: 100, reps: 10, seconds: null },
     ];
-    expect(latestSets(partial, "a")).toEqual([{ weight: 100, reps: 10 }]);
+    expect(latestSets(partial, "a")).toEqual([{ weight: 100, reps: 10, seconds: null }]);
   });
 });
