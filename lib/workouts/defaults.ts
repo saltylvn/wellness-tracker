@@ -3,7 +3,8 @@
 // cardio days in "Your week", then name each lifting day and add its exercises (Edit plan).
 // Weekdays: 1 = Monday ... 7 = Sunday.
 
-export type DayKind = "lift" | "cardio" | "rest";
+// "both" = a lifting day that also has cardio.
+export type DayKind = "lift" | "cardio" | "both" | "rest";
 
 export type StartingDay = {
   weekday: number;

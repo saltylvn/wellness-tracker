@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useRef, useState } from "react";
 import { saveDayPlan, type PlanFormState } from "@/app/(tabs)/workouts/actions";
-import type { PlanExercise } from "@/lib/workouts/plan";
+import { afterDayEditPath, type PlanExercise } from "@/lib/workouts/plan";
 import { MAX_DAY_NAME_LENGTH } from "@/lib/workouts/weekSetup";
 
 type Row = {
@@ -27,12 +27,14 @@ export default function PlanEditor({
   date,
   title,
   initialName,
+  back,
   initial,
 }: {
   dayId: string;
   date: string; // may be empty
   title: string; // the day's heading, used in the "Remove…?" question
   initialName: string; // what's in the name box at first ("" for a day not named yet)
+  back: "plan" | ""; // "plan" when opened from the week's Edit plan page, to go back there
   initial: PlanExercise[];
 }) {
   const nextKey = useRef(0);
@@ -81,12 +83,13 @@ export default function PlanEditor({
     })),
   );
 
-  const backHref = date ? `/workouts?date=${date}` : "/workouts";
+  const backHref = afterDayEditPath(back, date);
 
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="day_id" value={dayId} />
       <input type="hidden" name="date" value={date} />
+      <input type="hidden" name="back" value={back} />
       <input type="hidden" name="plan" value={planJson} />
 
       {/* The day's name ("theme"), shown on the Fitness tab: "Monday · Legs". Blank = "Lifting". */}

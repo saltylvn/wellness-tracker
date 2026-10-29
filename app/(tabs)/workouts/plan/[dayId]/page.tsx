@@ -3,17 +3,17 @@ import PlanEditor from "@/components/PlanEditor";
 import { isValidDateKey } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import type { PlanExercise } from "@/lib/workouts/plan";
-import { dayTitle, editableDayName } from "@/lib/workouts/weekSetup";
+import { editableDayName, hasLift, liftName } from "@/lib/workouts/weekSetup";
 
 export default async function EditPlanPage({
   params,
   searchParams,
 }: {
   params: Promise<{ dayId: string }>;
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; from?: string }>;
 }) {
   const { dayId } = await params;
-  const { date: rawDate } = await searchParams;
+  const { date: rawDate, from } = await searchParams;
   const date = rawDate && isValidDateKey(rawDate) ? rawDate : "";
 
   const supabase = await createClient();
@@ -23,7 +23,7 @@ export default async function EditPlanPage({
     .select("id, kind, title")
     .eq("id", dayId)
     .maybeSingle();
-  if (error || !day || day.kind !== "lift") notFound();
+  if (error || !day || !hasLift(day.kind)) notFound();
 
   const { data } = await supabase
     .from("workout_exercises")
@@ -34,7 +34,7 @@ export default async function EditPlanPage({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Edit {dayTitle(day)}</h1>
+        <h1 className="text-2xl font-bold">Edit {liftName(day.title)}</h1>
         <p className="text-sm text-muted">
           Name this workout, then add your exercises with their sets and rep range. Change, reorder, or
           remove them any time.
@@ -43,8 +43,9 @@ export default async function EditPlanPage({
       <PlanEditor
         dayId={day.id}
         date={date}
-        title={dayTitle(day)}
+        title={liftName(day.title)}
         initialName={editableDayName(day.title)}
+        back={from === "plan" ? "plan" : ""}
         initial={(data ?? []) as PlanExercise[]}
       />
     </div>
