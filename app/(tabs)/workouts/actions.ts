@@ -34,7 +34,7 @@ export async function saveDayPlan(
   if (!day || !(hasLift(day.kind) || hasCardio(day.kind))) return { message: "Couldn't find that workout day." };
 
   // Check everything first, so nothing is half-saved.
-  const cardio = hasCardio(day.kind) ? parseCardioPlan(formData.get("cardio_kind"), formData.get("cardio_distance")) : null;
+  const cardio = hasCardio(day.kind) ? parseCardioPlan(formData.get("cardio_kind"), formData.get("cardio_unit"), formData.get("cardio_target")) : null;
   if (cardio && !cardio.ok) return { message: cardio.message };
   const lifting = hasLift(day.kind);
   const title = lifting ? parseDayName(formData.get("title")) : day.title;
@@ -46,7 +46,11 @@ export async function saveDayPlan(
   if (cardio?.ok) {
     const { error } = await supabase
       .from("workout_days")
-      .update({ cardio_plan_kind: cardio.plan?.kind ?? null, cardio_plan_distance: cardio.plan?.distance ?? null })
+      .update({
+        cardio_plan_kind: cardio.plan?.kind ?? null,
+        cardio_plan_distance: cardio.plan?.target ?? null,
+        cardio_plan_unit: cardio.plan?.unit ?? null,
+      })
       .eq("id", day.id);
     if (error) {
       return { message: isMissingSchemaError(error) ? DATABASE_BEHIND_MESSAGE : "Couldn't save. Please try again." };

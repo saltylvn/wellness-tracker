@@ -34,8 +34,9 @@ export default async function EditPlanPage({
       .select("id, name, target_sets, rep_min, rep_max, superset_with_next")
       .eq("day_id", day.id)
       .order("position", { ascending: true }),
-    // Read on its own, so this page still opens before the cardio plan SQL step is run.
-    supabase.from("workout_days").select("cardio_plan_kind, cardio_plan_distance").eq("id", day.id).maybeSingle(),
+    // Read on its own, with "*" (whichever plan columns exist), so this page still opens
+    // before the cardio plan SQL steps are run.
+    supabase.from("workout_days").select("*").eq("id", day.id).maybeSingle(),
   ]);
 
   return (

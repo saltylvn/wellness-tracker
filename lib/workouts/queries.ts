@@ -211,8 +211,9 @@ export async function loadPlanOverview(supabase: SupabaseClient, userId: string)
   const [days, exercises, plans] = await Promise.all([
     loadWorkoutDays(supabase, userId),
     supabase.from("workout_exercises").select("day_id"),
-    // Read on its own, so the page still works before the cardio plan SQL step is run.
-    supabase.from("workout_days").select("id, cardio_plan_kind, cardio_plan_distance"),
+    // Read on its own, with "*" (whichever plan columns exist), so the page still works
+    // before the cardio plan SQL steps are run.
+    supabase.from("workout_days").select("*"),
   ]);
   const counts = new Map<string, number>();
   for (const row of exercises.data ?? []) {
@@ -231,7 +232,7 @@ export async function loadPlanOverview(supabase: SupabaseClient, userId: string)
 export async function loadCardioPlan(supabase: SupabaseClient, weekday: number): Promise<CardioPlan | null> {
   const { data } = await supabase
     .from("workout_days")
-    .select("cardio_plan_kind, cardio_plan_distance")
+    .select("*") // whichever plan columns exist, so this works before the SQL steps are run
     .eq("weekday", weekday)
     .maybeSingle();
   return planFromRow(data);

@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import CardioLogger from "@/components/CardioLogger";
 import FitnessHeader from "@/components/FitnessHeader";
 import GymBarcodeCard from "@/components/GymBarcodeCard";
 import GoToToday from "@/components/GoToToday";
@@ -103,7 +102,6 @@ export default async function WorkoutsPage({
             completed={cardioPlan ? completingLog(cardioPlan, cardio.logs) !== null : false}
             editHref={`/workouts/plan/${today.id}?date=${date}`}
           />
-          <CardioLogger date={date} logs={cardio.logs} />
           <WeeklyCardioGoals totals={cardio.weekTotals} goals={cardio.weeklyGoals} />
         </>
       )}
