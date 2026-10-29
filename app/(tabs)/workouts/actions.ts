@@ -2,9 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { isValidDateKey } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
-import { parsePlanJson } from "@/lib/workouts/plan";
+import { afterDayEditPath, parsePlanJson } from "@/lib/workouts/plan";
 import { hasLift, MAX_DAY_NAME_LENGTH, parseDayName } from "@/lib/workouts/weekSetup";
 import { currentUserId } from "@/lib/actionResult";
 
@@ -103,5 +102,6 @@ export async function saveDayPlan(
   }
 
   revalidatePath("/workouts");
-  redirect(isValidDateKey(date) ? `/workouts?date=${date}` : "/workouts");
+  revalidatePath("/workouts/plan");
+  redirect(afterDayEditPath(formData.get("back"), date));
 }

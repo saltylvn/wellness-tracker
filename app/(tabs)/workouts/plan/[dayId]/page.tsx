@@ -10,10 +10,10 @@ export default async function EditPlanPage({
   searchParams,
 }: {
   params: Promise<{ dayId: string }>;
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; from?: string }>;
 }) {
   const { dayId } = await params;
-  const { date: rawDate } = await searchParams;
+  const { date: rawDate, from } = await searchParams;
   const date = rawDate && isValidDateKey(rawDate) ? rawDate : "";
 
   const supabase = await createClient();
@@ -45,6 +45,7 @@ export default async function EditPlanPage({
         date={date}
         title={liftName(day.title)}
         initialName={editableDayName(day.title)}
+        back={from === "plan" ? "plan" : ""}
         initial={(data ?? []) as PlanExercise[]}
       />
     </div>

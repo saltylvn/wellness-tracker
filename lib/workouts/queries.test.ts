@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { loadCardioDay, loadFitnessPage, loadGymBarcode, loadLiftDay, loadPlanExercises, loadTanning } from "./queries";
+import {
+  loadCardioDay,
+  loadFitnessPage,
+  loadGymBarcode,
+  loadLiftDay,
+  loadPlanExercises,
+  loadPlanOverview,
+  loadTanning,
+} from "./queries";
 
 // A stand-in for the database: each from("table") call hands back the next prepared
 // answer for that table (in the order the page asks), and any query-builder call chains on.
@@ -115,6 +123,22 @@ describe("loadPlanExercises", () => {
     });
     expect(await loadPlanExercises(db, 3)).toEqual([
       { id: "e1", name: "Squat", target_sets: 3, rep_min: 5, rep_max: 8, superset_with_next: true },
+    ]);
+  });
+});
+
+describe("loadPlanOverview", () => {
+  it("adds each day's exercise count", async () => {
+    const db = fakeSupabase({
+      workout_days: [[
+        { id: "d1", weekday: 1, kind: "lift", title: "Legs" },
+        { id: "d2", weekday: 2, kind: "cardio", title: "Cardio" },
+      ]],
+      workout_exercises: [[{ day_id: "d1" }, { day_id: "d1" }, { day_id: "d1" }]],
+    });
+    expect(await loadPlanOverview(db, "u")).toEqual([
+      { id: "d1", weekday: 1, kind: "lift", title: "Legs", exerciseCount: 3 },
+      { id: "d2", weekday: 2, kind: "cardio", title: "Cardio", exerciseCount: 0 },
     ]);
   });
 });

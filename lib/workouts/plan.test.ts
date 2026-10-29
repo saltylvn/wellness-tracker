@@ -1,12 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { STARTING_PLAN } from "./defaults";
 import {
+  afterDayEditPath,
   connectorAfter,
   formatRest,
   formatSetsReps,
   parsePlanJson,
   REST_BETWEEN_EXERCISES,
+  weekPlanPath,
 } from "./plan";
+
+describe("afterDayEditPath / weekPlanPath", () => {
+  it("goes back to the week's Edit plan page when you came from it", () => {
+    expect(afterDayEditPath("plan", "2026-10-29")).toBe("/workouts/plan?date=2026-10-29");
+    expect(weekPlanPath("2026-10-29")).toBe("/workouts/plan?date=2026-10-29");
+  });
+
+  it("otherwise goes to the Fitness tab, and ignores a bad date", () => {
+    expect(afterDayEditPath("", "2026-10-29")).toBe("/workouts?date=2026-10-29");
+    expect(afterDayEditPath("elsewhere", "nope")).toBe("/workouts");
+    expect(afterDayEditPath("plan", "javascript:alert(1)")).toBe("/workouts/plan");
+  });
+});
 
 describe("STARTING_PLAN", () => {
   it("is a blank week: all seven days rest, ready for a new user to plan", () => {

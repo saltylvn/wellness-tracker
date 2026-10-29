@@ -200,6 +200,22 @@ export async function loadGymBarcode(supabase: SupabaseClient, userId: string): 
   return data ? parseGymBarcode({ text: data.gym_barcode_text, format: data.gym_barcode_format }) : null;
 }
 
+export type PlanOverviewDay = WorkoutDay & { exerciseCount: number };
+
+/** The week for the Edit plan page: your seven days, each with how many exercises it has. */
+export async function loadPlanOverview(supabase: SupabaseClient, userId: string): Promise<PlanOverviewDay[]> {
+  const [days, exercises] = await Promise.all([
+    loadWorkoutDays(supabase, userId),
+    supabase.from("workout_exercises").select("day_id"),
+  ]);
+  const counts = new Map<string, number>();
+  for (const row of exercises.data ?? []) {
+    const dayId = row.day_id as string;
+    counts.set(dayId, (counts.get(dayId) ?? 0) + 1);
+  }
+  return days.map((day) => ({ ...day, exerciseCount: counts.get(day.id) ?? 0 }));
+}
+
 export type FitnessPageData = {
   days: WorkoutDay[]; // your weekly plan
   doneDates: string[]; // every day you logged a workout or cardio (streak and green rings)

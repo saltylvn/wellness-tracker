@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TOP_CARD } from "@/components/cardStyles";
 import { saveWeekKinds } from "@/app/(tabs)/workouts/week-actions";
@@ -20,7 +21,13 @@ const SAVE_DELAY_MS = 600; // wait for a short pause in tapping, then save once
 // A day turns green when it's on. The rows are separate: a day on in both rows has lifting
 // and cardio; a day that's off in both is a rest day.
 // Changes save by themselves a moment after you stop tapping.
-export default function WeekSetup({ days }: { days: { weekday: number; kind: DayKind }[] }) {
+export default function WeekSetup({
+  days,
+  editPlanHref,
+}: {
+  days: { weekday: number; kind: DayKind }[];
+  editPlanHref?: string; // on the Fitness tab: an "Edit plan" link to the whole week's plan
+}) {
   const router = useRouter();
   const [kinds, setKinds] = useState<DayKind[]>(() =>
     PLANNABLE_WEEKDAYS.map((weekday) => days.find((d) => d.weekday === weekday)?.kind ?? "rest"),
@@ -85,9 +92,20 @@ export default function WeekSetup({ days }: { days: { weekday: number; kind: Day
         </div>
       ))}
 
-      <p role="status" className={`text-xs ${status === "error" ? "text-danger" : "text-muted"}`}>
-        {status === "error" ? error : status === "saving" ? "Saving…" : status === "saved" ? "Saved." : "Sunday is always a recovery day."}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p role="status" className={`min-w-0 text-xs ${status === "error" ? "text-danger" : "text-muted"}`}>
+          {status === "error" ? error : status === "saving" ? "Saving…" : status === "saved" ? "Saved." : "Sunday is always a recovery day."}
+        </p>
+        {editPlanHref && (
+          // -my-3 keeps the card the same height while giving the link a full 44px tap area.
+          <Link
+            href={editPlanHref}
+            className="-my-3 flex min-h-11 shrink-0 items-center text-sm font-semibold text-accent active:opacity-70"
+          >
+            Edit plan ›
+          </Link>
+        )}
+      </div>
     </section>
   );
 }

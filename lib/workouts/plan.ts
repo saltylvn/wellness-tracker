@@ -43,6 +43,20 @@ export type PlanParseResult =
 
 export const MAX_EXERCISES = 30;
 
+/** The Edit plan page for the whole week ("/workouts/plan"), keeping the day you were on. */
+export function weekPlanPath(date: unknown): string {
+  return typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) ? `/workouts/plan?date=${date}` : "/workouts/plan";
+}
+
+/**
+ * Where to go after saving (or cancelling) a day's exercises: back to the week's Edit plan
+ * page if that's where you came from (`back` = "plan"), otherwise the Fitness tab.
+ */
+export function afterDayEditPath(back: unknown, date: unknown): string {
+  if (back === "plan") return weekPlanPath(date);
+  return typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) ? `/workouts?date=${date}` : "/workouts";
+}
+
 /** "3 × 8–12", "3 × 10", "3 sets", "8–12 reps", or "" when nothing is set. */
 export function formatSetsReps(
   sets: number | null,
