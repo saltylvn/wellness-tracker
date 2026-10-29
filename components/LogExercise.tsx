@@ -62,11 +62,22 @@ export default function LogExercise({
     });
   }
 
-  const summary = todaySets.length
-    ? `✓ Today: ${summarizeSets(todaySets)}`
-    : lastTime.length
-      ? `Last time: ${summarizeSets(lastTime)}`
-      : "Not logged yet";
+  // Today's sets are green with a black "+" between them: "✓ Today: 135 × 10 + 135 × 9".
+  const summary = todaySets.length ? (
+    <>
+      ✓ Today:{" "}
+      {todaySets.map((set, index) => (
+        <span key={set.id}>
+          {index > 0 && <span className="font-bold text-black"> + </span>}
+          {formatSet(set.weight, set.reps)}
+        </span>
+      ))}
+    </>
+  ) : lastTime.length ? (
+    `Last time: ${summarizeSets(lastTime)}`
+  ) : (
+    "Not logged yet"
+  );
 
   return (
     <>

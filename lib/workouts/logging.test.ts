@@ -86,7 +86,7 @@ describe("formatting", () => {
     expect(formatWeight(102.5)).toBe("102.5");
     expect(formatSet(135, 10)).toBe("135 × 10");
     expect(summarizeSets([{ weight: 135, reps: 10 }, { weight: 132.5, reps: 8 }])).toBe(
-      "135 × 10 · 132.5 × 8",
+      "135 × 10 + 132.5 × 8",
     );
     expect(summarizeSets([])).toBe("");
   });
