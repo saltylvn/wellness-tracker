@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 
-// The app icon, drawn in code (no image files): a bold green line graph trending upward
-// on a white background (to match the always-light app), with a dot at each point (what progress looks
-// like). The last dot is bigger, with a halo, because that's where you are now.
+// The app icon, drawn in code (no image files): a bold orange "D" (for DEVELOP) shaped
+// like a weight plate, with a white trend arrow rising inside it (lifting + progress), on
+// a white background to match the always-light, orange-and-white app.
 //
 // This file is the design. The icons the phone actually uses are plain PNG files in public/
 // (apple-touch-icon.png, icon-192.png, icon-512.png): after changing the design here, run
@@ -15,32 +15,25 @@ import { ImageResponse } from "next/og";
 // Note: the image renderer only allows plain SVG tags inside <svg> (no React
 // fragments or custom components), so everything is wrapped in <g> groups.
 
-// The data points on a 512 x 512 canvas: mostly up, with one small dip so it
-// looks like real progress rather than a ruler.
-const POINTS: [number, number][] = [
-  [88, 378],
-  [178, 318],
-  [262, 338],
-  [350, 214],
-  [432, 124],
-];
+// The D on a 512 x 512 canvas: a straight left side and a half-circle on the right.
+// It's drawn filled and also outlined (round corners) in the same orange, which rounds
+// the corners without changing its size much.
+const D_SHAPE = "M 132 104 H 262 A 152 152 0 0 1 262 408 H 132 Z";
+// The trend inside it: up, a small dip, then up to the arrowhead.
+const TREND = "166,328 224,270 262,302 342,214";
+const ARROW_HEAD = "290,210 348,210 348,268";
 
-const LINE = POINTS.map(([x, y]) => `${x},${y}`).join(" ");
-
-// A bold green glyph with a soft top-to-bottom gradient (lighter green to deeper green)
-// on a background that fades from white to a very light grey. The greens are a little
-// deeper than on a dark background so the graph stands out on white.
-const GREEN_TOP = "#34c759"; // Apple's system green, same as the app's accent
-const GREEN_BOTTOM = "#1a9e3a";
+// A soft top-to-bottom gradient, lighter orange to deeper orange (the app's accent is #f26b2a),
+// on a background that fades from white to the app's light grey.
+const ORANGE_TOP = "#f7843f";
+const ORANGE_BOTTOM = "#e5521a";
 const WHITE = "#ffffff";
-const BG_BOTTOM = "#f2f2f7"; // iOS light grey
+const BG_BOTTOM = "#f3f3f4";
 // The social preview card stays dark, so the white icon stands out on it.
 const BG_TOP = "#1c1c1e"; // iOS dark grey
 const BLACK = "#000000";
 
 function iconSvg(size: number) {
-  const last = POINTS[POINTS.length - 1];
-
   return (
     <svg width={size} height={size} viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -48,38 +41,22 @@ function iconSvg(size: number) {
           <stop offset="0" stopColor={WHITE} />
           <stop offset="1" stopColor={BG_BOTTOM} />
         </linearGradient>
-        {/* userSpaceOnUse: one gradient across the whole icon, so the line and dots match */}
-        <linearGradient id="green" gradientUnits="userSpaceOnUse" x1="0" y1="96" x2="0" y2="416">
-          <stop offset="0" stopColor={GREEN_TOP} />
-          <stop offset="1" stopColor={GREEN_BOTTOM} />
+        {/* userSpaceOnUse: one gradient across the whole icon */}
+        <linearGradient id="orange" gradientUnits="userSpaceOnUse" x1="0" y1="70" x2="0" y2="442">
+          <stop offset="0" stopColor={ORANGE_TOP} />
+          <stop offset="1" stopColor={ORANGE_BOTTOM} />
         </linearGradient>
       </defs>
 
       <rect width="512" height="512" fill="url(#bg)" />
 
-      {/* the connecting line: thick and bold, like iMessage's bubble */}
-      <polyline
-        points={LINE}
-        fill="none"
-        stroke="url(#green)"
-        strokeWidth="40"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {/* the D-shaped plate */}
+      <path d={D_SHAPE} fill="url(#orange)" stroke="url(#orange)" strokeWidth="28" strokeLinejoin="round" />
 
-      {/* a dot at every point; each has a white center so it reads as a node */}
-      {POINTS.slice(0, -1).map(([x, y]) => (
-        <g key={`${x}-${y}`}>
-          <circle cx={x} cy={y} r="34" fill="url(#green)" />
-          <circle cx={x} cy={y} r="13" fill={WHITE} />
-        </g>
-      ))}
-
-      {/* the last dot is bigger, with a halo: where you are now */}
-      <g>
-        <circle cx={last[0]} cy={last[1]} r="62" fill={GREEN_TOP} fillOpacity={0.22} />
-        <circle cx={last[0]} cy={last[1]} r="44" fill="url(#green)" />
-        <circle cx={last[0]} cy={last[1]} r="17" fill={WHITE} />
+      {/* the white trend arrow */}
+      <g stroke={WHITE} strokeWidth="42" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <polyline points={TREND} />
+        <polyline points={ARROW_HEAD} />
       </g>
     </svg>
   );
@@ -139,8 +116,8 @@ export function renderSocialPreview() {
                 fontSize: 22,
                 padding: "8px 16px",
                 borderRadius: 999,
-                border: `2px solid ${GREEN_BOTTOM}`,
-                color: GREEN_TOP,
+                border: `2px solid ${ORANGE_BOTTOM}`,
+                color: ORANGE_TOP,
               }}
             >
               {item}
