@@ -11,7 +11,7 @@ const arrowClass =
 
 // The top of the Nutrition tab, laid out like the Fitness tab: title on the left,
 // "Today / Jump to today" and settings on the right, your streak, the day's calories card,
-// the macros card, the week strip (green or red ring per day, against your calorie goal),
+// the macros card, the week strip (orange or red ring per day, against your calorie goal),
 // and a small date line.
 export default function NutritionHeader({
   date,

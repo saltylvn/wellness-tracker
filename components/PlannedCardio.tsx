@@ -7,7 +7,7 @@ import { setPlannedCardioDone } from "@/app/(tabs)/workouts/cardio-actions";
 import { formatCardioPlan, type CardioPlan } from "@/lib/cardioPlan";
 
 // The day's planned cardio, set ahead of time on Edit plan, with a "Completed" box. Ticking it
-// logs the planned run, ride or swim for this day (so it counts toward your streak, the green
+// logs the planned run, ride or swim for this day (so it counts toward your streak, the orange
 // ring and the weekly goals); unticking removes it. No plan yet: a link to plan one.
 export default function PlannedCardio({
   date,

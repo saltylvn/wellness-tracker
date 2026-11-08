@@ -8,7 +8,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 const fmt = (n: number) => n.toLocaleString("en-US");
 
 // The main number on the Nutrition tab: calories eaten today inside a ring that
-// fills toward your daily goal. Green while you're at or under the goal, red once
+// fills toward your daily goal. Orange while you're at or under the goal, red once
 // you're over it. With no goal set, the ring stays empty.
 export default function CalorieRing({
   calories,

@@ -14,7 +14,7 @@ const arrowClass =
 
 // The top of the Fitness page: title, your streak (in the same spot as on Nutrition), your
 // gym check-in barcode (`barcode`), "Your week" (toggles for lifting and cardio days, with
-// an "Edit plan" link to the whole week's plan), and the week strip with a green ring on
+// an "Edit plan" link to the whole week's plan), and the week strip with an orange ring on
 // every day you logged a workout or cardio.
 export default function FitnessHeader({
   date,

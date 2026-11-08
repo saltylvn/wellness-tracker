@@ -8,7 +8,7 @@ import { getGoalStatus } from "@/lib/goalStatus";
 export type WeekDay = { dateKey: string; calories: number; hasEntries: boolean };
 
 // The whole week at a glance: day name + date number, with a ring that is
-// green (at/under goal) or red (over goal) for days that have food logged.
+// orange (at/under goal) or red (over goal) for days that have food logged.
 // Laid out like the Fitness calendar (same height, same spacing): a ✅ under each day
 // you logged food, and days before today dimmed the same way. Tap a day to jump to it. The selected day is highlighted.
 // "use client" because "today" comes from the phone's clock; the server can't know it.

@@ -54,7 +54,7 @@ export default async function WorkoutsPage({
 
 
       <section className="space-y-1">
-        {/* The selected day, large and green, so it's easy to see which day you're on. */}
+        {/* The selected day, large and orange, so it's easy to see which day you're on. */}
         <h2 className="text-2xl font-bold">
           <span className="text-accent">{formatWeekday(date)}</span>
           {today ? (

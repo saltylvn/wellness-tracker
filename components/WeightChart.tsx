@@ -5,8 +5,8 @@ import { addDays, daysBetween, formatDayNumber, formatShortMonth } from "@/lib/d
 import { formatWeightLb } from "@/lib/weight";
 import type { WeighIn } from "@/lib/weightPlan";
 
-// A line chart of your weigh-ins (solid green), your target (dashed gray line), and,
-// when there's a pace, where you'll be heading (dashed green, from your latest weigh-in
+// A line chart of your weigh-ins (solid orange), your target (dashed gray line), and,
+// when there's a pace, where you'll be heading (dashed orange, from your latest weigh-in
 // to the target on the goal date). Touch or drag across it to see each weigh-in.
 
 const W = 340; // drawing size; the SVG scales to the card's width

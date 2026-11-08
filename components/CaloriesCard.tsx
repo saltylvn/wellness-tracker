@@ -5,7 +5,7 @@ import type { GoalStatus } from "@/lib/goalStatus";
 const fmt = (n: number) => n.toLocaleString("en-US");
 
 // Calories for the day: the ring with the one main number inside ("1,450 / 2,000 kcal";
-// green at or under your goal, red over), and beside it a plain line saying how much is
+// orange at or under your goal, red over), and beside it a plain line saying how much is
 // left, or how far over you are. (Macros have their own card up top.)
 export default function CaloriesCard({
   calories,
