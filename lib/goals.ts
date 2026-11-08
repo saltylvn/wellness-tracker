@@ -1,7 +1,7 @@
 import { PACE_CHOICES } from "./weightPlan";
 
 // Goals from the Settings form. The daily calorie goal is required (it drives the
-// green/red date circle). The three daily macro goals and the three weekly cardio
+// orange/red date circle). The three daily macro goals and the three weekly cardio
 // distance goals are optional: a blank field means "no goal for this one".
 
 export type Goals = {

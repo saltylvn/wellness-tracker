@@ -9,7 +9,7 @@ export type WeekDay = { dateKey: string; calories: number; hasEntries: boolean }
 
 // The whole week at a glance: day name + date number, with a ring that is
 // orange (at/under goal) or red (over goal) for days that have food logged.
-// Laid out like the Fitness calendar (same height, same spacing): a ✅ under each day
+// Laid out like the Fitness calendar (same height, same spacing): an orange check under each day
 // you logged food, and days before today dimmed the same way. Tap a day to jump to it. The selected day is highlighted.
 // "use client" because "today" comes from the phone's clock; the server can't know it.
 export default function WeekStrip({
@@ -59,10 +59,17 @@ export default function WeekStrip({
               >
                 {formatDayNumber(day.dateKey)}
               </span>
-              {/* A ✅ on days you logged food, in the same row and size as the Fitness day icons,
-                  so both calendars match. Days with nothing logged keep the row empty. */}
-              <span className="h-4 text-base leading-none" aria-hidden="true">
-                {day.hasEntries ? "✅" : ""}
+              {/* An orange check on days you logged food (drawn here, not the ✅ emoji, which iPhones
+                  show in green), in the same row and size as the Fitness day icons, so both calendars
+                  match. Days with nothing logged keep the row empty. */}
+              <span className="flex h-4 items-center justify-center" aria-hidden="true">
+                {day.hasEntries && (
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent">
+                    <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="var(--on-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3.5,8.5 6.5,11.5 12.5,4.5" />
+                    </svg>
+                  </span>
+                )}
               </span>
             </span>
           </Link>
