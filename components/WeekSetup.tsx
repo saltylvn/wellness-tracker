@@ -18,7 +18,7 @@ const ROWS = [
 const SAVE_DELAY_MS = 600; // wait for a short pause in tapping, then save once
 
 // "Your week" on the Fitness tab: two rows of small day toggles, Lift and Cardio, each on one line.
-// A day turns green when it's on. The rows are separate: a day on in both rows has lifting
+// A day turns orange when it's on. The rows are separate: a day on in both rows has lifting
 // and cardio; a day that's off in both is a rest day.
 // Changes save by themselves a moment after you stop tapping.
 export default function WeekSetup({

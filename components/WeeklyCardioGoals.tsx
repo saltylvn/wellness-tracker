@@ -4,7 +4,7 @@ import { goalProgress, type WeeklyGoals } from "@/lib/cardioGoals";
 
 // "This week" progress toward your weekly distance goals, shown on cardio days.
 // Run and cycle show up while they have a goal; swim shows once it has a goal
-// or you've swum this week, one compact line each. The bars stay green; reaching a goal gets a 🎯.
+// or you've swum this week, one compact line each. The bars stay orange; reaching a goal gets a 🎯.
 export default function WeeklyCardioGoals({
   totals,
   goals,

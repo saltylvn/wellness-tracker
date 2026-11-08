@@ -54,7 +54,7 @@ export default function PriorityLiftsForm({ picked, choices }: { picked: string[
         <button
           type="submit"
           disabled={pending}
-          className="min-h-12 w-full rounded-xl bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+          className="min-h-12 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save priority lifts"}
         </button>

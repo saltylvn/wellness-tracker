@@ -89,7 +89,7 @@ export default function LogExercise({
     });
   }
 
-  // Today's sets are green with a black "+" between them: "✓ Today: 135 × 10 + 135 × 9".
+  // Today's sets are orange with a black "+" between them: "✓ Today: 135 × 10 + 135 × 9".
   const summary = todaySets.length ? (
     <>
       ✓ Today:{" "}
@@ -129,7 +129,7 @@ export default function LogExercise({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="min-h-11 shrink-0 rounded-xl bg-accent px-6 text-base font-semibold text-on-accent active:opacity-80"
+            className="min-h-11 shrink-0 rounded-full bg-accent px-6 text-base font-semibold text-on-accent active:opacity-80"
           >
             Log
           </button>
@@ -239,7 +239,7 @@ export default function LogExercise({
           type="button"
           onClick={addSet}
           disabled={pending}
-          className="min-h-14 w-full rounded-xl bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+          className="min-h-14 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
         >
           {pending
             ? "Saving…"

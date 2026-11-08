@@ -13,7 +13,7 @@ export type WorkoutStripDay = {
 };
 
 // The week at a glance: day name, date number, and what kind of day it is.
-// A green ring around the number means you logged a workout or cardio that day.
+// An orange ring around the number means you logged a workout or cardio that day.
 // Days before today are dimmed (logged or not), so the days ahead stand out.
 // Tap a day to see its plan. The selected day is highlighted.
 // "use client" because "today" comes from the phone's clock; the server can't know it.

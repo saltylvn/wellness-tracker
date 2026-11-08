@@ -7,7 +7,7 @@ import WheelPicker from "@/components/WheelPicker";
 import { deleteSunshine, saveSunshine } from "@/app/(tabs)/workouts/sunshine-actions";
 import { reachedSunshineGoal, SUNSHINE_MINUTE_OPTIONS, wheelStart } from "@/lib/sunshine";
 
-// A quiet row every day: "☀️ Sunshine 10 / 20 min" (green once you reach your daily target
+// A quiet row every day: "☀️ Sunshine 10 / 20 min" (orange once you reach your daily target
 // from Settings). Tap it to pick 5 to 60 minutes on a scroll wheel, which starts on what you
 // did last time. It's plain text with no card, so it doesn't pull attention from the workout.
 export default function SunshineLog({
@@ -103,7 +103,7 @@ export default function SunshineLog({
           type="button"
           onClick={() => run(() => saveSunshine({ date, minutes: picked }))}
           disabled={pending}
-          className="min-h-14 w-full rounded-xl bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+          className="min-h-14 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save"}
         </button>

@@ -6,7 +6,7 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 type Macro = { label: string; grams: number; goal: number | null };
 
 // The day's macros, left to right: Protein, Carbs, Fat. Each shows "eaten / goal g" and a
-// thin bar filling toward the goal (with no goal set, just the grams). The bar stays green
+// thin bar filling toward the goal (with no goal set, just the grams). The bar stays orange
 // even past the goal: going over on protein isn't a problem, so it isn't flagged red.
 // Same size as the "Your week" card on Fitness (TOP_CARD), so the tabs line up.
 export default function MacrosCard({ macros }: { macros: Macro[] }) {
