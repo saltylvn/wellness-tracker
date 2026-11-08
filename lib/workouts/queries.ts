@@ -272,7 +272,7 @@ export async function loadCardioPlan(supabase: SupabaseClient, weekday: number):
 
 export type FitnessPageData = {
   days: WorkoutDay[]; // your weekly plan
-  doneDates: string[]; // every day you logged a workout or cardio (streak and green rings)
+  doneDates: string[]; // every day you logged a workout or cardio (streak and orange rings)
   today: WorkoutDay | undefined; // the plan for this date's weekday
   lift: LiftDayData | null;
   cardio: CardioDayData | null;
