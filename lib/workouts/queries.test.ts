@@ -58,13 +58,13 @@ describe("loadCardioDay", () => {
         [{ id: "c1", kind: "run", distance: "3.1", distance_unit: "mi", duration_minutes: "28" }],
       ],
       profiles: [
-        { weekly_run_miles: "5", weekly_cycle_miles: "10", weekly_swim_yards: null },
+        { weekly_run_miles: "5", weekly_cycle_miles: "10", weekly_swim_yards: null, weekly_walk_miles: "8" },
       ],
     });
     expect(await loadCardioDay(db, "user-1", "2026-10-06")).toEqual({
       logs: [{ id: "c1", kind: "run", distance: 3.1, unit: "mi", minutes: 28 }],
-      weekTotals: { run: 3.1, cycle: 0, swim: 500 },
-      weeklyGoals: { run: 5, cycle: 10, swim: null },
+      weekTotals: { run: 3.1, cycle: 0, swim: 500, walk: 0 },
+      weeklyGoals: { run: 5, cycle: 10, swim: null, walk: 8 },
     });
   });
 
@@ -72,8 +72,8 @@ describe("loadCardioDay", () => {
     const db = fakeSupabase({ cardio_logs: [[], []], profiles: [null] });
     expect(await loadCardioDay(db, "user-1", "2026-10-06")).toEqual({
       logs: [],
-      weekTotals: { run: 0, cycle: 0, swim: 0 },
-      weeklyGoals: { run: null, cycle: null, swim: null },
+      weekTotals: { run: 0, cycle: 0, swim: 0, walk: 0 },
+      weeklyGoals: { run: null, cycle: null, swim: null, walk: null },
     });
   });
 });
@@ -146,8 +146,16 @@ describe("loadPlanOverview", () => {
       workout_exercises: [[{ day_id: "d1" }, { day_id: "d1" }, { day_id: "d1" }]],
     });
     expect(await loadPlanOverview(db, "u")).toEqual([
-      { id: "d1", weekday: 1, kind: "lift", title: "Legs", exerciseCount: 3, cardioPlan: null },
-      { id: "d2", weekday: 2, kind: "cardio", title: "Cardio", exerciseCount: 0, cardioPlan: { kind: "run", target: 3, unit: "mi" } },
+      { id: "d1", weekday: 1, kind: "lift", title: "Legs", exerciseCount: 3, cardioPlan: null, restPlan: null },
+      {
+        id: "d2",
+        weekday: 2,
+        kind: "cardio",
+        title: "Cardio",
+        exerciseCount: 0,
+        cardioPlan: { kind: "run", target: 3, unit: "mi" },
+        restPlan: null,
+      },
     ]);
   });
 });

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { parseCardioPlan } from "@/lib/cardioPlan";
+import { parseRestPlan } from "@/lib/restPlan";
 import { DATABASE_BEHIND_MESSAGE, isMissingSchemaError } from "@/lib/dbErrors";
 import { createClient } from "@/lib/supabase/server";
 import { afterDayEditPath, parsePlanJson } from "@/lib/workouts/plan";
@@ -11,7 +12,8 @@ import { currentUserId } from "@/lib/actionResult";
 
 export type PlanFormState = { message: string } | null;
 
-// Saves one day's plan. A cardio day (or a lifting and cardio day): which cardio and how far.
+// Saves one day's plan. A rest day: its recovery activity (walk, bike ride or yoga) and target.
+// A cardio day (or a lifting and cardio day): which cardio and how far.
 // A lifting day: its name ("Legs", "Push day"...), and its exercise list: updates the ones you
 // kept (in their new order), adds new ones, and removes the ones you deleted.
 export async function saveDayPlan(
@@ -31,7 +33,23 @@ export async function saveDayPlan(
     .select("id, kind, title")
     .eq("id", dayId)
     .maybeSingle();
-  if (!day || !(hasLift(day.kind) || hasCardio(day.kind))) return { message: "Couldn't find that workout day." };
+  if (!day) return { message: "Couldn't find that workout day." };
+
+  // A rest day: just its recovery plan (walk, bike ride or yoga, and an optional target).
+  if (day.kind === "rest") {
+    const rest = parseRestPlan(formData.get("rest_activity"), formData.get("rest_target"));
+    if (!rest.ok) return { message: rest.message };
+    const { error } = await supabase
+      .from("workout_days")
+      .update({ rest_plan_activity: rest.plan?.activity ?? null, rest_plan_target: rest.plan?.target ?? null })
+      .eq("id", day.id);
+    if (error) {
+      return { message: isMissingSchemaError(error) ? DATABASE_BEHIND_MESSAGE : "Couldn't save. Please try again." };
+    }
+    revalidatePath("/workouts");
+    revalidatePath("/workouts/plan");
+    redirect(afterDayEditPath(formData.get("back"), date));
+  }
 
   // Check everything first, so nothing is half-saved.
   const cardio = hasCardio(day.kind) ? parseCardioPlan(formData.get("cardio_kind"), formData.get("cardio_unit"), formData.get("cardio_target")) : null;

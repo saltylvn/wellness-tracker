@@ -73,12 +73,13 @@ export default function GoalsForm({ goals }: { goals: Goals }) {
         <legend className="mb-1 text-sm font-medium text-muted">
           Weekly cardio goals <span className="font-normal">(optional, Monday to Sunday)</span>
         </legend>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {(
             [
               ["weekly_run_miles", "Run (mi)", goals.weekly_run_miles, "decimal"],
               ["weekly_cycle_miles", "Cycle (mi)", goals.weekly_cycle_miles, "decimal"],
               ["weekly_swim_yards", "Swim (yd)", goals.weekly_swim_yards, "numeric"],
+              ["weekly_walk_miles", "Walk (mi)", goals.weekly_walk_miles, "decimal"],
             ] as const
           ).map(([name, label, value, mode]) => (
             <div key={name}>

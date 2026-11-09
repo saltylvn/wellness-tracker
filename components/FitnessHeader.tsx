@@ -52,14 +52,11 @@ export default function FitnessHeader({
           <WorkoutWeekStrip
             selected={date}
             basePath={basePath}
-            // Monday to Saturday: Sunday is always a recovery day, so it isn't shown.
-            days={weekDays(date)
-              .filter((dateKey) => isoWeekday(dateKey) !== 7)
-              .map((dateKey) => ({
-                dateKey,
-                kind: byWeekday.get(isoWeekday(dateKey))?.kind ?? null,
-                done: done.has(dateKey),
-              }))}
+            days={weekDays(date).map((dateKey) => ({
+              dateKey,
+              kind: byWeekday.get(isoWeekday(dateKey))?.kind ?? null,
+              done: done.has(dateKey),
+            }))}
           />
         </div>
         <Link href={`${basePath}?date=${addDays(date, 7)}`} aria-label="Next week" className={arrowClass}>
