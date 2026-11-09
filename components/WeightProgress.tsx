@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import PlanRefresher from "@/components/PlanRefresher";
 import { formatDayNumber, formatShortMonth } from "@/lib/dates";
 import { formatWeightLb } from "@/lib/weight";
 import type { PlanSummary } from "@/lib/weightPlan";
@@ -17,10 +16,6 @@ export default function WeightProgress({
   target,
   plan,
   trend,
-  note,
-  source,
-  refreshing,
-  today,
   chart,
 }: {
   start: number;
@@ -28,10 +23,6 @@ export default function WeightProgress({
   target: number;
   plan: PlanSummary;
   trend: number | null; // your actual lb per week over the last 4 weeks (negative = losing)
-  note: string | null; // the AI's one-line coaching note
-  source: "ai" | "auto" | null;
-  refreshing: boolean; // the plan is out of date and is being updated now
-  today: string;
   chart: ReactNode; // the weigh-in chart (WeightChart), or nothing before your first weigh-in
 }) {
   const verb = plan.direction === "gain" || (plan.direction === "done" && target > start) ? "gained" : "lost";
@@ -95,18 +86,6 @@ export default function WeightProgress({
               <p className="text-xs text-muted">{label}</p>
             </div>
           ))}
-        </div>
-      )}
-
-      {plan.direction !== "done" && (
-        <div className="space-y-1">
-          {refreshing ? (
-            <PlanRefresher today={today} />
-          ) : source === "ai" && note ? (
-            <p className="text-sm">
-              <span aria-hidden="true">✨</span> {note}
-            </p>
-          ) : null}
         </div>
       )}
 

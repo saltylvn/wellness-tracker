@@ -6,13 +6,6 @@ import {
   SYSTEM_PROMPT,
   type AiEstimate,
 } from "./nutrition";
-import {
-  COACH_JSON_SCHEMA,
-  COACH_SYSTEM_PROMPT,
-  coachPrompt,
-  parseCoachNote,
-  type CoachInput,
-} from "./weightCoach";
 
 // Time limits. The API route allows 30 seconds in total, so we stop trying models once
 // ~24 seconds have passed, and never wait more than 9 seconds on one. A model usually
@@ -79,28 +72,6 @@ export async function estimateNutrition(input: EstimateInput): Promise<EstimateR
     read: (text) => {
       const parsed = parseAiNutrition(text);
       return parsed.ok || parsed.reason === "not_food" ? { done: parsed } : { retry: parsed };
-    },
-  });
-}
-
-/**
- * Asks the AI for one line of coaching about your weight goal (your pace is your own
- * choice; the AI doesn't change it). Returns null when the AI isn't set up, is busy, or
- * sent something unusable; the Weight tab then just shows no note.
- */
-export async function writeWeightCoachNote(input: CoachInput): Promise<string | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return null;
-  return runModelChain<string | null>({
-    apiKey,
-    parts: [{ text: coachPrompt(input) }],
-    systemInstruction: COACH_SYSTEM_PROMPT,
-    schema: COACH_JSON_SCHEMA,
-    busy: null,
-    stopped: null,
-    read: (text) => {
-      const note = parseCoachNote(text);
-      return note ? { done: note } : { retry: null };
     },
   });
 }

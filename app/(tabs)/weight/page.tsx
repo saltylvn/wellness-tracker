@@ -7,15 +7,16 @@ import WeighInCard from "@/components/WeighInCard";
 import WeightChart from "@/components/WeightChart";
 import WeightProgress from "@/components/WeightProgress";
 import WeightStreakBadge from "@/components/WeightStreakBadge";
+import WeightWeekStrip from "@/components/WeightWeekStrip";
 import { currentUserId } from "@/lib/actionResult";
 import { DATABASE_BEHIND_MESSAGE } from "@/lib/dbErrors";
-import { formatFullDate, formatWeekday, isValidDateKey } from "@/lib/dates";
-import { chosenPace, coachKey, goalNumbers, planSummary, recentTrend } from "@/lib/weightPlan";
+import { isValidDateKey } from "@/lib/dates";
+import { chosenPace, goalNumbers, planSummary, recentTrend } from "@/lib/weightPlan";
 import { loadWeightData } from "@/lib/weightQueries";
 import { createClient } from "@/lib/supabase/server";
 
-// The Weight tab: one card at the top with your progress toward your target, a chart,
-// and your weekly pace from Settings (weeks to go, goal date) with an AI coaching note; then today's weigh-in wheels.
+// The Weight tab: today's weigh-in wheels first, then one card with your progress toward
+// your target, a chart, and your weekly pace from Settings (weeks to go, goal date).
 export default async function WeightPage({
   searchParams,
 }: {
@@ -34,10 +35,7 @@ export default async function WeightPage({
   const latest = data.logs.at(-1) ?? null;
   const trend = recentTrend(data.logs);
 
-  // The numbers always use your chosen pace. The AI note is shown only if it was written
-  // for these exact numbers; if not, the card shows "Updating your plan…" and gets a fresh one.
-  const pace = chosenPace(data.plan.pace); // your weekly pace from Settings (2 lb if none)
-  const fresh = numbers !== null && data.plan.key === coachKey(numbers.start, numbers.current, numbers.target, pace);
+  const pace = chosenPace(data.pace); // your weekly pace from Settings (2 lb if none)
   const plan = numbers && planSummary({ ...numbers, pace, today: date });
 
   const chart =
@@ -47,7 +45,7 @@ export default async function WeightPage({
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
+      <header>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Weight</h1>
           <div className="flex items-center gap-1">
@@ -55,13 +53,17 @@ export default async function WeightPage({
             <SettingsGear />
           </div>
         </div>
-        <p className="text-sm text-muted">
-          <span className="font-semibold text-foreground">{formatWeekday(date)}</span> · {formatFullDate(date)}
-        </p>
       </header>
 
       {/* Weeks in a row you lost at least 1 lb, from your weigh-ins. */}
       <WeightStreakBadge logs={data.logs} />
+
+      {/* This week, with an orange ring on each day you weighed in. Tap a day to weigh in for it. */}
+      <WeightWeekStrip date={date} logged={data.weekLogged} />
+
+      {/* Today's weigh-in first, above your progress and the graph. No key={date} here: on the
+          Fitness page that left stale copies on screen. */}
+      <WeighInCard date={date} latest={latest} fallback={data.startSetting ?? data.targetSetting} />
 
       {data.databaseBehind && (
         <p role="alert" className="rounded-2xl border border-danger p-4 text-sm text-danger">
@@ -75,10 +77,6 @@ export default async function WeightPage({
           {...numbers}
           plan={plan}
           trend={trend}
-          note={fresh ? data.plan.note : null}
-          source={fresh ? data.plan.source : null}
-          refreshing={!fresh && plan.direction !== "done" && !data.databaseBehind}
-          today={date}
           chart={chart}
         />
       ) : (
@@ -102,8 +100,6 @@ export default async function WeightPage({
         </section>
       )}
 
-      {/* No key={date} here: on the Fitness page that left stale copies on screen. */}
-      <WeighInCard date={date} latest={latest} fallback={data.startSetting ?? data.targetSetting} />
     </div>
   );
 }
