@@ -64,18 +64,19 @@ describe("isBlankWeek", () => {
 });
 
 describe("parseWeekKinds", () => {
-  const good = { 1: "lift", 2: "cardio", 3: "lift", 4: "cardio", 5: "lift", 6: "cardio" };
+  const good = { 1: "lift", 2: "cardio", 3: "lift", 4: "cardio", 5: "lift", 6: "cardio", 7: "rest" };
 
-  it("reads Monday to Saturday and always makes Sunday a rest day", () => {
+  it("reads Monday to Sunday, and Sunday can be planned like any day", () => {
     const week = parseWeekKinds(good);
     expect(week?.get(1)).toBe("lift");
     expect(week?.get(6)).toBe("cardio");
     expect(week?.get(7)).toBe("rest");
-    expect(parseWeekKinds({ ...good, 7: "lift" })?.get(7)).toBe("rest");
+    expect(parseWeekKinds({ ...good, 7: "lift" })?.get(7)).toBe("lift");
   });
 
   it("rejects missing days or unknown kinds", () => {
     expect(parseWeekKinds({ ...good, 6: undefined })).toBeNull();
+    expect(parseWeekKinds({ ...good, 7: undefined })).toBeNull(); // Sunday must be sent too
     expect(parseWeekKinds({ ...good, 3: "yoga" })).toBeNull();
     expect(parseWeekKinds(null)).toBeNull();
     expect(parseWeekKinds(["lift"])).toBeNull();
@@ -102,5 +103,11 @@ describe("toggleDay", () => {
 
   it("turns a day that's on in one row only off (rest)", () => {
     expect(toggleDay([...week], 0, "lift")).toEqual(["rest", "cardio", "rest"]);
+  });
+
+  it("the Rest row makes a day a planned rest day, turning Lift and Cardio off", () => {
+    expect(toggleDay([...week], 0, "rest")).toEqual(["rest", "cardio", "rest"]);
+    expect(toggleDay(["both"], 0, "rest")).toEqual(["rest"]);
+    expect(toggleDay([...week], 2, "rest")).toEqual(["lift", "cardio", "rest"]); // already rest: stays rest
   });
 });

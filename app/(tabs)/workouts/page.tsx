@@ -6,19 +6,20 @@ import GymBarcodeCard from "@/components/GymBarcodeCard";
 import GoToToday from "@/components/GoToToday";
 import LogExercise from "@/components/LogExercise";
 import PlannedCardio from "@/components/PlannedCardio";
+import PlannedRest from "@/components/PlannedRest";
 import PriorityLifts from "@/components/PriorityLifts";
 import SunshineLog from "@/components/SunshineLog";
 import WeeklyCardioGoals from "@/components/WeeklyCardioGoals";
 import { currentUserId } from "@/lib/actionResult";
 import { completingLog } from "@/lib/cardioPlan";
+import { restPlanDone } from "@/lib/restPlan";
 import { formatFullDate, formatWeekday, isValidDateKey } from "@/lib/dates";
 import { gymBarcodeSvg } from "@/lib/gymBarcodeSvg";
 import { createClient } from "@/lib/supabase/server";
 import { connectorAfter, formatRest, formatSetsReps } from "@/lib/workouts/plan";
 import { latestSets } from "@/lib/workouts/history";
 import { defaultRepsFor, defaultSecondsFor, defaultWeightFor, isTimed } from "@/lib/workouts/logging";
-import { REST_DAY_TITLE } from "@/lib/workouts/defaults";
-import { dayTitle, isBlankWeek } from "@/lib/workouts/weekSetup";
+import { dayTitle, hasCardio, isBlankWeek } from "@/lib/workouts/weekSetup";
 import { loadFitnessPage } from "@/lib/workouts/queries";
 
 export default async function WorkoutsPage({
@@ -36,7 +37,8 @@ export default async function WorkoutsPage({
 
   // Everything this page reads, in two rounds (see loadFitnessPage).
   // (Don't put key={date} on the cards below: switching days then left stale copies on screen.)
-  const { days, doneDates, today, lift, cardio, sunshine, gymBarcode, cardioPlan, priorityLifts } = await loadFitnessPage(
+  const { days, doneDates, today, lift, cardio, sunshine, gymBarcode, cardioPlan, restPlan, priorityLifts } =
+    await loadFitnessPage(
     supabase,
     userId,
     date,
@@ -87,17 +89,33 @@ export default async function WorkoutsPage({
         </section>
       )}
 
-      {today?.kind === "rest" && !isBlankWeek(days) && (
-        <section className="rounded-2xl bg-card p-6 text-center">
-          <p className="text-4xl" aria-hidden="true">
-            🧘
-          </p>
-          <p className="mt-2 text-base font-semibold">{REST_DAY_TITLE}</p>
-          <p className="mt-1 text-sm text-muted">Recover, stretch, and sleep well.</p>
-        </section>
+      {today?.kind === "rest" && cardio && !isBlankWeek(days) && (
+        <>
+          {/* A rest day, laid out like a cardio day: the recovery you planned on Edit plan (a walk,
+              bike ride or yoga) with its Completed box, then this week's goals. */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-muted">{formatWeekday(date)}&apos;s recovery</h3>
+              <Link
+                href={`/workouts/plan/${today.id}?date=${date}`}
+                className="flex min-h-11 items-center text-sm font-medium text-accent active:opacity-70"
+              >
+                Edit plan
+              </Link>
+            </div>
+            <PlannedRest
+              key={`${date}-${restPlan ? restPlanDone(restPlan, cardio.logs) : false}`}
+              date={date}
+              plan={restPlan}
+              completed={restPlan ? restPlanDone(restPlan, cardio.logs) : false}
+              editHref={`/workouts/plan/${today.id}?date=${date}`}
+            />
+          </section>
+          <WeeklyCardioGoals totals={cardio.weekTotals} goals={cardio.weeklyGoals} />
+        </>
       )}
 
-      {cardio && today && (
+      {cardio && today && hasCardio(today.kind) && (
         <>
           {/* The cardio you planned for this weekday on Edit plan, with its Completed box. The
               heading row matches the exercises one below: day on the left, Edit plan on the right. */}

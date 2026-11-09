@@ -1,14 +1,15 @@
-// Cardio logging: run, cycle, or swim, each with an optional distance and time.
+// Cardio logging: run, cycle, swim, or walk, each with an optional distance and time.
 
-export const CARDIO_KINDS = ["run", "cycle", "swim"] as const;
+export const CARDIO_KINDS = ["run", "cycle", "swim", "walk"] as const;
 export type CardioKind = (typeof CARDIO_KINDS)[number];
 export type DistanceUnit = "mi" | "yd";
 
-// Run and cycle are in miles; swim is in yards.
+// Run, cycle and walk are in miles; swim is in yards.
 export const CARDIO: Record<CardioKind, { label: string; icon: string; unit: DistanceUnit }> = {
   run: { label: "Run", icon: "🏃", unit: "mi" },
   cycle: { label: "Cycle", icon: "🚴", unit: "mi" },
   swim: { label: "Swim", icon: "🏊", unit: "yd" },
+  walk: { label: "Walk", icon: "🚶", unit: "mi" },
 };
 
 // One logged cardio session, as shown in the list on a cardio day.
@@ -23,7 +24,7 @@ export type CardioLogRow = {
 export const MAX_DISTANCE: Record<DistanceUnit, number> = { mi: 500, yd: 100000 };
 export const MAX_MINUTES = 1440; // 24 hours
 
-/** Checks a value from the browser is really "run", "cycle", or "swim"; otherwise null. */
+/** Checks a value from the browser is really "run", "cycle", "swim", or "walk"; otherwise null. */
 export function parseCardioKind(value: unknown): CardioKind | null {
   return (CARDIO_KINDS as readonly unknown[]).includes(value) ? (value as CardioKind) : null;
 }
@@ -42,7 +43,7 @@ export type CardioCheck =
 // Distance and minutes are both optional (null or undefined means "not entered").
 export function validateCardio(kind: unknown, distance: unknown, minutes: unknown): CardioCheck {
   const parsedKind = parseCardioKind(kind);
-  if (!parsedKind) return { ok: false, message: "Choose run, cycle, or swim." };
+  if (!parsedKind) return { ok: false, message: "Choose run, cycle, swim, or walk." };
   const { unit } = CARDIO[parsedKind];
 
   let cleanDistance: number | null = null;

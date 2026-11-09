@@ -14,6 +14,7 @@ export const PLAN_UNITS: Record<CardioKind, PlanUnit[]> = {
   run: ["mi", "km", "m", "min"],
   cycle: ["mi", "km", "m", "min"],
   swim: ["yd", "m", "mi", "km", "min"],
+  walk: ["mi", "km", "m", "min"],
 };
 
 export const UNIT_LABELS: Record<PlanUnit, string> = { mi: "Miles", km: "Km", m: "Meters", yd: "Yards", min: "Time" };

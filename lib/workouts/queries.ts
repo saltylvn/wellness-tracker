@@ -5,6 +5,7 @@ import { addDays, isoWeekday, weekDays } from "../dates";
 import { planFromRow, type CardioPlan } from "../cardioPlan";
 import { parseGymBarcode, type GymBarcode } from "../gymBarcode";
 import { priorityNames, type PriorityLift } from "../priorityLifts";
+import { restPlanFromRow, type RestPlan } from "../restPlan";
 import { loadDoneDates } from "./activity";
 import type { HistoryRow } from "./history";
 import type { PlanExercise, WorkoutDay } from "./plan";
@@ -136,11 +137,8 @@ export async function loadCardioDay(supabase: SupabaseClient, userId: string, da
   const week = weekDays(date);
   const [weekLogs, profile, dayLogs] = await Promise.all([
     supabase.from("cardio_logs").select("kind, distance, distance_unit").gte("log_date", week[0]).lte("log_date", week[6]),
-    supabase
-      .from("profiles")
-      .select("weekly_run_miles, weekly_cycle_miles, weekly_swim_yards")
-      .eq("id", userId)
-      .maybeSingle(),
+    // "*" so this still works before the walking goal's SQL step is run.
+    supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     supabase
       .from("cardio_logs")
       .select("id, kind, distance, distance_unit, duration_minutes")
@@ -168,6 +166,7 @@ export async function loadCardioDay(supabase: SupabaseClient, userId: string, da
       run: asNumber(goals?.weekly_run_miles),
       cycle: asNumber(goals?.weekly_cycle_miles),
       swim: asNumber(goals?.weekly_swim_yards),
+      walk: asNumber(goals?.weekly_walk_miles),
     },
   };
 }
@@ -233,11 +232,15 @@ export async function loadPriorityBests(supabase: SupabaseClient, names: string[
   );
 }
 
-export type PlanOverviewDay = WorkoutDay & { exerciseCount: number; cardioPlan: CardioPlan | null };
+export type PlanOverviewDay = WorkoutDay & {
+  exerciseCount: number;
+  cardioPlan: CardioPlan | null;
+  restPlan: RestPlan | null; // a rest day's recovery plan (walk, bike ride or yoga), if any
+};
 
 /**
  * The week for the Edit plan page: your seven days, each with how many exercises it has
- * and its cardio plan (if any).
+ * and its cardio plan or rest day plan (if any).
  */
 export async function loadPlanOverview(supabase: SupabaseClient, userId: string): Promise<PlanOverviewDay[]> {
   const [days, exercises, plans] = await Promise.all([
@@ -252,22 +255,26 @@ export async function loadPlanOverview(supabase: SupabaseClient, userId: string)
     const dayId = row.day_id as string;
     counts.set(dayId, (counts.get(dayId) ?? 0) + 1);
   }
-  const planById = new Map((plans.data ?? []).map((row) => [row.id as string, planFromRow(row)]));
+  const rowById = new Map((plans.data ?? []).map((row) => [row.id as string, row]));
   return days.map((day) => ({
     ...day,
     exerciseCount: counts.get(day.id) ?? 0,
-    cardioPlan: planById.get(day.id) ?? null,
+    cardioPlan: planFromRow(rowById.get(day.id) ?? null),
+    restPlan: restPlanFromRow(rowById.get(day.id) ?? null),
   }));
 }
 
-/** A weekday's cardio plan, or null (none, or the SQL step for it isn't run yet). */
-export async function loadCardioPlan(supabase: SupabaseClient, weekday: number): Promise<CardioPlan | null> {
+/** A weekday's cardio plan and rest day plan, each null if none (or its SQL step isn't run yet). */
+export async function loadDayPlans(
+  supabase: SupabaseClient,
+  weekday: number,
+): Promise<{ cardioPlan: CardioPlan | null; restPlan: RestPlan | null }> {
   const { data } = await supabase
     .from("workout_days")
     .select("*") // whichever plan columns exist, so this works before the SQL steps are run
     .eq("weekday", weekday)
     .maybeSingle();
-  return planFromRow(data);
+  return { cardioPlan: planFromRow(data), restPlan: restPlanFromRow(data) };
 }
 
 export type FitnessPageData = {
@@ -279,24 +286,26 @@ export type FitnessPageData = {
   sunshine: SunshineData; // shown every day
   gymBarcode: GymBarcode | null; // shown at the top of the page
   cardioPlan: CardioPlan | null; // this weekday's planned cardio, if any
+  restPlan: RestPlan | null; // this weekday's recovery plan on a rest day (walk, bike ride or yoga), if any
   priorityLifts: PriorityLift[]; // your priority lifts (lifting days only), with their best weights
 };
 
 /**
  * Everything the Fitness page reads, in as few trips to the database as possible:
  *   1. your plan, the days you logged, this weekday's exercises, sunshine, your
- *      gym barcode, this weekday's cardio plan, and your priority lifts' names, together;
- *   2. then what this kind of day needs (lifting or cardio, and the priority lifts' bests), together.
+ *      gym barcode, this weekday's cardio and rest day plans, and your priority lifts' names, together;
+ *   2. then what this kind of day needs (lifting, and the priority lifts' bests; cardio logs and
+ *      weekly goals on cardio and rest days), together.
  */
 export async function loadFitnessPage(supabase: SupabaseClient, userId: string, date: string): Promise<FitnessPageData> {
   const weekday = isoWeekday(date);
-  const [days, doneDates, planExercises, sunshine, gymBarcode, cardioPlan, priority] = await Promise.all([
+  const [days, doneDates, planExercises, sunshine, gymBarcode, dayPlans, priority] = await Promise.all([
     loadWorkoutDays(supabase, userId),
     loadDoneDates(supabase, addDays(date, -400)),
     loadPlanExercises(supabase, weekday),
     loadSunshine(supabase, userId, date),
     loadGymBarcode(supabase, userId),
-    loadCardioPlan(supabase, weekday),
+    loadDayPlans(supabase, weekday),
     loadPriorityNames(supabase, userId),
   ]);
   const today = days.find((d) => d.weekday === weekday);
@@ -305,9 +314,10 @@ export async function loadFitnessPage(supabase: SupabaseClient, userId: string, 
   const liftDay = Boolean(today && hasLift(today.kind));
   const [lift, cardio, priorityLifts] = await Promise.all([
     liftDay ? loadLiftDay(supabase, date, planExercises) : null,
-    today && hasCardio(today.kind) ? loadCardioDay(supabase, userId, date) : null,
+    // Rest days need the day's logs too (to tick off the recovery plan) and the weekly goals.
+    today && (hasCardio(today.kind) || today.kind === "rest") ? loadCardioDay(supabase, userId, date) : null,
     liftDay ? loadPriorityBests(supabase, priority) : [],
   ]);
 
-  return { days, doneDates, today, lift, cardio, sunshine, gymBarcode, cardioPlan, priorityLifts };
+  return { days, doneDates, today, lift, cardio, sunshine, gymBarcode, ...dayPlans, priorityLifts };
 }

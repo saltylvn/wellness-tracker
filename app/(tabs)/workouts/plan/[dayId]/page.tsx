@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import PlanEditor from "@/components/PlanEditor";
 import { planFromRow } from "@/lib/cardioPlan";
+import { restPlanFromRow } from "@/lib/restPlan";
 import { isValidDateKey } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import { afterDayEditPath, type PlanExercise } from "@/lib/workouts/plan";
@@ -25,9 +26,10 @@ export default async function EditPlanPage({
     .select("id, kind, title")
     .eq("id", dayId)
     .maybeSingle();
-  if (error || !day || !(hasLift(day.kind) || hasCardio(day.kind))) notFound();
+  if (error || !day) notFound();
   const lift = hasLift(day.kind);
   const cardio = hasCardio(day.kind);
+  const rest = day.kind === "rest";
 
   const [{ data }, { data: planRow }] = await Promise.all([
     supabase
@@ -46,6 +48,7 @@ export default async function EditPlanPage({
         <BackButton fallback={afterDayEditPath(from, date)} />
         <h1 className="text-2xl font-bold">Edit {dayTitle(day)}</h1>
         <p className="text-sm text-muted">
+          {rest && "Pick an easy recovery activity and, if you like, a target. On the day, tick Completed to log it. "}
           {cardio && "Pick the cardio you'll do and how far. On the day, tick Completed to log it. "}
           {lift &&
             "Name this workout, then add your exercises with their sets and rep range. Change, reorder, or remove them any time."}
@@ -60,6 +63,7 @@ export default async function EditPlanPage({
         initial={(data ?? []) as PlanExercise[]}
         lift={lift}
         cardio={cardio ? planFromRow(planRow) : undefined}
+        rest={rest ? restPlanFromRow(planRow) : undefined}
       />
     </div>
   );
