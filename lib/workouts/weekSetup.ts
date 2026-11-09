@@ -94,13 +94,11 @@ export function parseWeekKinds(raw: unknown): Map<number, DayKind> | null {
 
 /**
  * Tapping a day in the Lift or Cardio row turns that row on or off for the day; the other
- * row stays as it is (on in both = a lifting and cardio day, off in both = rest). Tapping a
- * day in the Rest row makes it a planned rest day, turning Lift and Cardio off.
+ * row stays as it is (on in both = a lifting and cardio day, off in both = rest).
  */
-export function toggleDay(kinds: DayKind[], index: number, row: "lift" | "cardio" | "rest"): DayKind[] {
+export function toggleDay(kinds: DayKind[], index: number, row: "lift" | "cardio"): DayKind[] {
   return kinds.map((kind, i) => {
     if (i !== index) return kind;
-    if (row === "rest") return "rest";
     return row === "lift" ? kindFrom(!hasLift(kind), hasCardio(kind)) : kindFrom(hasLift(kind), !hasCardio(kind));
   });
 }

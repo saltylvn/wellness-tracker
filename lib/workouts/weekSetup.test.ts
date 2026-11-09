@@ -104,10 +104,4 @@ describe("toggleDay", () => {
   it("turns a day that's on in one row only off (rest)", () => {
     expect(toggleDay([...week], 0, "lift")).toEqual(["rest", "cardio", "rest"]);
   });
-
-  it("the Rest row makes a day a planned rest day, turning Lift and Cardio off", () => {
-    expect(toggleDay([...week], 0, "rest")).toEqual(["rest", "cardio", "rest"]);
-    expect(toggleDay(["both"], 0, "rest")).toEqual(["rest"]);
-    expect(toggleDay([...week], 2, "rest")).toEqual(["lift", "cardio", "rest"]); // already rest: stays rest
-  });
 });
