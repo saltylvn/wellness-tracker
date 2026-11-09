@@ -124,7 +124,7 @@ export default async function WorkoutsPage({
       )}
 
       {today && lift && (
-        <section className="space-y-3">
+        <section className="space-y-2">
           {/* The lifts you're focusing on (picked in Settings), small and side by side. */}
           <PriorityLifts lifts={priorityLifts} />
           <div className="flex items-center justify-between">
@@ -168,12 +168,12 @@ export default async function WorkoutsPage({
                     initialSeconds={defaultSecondsFor(timeSeed?.seconds)}
                   />
                   {connector === "superset" && (
-                    <p className="flex items-center justify-center gap-1.5 py-0.5 text-sm font-semibold text-accent">
+                    <p className="flex items-center justify-center gap-1.5 text-xs font-semibold text-accent">
                       <span aria-hidden="true">⚡</span> Superset · no rest
                     </p>
                   )}
                   {connector === "rest" && (
-                    <p className="flex items-center justify-center gap-1.5 py-0.5 text-sm font-medium text-muted">
+                    <p className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted">
                       <span aria-hidden="true">⏱</span> {formatRest()}
                     </p>
                   )}
