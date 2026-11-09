@@ -108,32 +108,31 @@ export default function LogExercise({
 
   return (
     <>
-      <div className="rounded-2xl bg-card px-4 py-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-base font-medium">{exercise.name}</p>
+      {/* Compact, so more exercises fit on screen: the text on the left (name; target and
+          heaviest; today's sets or last time) and the Log button beside it, not below. */}
+      <div className="flex items-center gap-3 rounded-2xl bg-card py-2.5 pr-3 pl-4">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-semibold leading-snug">{exercise.name}</p>
+          <p className="truncate text-xs text-muted">
+            <span className={exercise.target ? "font-semibold text-foreground" : ""}>
+              {exercise.target || "Set sets & reps"}
+            </span>
             {bestWeight !== null && (
-              <p className="text-xs font-medium text-muted">
-                <span aria-hidden="true">🏆</span> Heaviest: {formatWeight(bestWeight)} lb
-              </p>
+              <>
+                {" · "}
+                <span aria-hidden="true">🏆</span> {formatWeight(bestWeight)} lb
+              </>
             )}
-          </div>
-          <p className={`shrink-0 text-sm ${exercise.target ? "font-semibold" : "text-muted"}`}>
-            {exercise.target || "Set sets & reps"}
           </p>
+          <p className={`text-xs ${todaySets.length ? "font-medium text-accent" : "text-muted"}`}>{summary}</p>
         </div>
-        <div className="mt-2 flex items-center justify-between gap-3">
-          <p className={`min-w-0 text-xs ${todaySets.length ? "font-medium text-accent" : "text-muted"}`}>
-            {summary}
-          </p>
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="min-h-11 shrink-0 rounded-full bg-accent px-6 text-base font-semibold text-on-accent active:opacity-80"
-          >
-            Log
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="min-h-11 shrink-0 rounded-full bg-accent px-5 text-base font-semibold text-on-accent active:opacity-80"
+        >
+          Log
+        </button>
       </div>
 
       <BottomSheet open={open} onClose={() => setOpen(false)} label={`Log ${exercise.name}`}>
