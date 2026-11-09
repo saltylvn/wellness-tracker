@@ -1,24 +1,17 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isMissingSchemaError } from "./dbErrors";
-import { addDays } from "./dates";
+import { addDays, weekDays } from "./dates";
 import type { WeighIn } from "./weightPlan";
 
-// Everything the Weight tab reads, fetched at the same time. The server actions use it
-// too, so the page and the AI plan always work from the same numbers.
-
-export type SavedPlan = {
-  pace: number | null; // your weekly pace from Settings (lb per week), null = the default 2
-  note: string | null;
-  source: "ai" | "auto" | null;
-  key: string | null; // the numbers it was worked out for (see coachKey)
-};
+// Everything the Weight tab reads, fetched at the same time.
 
 export type WeightData = {
   logs: WeighIn[]; // the last ~6 months of weigh-ins up to `date`, oldest first
+  weekLogged: string[]; // the days in `date`'s Monday-to-Sunday week with a weigh-in (for the calendar)
   first: WeighIn | null; // your very first weigh-in
   targetSetting: number | null;
   startSetting: number | null;
-  plan: SavedPlan;
+  pace: number | null; // your weekly pace from Settings (lb per week), null = the default 2
   databaseBehind: boolean; // true until the weight_plan SQL step has been run
 };
 
@@ -31,7 +24,8 @@ const toWeighIn = (row: { log_date: unknown; weight_lb: unknown }): WeighIn => (
 });
 
 export async function loadWeightData(supabase: SupabaseClient, userId: string, date: string): Promise<WeightData> {
-  const [logs, first, profile] = await Promise.all([
+  const week = weekDays(date);
+  const [logs, first, profile, weekLogs] = await Promise.all([
     supabase
       .from("weight_logs")
       .select("log_date, weight_lb")
@@ -46,11 +40,11 @@ export async function loadWeightData(supabase: SupabaseClient, userId: string, d
       .maybeSingle(),
     supabase
       .from("profiles")
-      .select(
-        "target_weight_lb, start_weight_lb, weight_pace_lb_week, weight_coach_note, weight_coach_source, weight_coach_key",
-      )
+      .select("target_weight_lb, start_weight_lb, weight_pace_lb_week")
       .eq("id", userId)
       .maybeSingle(),
+    // The whole week, including days after `date`, so the calendar's rings are all there.
+    supabase.from("weight_logs").select("log_date").gte("log_date", week[0]).lte("log_date", week[6]),
   ]);
 
   // Before the new SQL step is run, the new columns don't exist: still show the target.
@@ -63,15 +57,11 @@ export async function loadWeightData(supabase: SupabaseClient, userId: string, d
 
   return {
     logs: (logs.data ?? []).map(toWeighIn),
+    weekLogged: (weekLogs.data ?? []).map((row) => row.log_date as string),
     first: first.data ? toWeighIn(first.data) : null,
     targetSetting: asNumber(row?.target_weight_lb),
     startSetting: asNumber(row?.start_weight_lb),
-    plan: {
-      pace: asNumber(row?.weight_pace_lb_week),
-      note: (row?.weight_coach_note as string | null) ?? null,
-      source: (row?.weight_coach_source as SavedPlan["source"]) ?? null,
-      key: (row?.weight_coach_key as string | null) ?? null,
-    },
+    pace: asNumber(row?.weight_pace_lb_week),
     databaseBehind,
   };
 }

@@ -1,7 +1,6 @@
 // The Weight tab's goal math: where you started, where you are, where you're going,
 // how fast (lb per week), and how many weeks that takes. Every number on screen is
-// worked out here, so it's always exact (the AI only writes the one-line coaching note:
-// lib/ai/weightCoach.ts). Pure functions, no database, so they're easy to test.
+// worked out here, so it's always exact. Pure functions, no database, so they're easy to test.
 
 /** The weekly pace when you haven't chosen one in Settings: 2 lb a week toward your target. */
 export const WEEKLY_PACE_LB = 2;
@@ -108,11 +107,6 @@ export function planSummary(input: {
   const weeks = pace === null ? null : Math.max(1, Math.ceil(remainingLb / pace));
   const goalDate = pace === null ? null : addDays(today, Math.ceil((remainingLb / pace) * 7));
   return { direction, totalLb, doneLb, remainingLb, progress, pace, weeks, goalDate };
-}
-
-/** The numbers a saved coaching note was written for. When any changes, ask the AI again. */
-export function coachKey(start: number, current: number, target: number, pace: number = WEEKLY_PACE_LB): string {
-  return [start, current, target, pace].map((n) => n.toFixed(1)).join("|");
 }
 
 /**

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   clampPace,
-  coachKey,
   goalDirection,
   goalNumbers,
   planSummary,
@@ -122,14 +121,6 @@ describe("chosenPace", () => {
     expect(chosenPace(null)).toBe(2);
     expect(chosenPace(undefined)).toBe(2);
     expect(chosenPace(0)).toBe(2);
-  });
-});
-
-describe("coachKey", () => {
-  it("changes when any of the three numbers changes", () => {
-    expect(coachKey(200, 190.5, 180)).toBe("200.0|190.5|180.0|2.0");
-    expect(coachKey(200, 190.4, 180)).not.toBe(coachKey(200, 190.5, 180));
-    expect(coachKey(200, 190.5, 180, 1)).toBe("200.0|190.5|180.0|1.0"); // a new pace asks again
   });
 });
 

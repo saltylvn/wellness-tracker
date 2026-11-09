@@ -13,7 +13,8 @@ export type WorkoutStripDay = {
 };
 
 // The week at a glance: day name, date number, and what kind of day it is.
-// An orange ring around the number means you logged a workout or cardio that day.
+// An orange ring around the number means you logged a workout or cardio that day (on the
+// Weight tab, that you weighed in; there the kind is left empty).
 // Days before today are dimmed (logged or not), so the days ahead stand out.
 // Tap a day to see its plan. The selected day is highlighted.
 // "use client" because "today" comes from the phone's clock; the server can't know it.
@@ -21,10 +22,12 @@ export default function WorkoutWeekStrip({
   days,
   selected,
   basePath,
+  doneLabel = "workout logged",
 }: {
   days: WorkoutStripDay[];
   selected: string;
   basePath: string; // the page the days link to, e.g. "/workouts"
+  doneLabel?: string; // read aloud for a day with a ring, e.g. "weighed in" on the Weight tab
 }) {
   // null while the page is first drawn on the server; nothing is dimmed until the phone says what day it is.
   const today = useToday();
@@ -34,7 +37,7 @@ export default function WorkoutWeekStrip({
       {days.map((day) => {
         const isSelected = day.dateKey === selected;
         const isPast = today !== null && day.dateKey < today; // "YYYY-MM-DD" keys sort like dates
-        const label = [formatFullDate(day.dateKey), day.kind ? KIND_NAME[day.kind] : null, day.done ? "workout logged" : null]
+        const label = [formatFullDate(day.dateKey), day.kind ? KIND_NAME[day.kind] : null, day.done ? doneLabel : null]
           .filter(Boolean)
           .join(", ");
         return (
