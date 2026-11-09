@@ -158,7 +158,7 @@ export default function FoodEntryForm({
           disabled={pending}
           className="min-h-12 flex-1 rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
         >
-          {pending ? "Saving…" : entry ? "Save changes" : "Add food"}
+          {pending ? "Saving…" : entry ? "Save changes" : "Log food"}
         </button>
       </div>
     </form>

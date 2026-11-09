@@ -12,10 +12,10 @@ import type { WorkoutDay } from "@/lib/workouts/plan";
 const arrowClass =
   "flex h-11 w-11 items-center justify-center rounded-full text-2xl text-muted active:bg-card";
 
-// The top of the Fitness page: title, your streak (in the same spot as on Weight and
-// Nutrition), "Your week" (toggles for lifting and cardio days, with an "Edit plan" link to
-// the whole week's plan), the week strip with an orange ring on every day you logged a
-// workout or cardio, then your gym check-in barcode (`barcode`).
+// The top of the Fitness page, laid out like Weight and Nutrition: title, your streak, the
+// week strip right under it (an orange ring on every day you logged a workout or cardio),
+// then "Your week" (toggles for lifting and cardio days, with an "Edit plan" link to the
+// whole week's plan), then your gym check-in barcode (`barcode`).
 export default function FitnessHeader({
   date,
   days,
@@ -44,8 +44,6 @@ export default function FitnessHeader({
 
       <StreakBadge doneDates={doneDates} restWeekdays={restWeekdays} />
 
-      <WeekSetup days={days} editPlanHref={weekPlanPath(date)} />
-
       <div className="flex items-center gap-1">
         <Link href={`${basePath}?date=${addDays(date, -7)}`} aria-label="Previous week" className={arrowClass}>
           ‹
@@ -68,6 +66,8 @@ export default function FitnessHeader({
           ›
         </Link>
       </div>
+
+      <WeekSetup days={days} editPlanHref={weekPlanPath(date)} />
 
       {/* The gym check-in barcode, below the calendar. */}
       {barcode}

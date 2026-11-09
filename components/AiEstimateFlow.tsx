@@ -38,7 +38,7 @@ const inputClass = "w-full rounded-xl border border-border bg-background px-4 py
 // One screen for both AI options:
 //   1. you give it a photo or a description
 //   2. the AI estimate comes back inside the normal editable form
-//   3. nothing is saved until you check it and tap "Add food"
+//   3. nothing is saved until you check it and tap "Log food"
 export default function AiEstimateFlow({ mode, date }: Props) {
   const [stage, setStage] = useState<Stage>({ name: "input" });
   const [error, setError] = useState<string | null>(null);
