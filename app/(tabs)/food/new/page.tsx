@@ -27,7 +27,7 @@ export default async function NewFoodPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{prefill ? "Log saved food" : "Add food"}</h1>
+      <h1 className="text-2xl font-bold">{prefill ? "Log saved food" : "Log food"}</h1>
       <FoodEntryForm defaultDate={date} prefill={prefill} hideSaveToggle={Boolean(prefill)} />
     </div>
   );

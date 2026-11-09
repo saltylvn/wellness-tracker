@@ -1,5 +1,6 @@
 "use client";
 
+import { STREAK_CARD, STREAK_PLACEHOLDER } from "@/components/cardStyles";
 import { computeStreak, milestoneMessage, nextMilestone } from "@/lib/streak";
 import { useToday } from "@/components/useToday";
 
@@ -18,14 +19,14 @@ export default function StreakBadge({
   startHint?: string; // shown when you have no streak yet
 }) {
   const today = useToday();
-  if (!today) return <div className="h-[72px]" aria-hidden="true" />; // keeps the layout steady
+  if (!today) return <div className={STREAK_PLACEHOLDER} aria-hidden="true" />; // keeps the layout steady
 
   const { current, longest, doneToday } = computeStreak(doneDates, today, new Set(restWeekdays));
   const celebration = milestoneMessage(current);
   const next = nextMilestone(current);
 
   return (
-    <section aria-label={label} className="rounded-2xl bg-card px-4 py-3">
+    <section aria-label={label} className={STREAK_CARD}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-lg font-bold">
           <span aria-hidden="true">🔥</span>{" "}
@@ -33,7 +34,7 @@ export default function StreakBadge({
         </p>
         <p className="text-sm font-medium text-muted">Best: {longest}</p>
       </div>
-      <p className={`mt-0.5 text-sm ${celebration ? "font-medium text-accent" : "text-muted"}`}>
+      <p className={`mt-0.5 truncate text-sm ${celebration ? "font-medium text-accent" : "text-muted"}`}>
         {celebration ??
           (current === 0
             ? startHint

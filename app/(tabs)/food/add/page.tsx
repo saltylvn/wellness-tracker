@@ -16,7 +16,7 @@ export default async function AddFoodPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Add food</h1>
+        <h1 className="text-2xl font-bold">Log food</h1>
         <p className="text-sm text-muted">for {formatFullDate(date)}</p>
       </div>
 
