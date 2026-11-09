@@ -45,8 +45,8 @@ export default async function WeightPage({
 
   return (
     <div className="space-y-6">
-      {/* Title and streak spaced exactly like the Fitness and Nutrition headers, so the streak
-          card sits in the same place on all three tabs. */}
+      {/* Title, streak and calendar spaced exactly like the Fitness and Nutrition headers, so
+          they sit in the same places on all three tabs. */}
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Weight</h1>
@@ -58,10 +58,10 @@ export default async function WeightPage({
 
         {/* Weeks in a row you lost at least 1 lb, from your weigh-ins. */}
         <WeightStreakBadge logs={data.logs} />
-      </header>
 
-      {/* This week, with an orange ring on each day you weighed in. Tap a day to weigh in for it. */}
-      <WeightWeekStrip date={date} logged={data.weekLogged} />
+        {/* This week, with an orange ring on each day you weighed in. Tap a day to weigh in for it. */}
+        <WeightWeekStrip date={date} logged={data.weekLogged} />
+      </header>
 
       {/* Today's weigh-in first, above your progress and the graph. No key={date} here: on the
           Fitness page that left stale copies on screen. */}
