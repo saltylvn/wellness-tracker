@@ -111,3 +111,20 @@ export function inviteStatus(row: InviteRow, now: Date): InviteStatus {
   const ageMs = now.getTime() - new Date(row.created_at).getTime();
   return ageMs > INVITE_DAYS * 24 * 60 * 60 * 1000 ? { kind: "expired" } : { kind: "waiting" };
 }
+
+/** "Just now", "5 min ago", "3 hr ago", "Yesterday", "4 days ago", "Nov 2" (older); "Never". */
+export function lastLoginLabel(iso: string | null, now: Date): string {
+  if (!iso) return "Never";
+  const then = new Date(iso);
+  const minutes = Math.floor((now.getTime() - then.getTime()) / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const label = `${months[then.getUTCMonth()]} ${then.getUTCDate()}`;
+  return then.getUTCFullYear() === now.getUTCFullYear() ? label : `${label}, ${then.getUTCFullYear()}`;
+}

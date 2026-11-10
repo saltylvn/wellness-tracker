@@ -6,8 +6,9 @@ export const DATABASE_BEHIND_MESSAGE =
 
 // Postgres / PostgREST codes for a missing column or table:
 //   42703 = undefined column, 42P01 = undefined table,
-//   PGRST204 = column not found, PGRST205 = table not found.
-const MISSING_SCHEMA_CODES = ["42703", "42P01", "PGRST204", "PGRST205"];
+//   PGRST204 = column not found, PGRST205 = table not found,
+//   42883 / PGRST202 = function not found.
+const MISSING_SCHEMA_CODES = ["42703", "42P01", "PGRST204", "PGRST205", "42883", "PGRST202"];
 
 export function isMissingSchemaError(error: { code?: string | null } | null | undefined): boolean {
   return Boolean(error?.code && MISSING_SCHEMA_CODES.includes(error.code));

@@ -3,7 +3,7 @@ import { DATABASE_BEHIND_MESSAGE, isCheckViolation, isMissingSchemaError } from 
 
 describe("isMissingSchemaError", () => {
   it("recognizes a missing column or table", () => {
-    for (const code of ["42703", "42P01", "PGRST204", "PGRST205"]) {
+    for (const code of ["42703", "42P01", "PGRST204", "PGRST205", "42883", "PGRST202"]) {
       expect(isMissingSchemaError({ code })).toBe(true);
     }
   });

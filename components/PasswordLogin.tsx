@@ -13,18 +13,20 @@ type Mode = "closed" | "login" | "create";
 
 // The second way in, under "Continue with Google": "Log in with password" opens a username
 // and password form. From there, "Create an account" (for people with an invite code) swaps
-// in the sign-up form. An invite link (/login?invite=CODE) opens that form with the code filled in.
-export default function PasswordLogin({ invite }: { invite: string | null }) {
-  const [mode, setMode] = useState<Mode>(invite ? "create" : "closed");
+// in the sign-up form. For a new person (`newcomer`: they opened an invite link, or Google
+// didn't let them in yet), the button offers "Use a username and password instead" and opens
+// the sign-up form, with their code filled in when the link had one.
+export default function PasswordLogin({ invite, newcomer = false }: { invite: string | null; newcomer?: boolean }) {
+  const [mode, setMode] = useState<Mode>("closed");
 
   if (mode === "closed") {
     return (
       <button
         type="button"
-        onClick={() => setMode("login")}
+        onClick={() => setMode(newcomer ? "create" : "login")}
         className="flex min-h-12 w-full items-center justify-center rounded-full border border-border bg-card px-4 text-base font-semibold active:opacity-80"
       >
-        Log in with password
+        {newcomer ? "Use a username and password instead" : "Log in with password"}
       </button>
     );
   }

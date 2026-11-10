@@ -3,6 +3,7 @@ import {
   inviteSmsHref,
   inviteStatus,
   isFairCodeByte,
+  lastLoginLabel,
   makeInviteCode,
   normalizeInviteCode,
   parsePassword,
@@ -93,5 +94,19 @@ describe("invite codes", () => {
     expect(
       inviteStatus({ ...base, created_at: "2026-11-01T12:00:00Z", used_at: "2026-11-02T00:00:00Z", used_username: "sam" }, now),
     ).toEqual({ kind: "used", by: "sam" });
+  });
+});
+
+describe("lastLoginLabel", () => {
+  const now = new Date("2026-11-10T12:00:00Z");
+  it("reads like a phone would say it", () => {
+    expect(lastLoginLabel(null, now)).toBe("Never");
+    expect(lastLoginLabel("2026-11-10T11:59:40Z", now)).toBe("Just now");
+    expect(lastLoginLabel("2026-11-10T11:55:00Z", now)).toBe("5 min ago");
+    expect(lastLoginLabel("2026-11-10T09:00:00Z", now)).toBe("3 hr ago");
+    expect(lastLoginLabel("2026-11-09T10:00:00Z", now)).toBe("Yesterday");
+    expect(lastLoginLabel("2026-11-06T12:00:00Z", now)).toBe("4 days ago");
+    expect(lastLoginLabel("2026-11-02T12:00:00Z", now)).toBe("Nov 2");
+    expect(lastLoginLabel("2025-12-25T12:00:00Z", now)).toBe("Dec 25, 2025");
   });
 });

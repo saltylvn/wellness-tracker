@@ -16,6 +16,10 @@ export type LoginState = { message: string } | null;
 // approve, Google sends you back to /auth/callback, which finishes the login.
 // Doing this on the server means the login page doesn't download the Supabase library.
 export async function signInWithGoogle() {
+  await startGoogle();
+}
+
+async function startGoogle(): Promise<never> {
   // This app's own address (Next.js only runs server actions sent from this same site).
   const h = await headers();
   const origin = h.get("origin") ?? `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
@@ -27,6 +31,20 @@ export async function signInWithGoogle() {
   });
   if (error || !data.url) redirect("/login?error=auth");
   redirect(data.url);
+}
+
+// A new person's first "Continue with Google", with their invite code. Google can't carry
+// the code to the database, so we "arm" it first (the database checks it and holds it for
+// 10 minutes); when Google creates the new account, the database uses that armed code.
+export async function signInWithGoogleInvite(formData: FormData) {
+  const code = normalizeInviteCode(formData.get("invite"));
+  if (!code) redirect("/login?error=badinvite");
+
+  const supabase = await createClient();
+  const { data: armed, error } = await supabase.rpc("arm_invite_code", { p_code: code });
+  if (error) redirect(isMissingSchemaError(error) ? "/login?error=setup" : "/login?error=auth");
+  if (!armed) redirect("/login?error=badinvite");
+  await startGoogle();
 }
 
 // "Try the demo": signs in to the shared demo account on the server (its password is
