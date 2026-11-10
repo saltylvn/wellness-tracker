@@ -58,13 +58,14 @@ export default function WeightProgress({
         >
           <div className="h-full rounded-full bg-accent" style={{ width: `${percent}%` }} />
         </div>
-        <p className="flex justify-between text-xs text-muted tabular-nums">
+        {/* How far you've come, in bold black so it's easy to read at a glance. */}
+        <p className="flex items-baseline justify-between text-sm font-bold text-foreground tabular-nums">
           <span>
             {plan.doneLb >= 0
               ? `${formatWeightLb(plan.doneLb)} of ${formatWeightLb(plan.totalLb)} lb ${verb}`
               : `${formatWeightLb(-plan.doneLb)} lb past your start`}
           </span>
-          <span className="font-semibold text-foreground">{percent}%</span>
+          <span>{percent}%</span>
         </p>
       </div>
 

@@ -84,6 +84,28 @@ export type PlanSummary = {
 };
 
 /** Everything the progress card shows, from four numbers and today's date. */
+/**
+ * What the weigh-in chart covers: from your first weigh-in (your start) to today across,
+ * and from your highest to your lowest weigh-in up and down (with a little room). The
+ * target isn't part of the scale, so the line uses the whole chart; the target line shows
+ * only when it fits in that range.
+ */
+export function chartRange(
+  logs: WeighIn[],
+  today: string,
+): { firstDate: string; lastDate: string; low: number; high: number } | null {
+  if (logs.length === 0) return null;
+  const firstDate = logs[0].date;
+  const latestDate = logs[logs.length - 1].date;
+  let lastDate = latestDate > today ? latestDate : today;
+  if (daysBetween(firstDate, lastDate) < 7) lastDate = addDays(firstDate, 7); // never squeeze to a dot
+  const pounds = logs.map((l) => l.pounds);
+  let low = Math.floor(Math.min(...pounds) - 1);
+  let high = Math.ceil(Math.max(...pounds) + 1);
+  if (high - low < 6) [low, high] = [low - 2, high + 2];
+  return { firstDate, lastDate, low, high };
+}
+
 export function planSummary(input: {
   start: number;
   current: number;

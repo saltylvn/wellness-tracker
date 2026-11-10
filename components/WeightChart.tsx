@@ -2,13 +2,14 @@
 
 import { useId, useState } from "react";
 import { addDays, daysBetween, formatDayNumber, formatShortMonth } from "@/lib/dates";
+import { chartRange } from "@/lib/weightPlan";
 import { formatWeightLb } from "@/lib/weight";
 import type { WeighIn } from "@/lib/weightPlan";
 
 // A line chart of your weigh-ins (solid orange, with a soft orange fill under it and a small
-// dot on each weigh-in), your target (dashed gray line), and, when there's a pace, where
-// you'll be heading (dashed orange, from your latest weigh-in to the target on the goal
-// date). Your latest weight is labeled on the chart. Touch or drag across it to see each weigh-in.
+// dot on each weigh-in), from your first weigh-in (your start) to today, scaled to your
+// weights (chartRange), plus your target as a dashed gray line when it fits in that range.
+// Your latest weight is labeled on the chart. Touch or drag across it to see each weigh-in.
 
 const W = 340; // drawing size; the SVG scales to the card's width
 const H = 140; // the weigh-in card sits above the chart now, so it has room to be taller
@@ -20,28 +21,21 @@ const shortDate = (key: string) => `${formatShortMonth(key)} ${formatDayNumber(k
 export default function WeightChart({
   logs,
   target,
-  goalDate,
+  today,
 }: {
-  logs: WeighIn[]; // oldest first
+  logs: WeighIn[]; // oldest first, from your first weigh-in
   target: number | null;
-  goalDate: string | null; // when the projection reaches the target
+  today: string; // the chart runs up to this day
 }) {
   const [active, setActive] = useState<number | null>(null); // index of the weigh-in being touched
   const fillId = useId(); // a unique id for the fill's gradient (two charts on a page can't share one)
 
-  if (logs.length === 0) return null;
+  const range = chartRange(logs, today);
+  if (!range) return null;
   const latest = logs.at(-1)!;
-  const projection = target !== null && goalDate ? { from: latest, to: { date: goalDate, pounds: target } } : null;
-
-  // The ranges the chart covers: dates across, pounds up.
-  const firstDate = logs[0].date;
-  let lastDate = projection?.to.date ?? latest.date;
-  if (daysBetween(firstDate, lastDate) < 7) lastDate = addDays(firstDate, 7); // never squeeze to a dot
+  const { firstDate, lastDate, low, high } = range;
   const span = daysBetween(firstDate, lastDate);
-  const pounds = [...logs.map((l) => l.pounds), ...(target !== null ? [target] : [])];
-  let low = Math.floor(Math.min(...pounds) - 2);
-  let high = Math.ceil(Math.max(...pounds) + 2);
-  if (high - low < 6) [low, high] = [low - 2, high + 2];
+  const showTarget = target !== null && target >= low && target <= high;
 
   const x = (date: string) => PAD.left + (daysBetween(firstDate, date) / span) * (W - PAD.left - PAD.right);
   const y = (lb: number) => PAD.top + ((high - lb) / (high - low)) * (H - PAD.top - PAD.bottom);
@@ -121,7 +115,7 @@ export default function WeightChart({
           {shortDate(lastDate)}
         </text>
 
-        {target !== null && (
+        {showTarget && target !== null && (
           <g>
             <line
               x1={PAD.left}
@@ -136,31 +130,6 @@ export default function WeightChart({
               Target {formatWeightLb(target)}
             </text>
           </g>
-        )}
-
-        {projection && (
-          <line
-            x1={x(projection.from.date)}
-            y1={y(projection.from.pounds)}
-            x2={x(projection.to.date)}
-            y2={y(projection.to.pounds)}
-            stroke="var(--accent)"
-            strokeOpacity={0.6}
-            strokeWidth={2}
-            strokeDasharray="5 5"
-            strokeLinecap="round"
-          />
-        )}
-        {projection && (
-          // The goal: a ring where the projection meets the target.
-          <circle
-            cx={x(projection.to.date)}
-            cy={y(projection.to.pounds)}
-            r={4}
-            fill="var(--card)"
-            stroke="var(--accent)"
-            strokeWidth={2}
-          />
         )}
 
         <path d={area} fill={`url(#${fillId})`} />

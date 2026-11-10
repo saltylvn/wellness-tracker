@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  chartRange,
   clampPace,
   goalDirection,
   goalNumbers,
@@ -139,5 +140,26 @@ describe("goalNumbers", () => {
   it("is null until there's a target and a weigh-in", () => {
     expect(goalNumbers({ logs, first, startSetting: null, targetSetting: null })).toBeNull();
     expect(goalNumbers({ logs: [], first: null, startSetting: 200, targetSetting: 180 })).toBeNull();
+  });
+});
+
+describe("chartRange", () => {
+  it("runs from your first weigh-in to today, scaled to your weigh-ins", () => {
+    const logs = [
+      { date: "2026-08-04", pounds: 231.4 },
+      { date: "2026-09-15", pounds: 222 },
+      { date: "2026-11-08", pounds: 214.6 },
+    ];
+    expect(chartRange(logs, "2026-11-10")).toEqual({ firstDate: "2026-08-04", lastDate: "2026-11-10", low: 213, high: 233 });
+  });
+
+  it("keeps at least a week and 6 lb of room, and is empty with no weigh-ins", () => {
+    expect(chartRange([{ date: "2026-11-10", pounds: 200 }], "2026-11-10")).toEqual({
+      firstDate: "2026-11-10",
+      lastDate: "2026-11-17",
+      low: 197,
+      high: 203,
+    });
+    expect(chartRange([], "2026-11-10")).toBeNull();
   });
 });
