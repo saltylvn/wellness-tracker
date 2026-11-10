@@ -40,7 +40,7 @@ export default async function WeightPage({
 
   const chart =
     data.logs.length > 0 ? (
-      <WeightChart logs={data.logs} target={data.targetSetting} goalDate={plan?.goalDate ?? null} />
+      <WeightChart logs={data.logs} target={data.targetSetting} today={date} />
     ) : null;
 
   return (
