@@ -69,17 +69,12 @@ export default function WeightProgress({
         </p>
       </div>
 
-      {/* The big number: how much you've lost so far (start to your latest weigh-in). */}
+      {/* The big number: how much you're down since your start ("12.1 lb down"; "up" if above it). */}
       {change && (
-        <div className="pt-2 text-center">
-          <p className="text-4xl font-extrabold leading-none tracking-tight text-accent tabular-nums">
-            {formatWeightLb(change.lb)}
-            <span className="ml-1 text-xl font-bold">lb</span>
-          </p>
-          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-muted">
-            {change.kind} so far
-          </p>
-        </div>
+        <p className="pt-2 text-center text-4xl font-extrabold leading-none tracking-tight text-accent tabular-nums">
+          {formatWeightLb(change.lb)}
+          <span className="ml-1.5 text-xl font-bold">lb {change.kind === "lost" ? "down" : "up"}</span>
+        </p>
       )}
 
       {chart}
