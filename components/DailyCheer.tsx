@@ -1,68 +1,111 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getLocalDateKey } from "@/lib/dates";
 import { CHEER_MESSAGE, CHEER_STORAGE_KEY, shouldCheer } from "@/lib/dailyCheer";
 
-const SHOW_MS = 3500; // how long the banner stays before sliding away
+const HOLD_MS = 1800; // how long the orange page stays before flying into the streak flame
+const FLY_MS = 650;
 
-// "Way to get after it!": slides down from the top of the screen the first time you open
-// the app each day (by your phone's date), then slides away after a few seconds; tap it to
-// close it sooner. The day it was last shown is remembered on this phone (localStorage), so
-// it doesn't come back when you switch tabs or reopen the app later that day.
+// "Way to get after it!": the first time you open the app each day (by your phone's date),
+// the whole screen turns orange with a big 🔥 and the message. After a moment (or a tap)
+// it shrinks away into the 🔥 on the streak card (`data-streak-flame`), which gives a
+// little bounce as it "lands". On a page without a streak card it shrinks toward the top.
+// The day it was last shown is remembered on this phone (localStorage), so switching tabs
+// or reopening the app later that day doesn't show it again.
 export default function DailyCheer() {
-  const [phase, setPhase] = useState<"hidden" | "in" | "out">("hidden");
+  const [phase, setPhase] = useState<"hidden" | "show" | "fly">("hidden");
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const flameRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
 
+  // First visit of the day? Then show it (under the launch splash, which fades to reveal it).
   useEffect(() => {
     const today = getLocalDateKey();
     let lastShown: string | null;
     try {
       lastShown = localStorage.getItem(CHEER_STORAGE_KEY);
     } catch {
-      return; // storage blocked (private browsing): skip the banner rather than show it every time
+      return; // storage blocked (private browsing): skip it rather than show it every time
     }
     if (!shouldCheer(lastShown, today)) return;
 
-    // Wait for the launch splash to finish (about a second) when it's showing. The day is
-    // saved only when the banner actually appears.
-    const delay = document.documentElement.classList.contains("no-splash") ? 300 : 1400;
+    const splashShowing = !document.documentElement.classList.contains("no-splash");
     const showTimer = setTimeout(() => {
       try {
-        localStorage.setItem(CHEER_STORAGE_KEY, today);
+        localStorage.setItem(CHEER_STORAGE_KEY, today); // saved only once it really shows
       } catch {
         // can't remember it: it may show again later today, which is harmless
       }
-      setPhase("in");
-    }, delay);
-    const hideTimer = setTimeout(() => setPhase("out"), delay + SHOW_MS);
+      setPhase("show");
+    }, 0);
+    const flyTimer = setTimeout(() => setPhase("fly"), (splashShowing ? 1450 : 0) + HOLD_MS);
     return () => {
       clearTimeout(showTimer);
-      clearTimeout(hideTimer);
+      clearTimeout(flyTimer);
     };
   }, []);
 
-  // Once it starts sliding away, remove it after the slide (a timer, so it also goes away
-  // when the phone is set to reduce motion and there's no slide).
+  // Shrink into the streak card's flame, then go away.
   useEffect(() => {
-    if (phase !== "out") return;
-    const timer = setTimeout(() => setPhase("hidden"), 320);
-    return () => clearTimeout(timer);
+    if (phase !== "fly") return;
+    const overlay = overlayRef.current;
+    const flame = flameRef.current;
+    const done = setTimeout(() => setPhase("hidden"), FLY_MS + 50);
+    if (!overlay || !flame) return () => clearTimeout(done);
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const target = document.querySelector<HTMLElement>("[data-streak-flame]");
+    const targetRect = target?.getBoundingClientRect();
+    const tx = targetRect ? targetRect.left + targetRect.width / 2 : window.innerWidth / 2;
+    const ty = targetRect ? targetRect.top + targetRect.height / 2 : 0;
+
+    const timing = { duration: reduceMotion ? 1 : FLY_MS, easing: "cubic-bezier(0.6, 0, 0.3, 1)", fill: "forwards" as const };
+    overlay.animate(
+      [{ clipPath: `circle(150% at ${tx}px ${ty}px)` }, { clipPath: `circle(0px at ${tx}px ${ty}px)` }],
+      timing,
+    );
+    const flameRect = flame.getBoundingClientRect();
+    const dx = tx - (flameRect.left + flameRect.width / 2);
+    const dy = ty - (flameRect.top + flameRect.height / 2);
+    const scale = targetRect ? targetRect.height / flameRect.height : 0.2;
+    flame.animate(
+      [{ transform: "translate(0, 0) scale(1)" }, { transform: `translate(${dx}px, ${dy}px) scale(${scale})` }],
+      timing,
+    );
+    textRef.current?.animate([{ opacity: 1 }, { opacity: 0 }], { ...timing, duration: reduceMotion ? 1 : 250 });
+
+    // The streak flame "catches" it with a small bounce.
+    let bounce: ReturnType<typeof setTimeout> | undefined;
+    if (target && !reduceMotion) {
+      bounce = setTimeout(() => {
+        target.animate([{ transform: "scale(1)" }, { transform: "scale(1.5)" }, { transform: "scale(1)" }], {
+          duration: 400,
+          easing: "ease-out",
+        });
+      }, FLY_MS - 80);
+    }
+    return () => {
+      clearTimeout(done);
+      if (bounce) clearTimeout(bounce);
+    };
   }, [phase]);
 
   if (phase === "hidden") return null;
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
-      <button
-        type="button"
-        role="status"
-        onClick={() => setPhase("out")}
-        className={`pointer-events-auto flex min-h-12 w-full max-w-md items-center justify-center gap-2 rounded-2xl bg-accent px-4 text-base font-semibold text-on-accent shadow-lg ${
-          phase === "in" ? "cheer-in" : "cheer-out"
-        }`}
-      >
-        <span aria-hidden="true">🔥</span>
+    <div
+      ref={overlayRef}
+      role="status"
+      onClick={() => setPhase("fly")}
+      className="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-5 bg-accent px-8 text-center text-on-accent"
+    >
+      {/* The flame is a span (not the text), so it can fly on its own into the streak card. */}
+      <span ref={flameRef} aria-hidden="true" className="cheer-flame inline-block text-8xl leading-none">
+        🔥
+      </span>
+      <p ref={textRef} className="cheer-text text-3xl font-extrabold tracking-tight">
         {CHEER_MESSAGE}
-      </button>
+      </p>
     </div>
   );
 }
