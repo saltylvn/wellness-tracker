@@ -23,7 +23,14 @@ export async function saveGoals(_previous: SaveResult, formData: FormData): Prom
   if (!userId) redirect("/login");
 
   // Row Level Security in the database also enforces "only your own row".
-  const { error } = await supabase.from("profiles").update(parsed.values).eq("id", userId);
+  let { error } = await supabase.from("profiles").update(parsed.values).eq("id", userId);
+  // Before the starting-date SQL step, the column doesn't exist: still save the rest when no
+  // date was picked (picking one needs the SQL step, and says so).
+  if (isMissingSchemaError(error) && parsed.values.start_date === null) {
+    const { start_date: _skip, ...rest } = parsed.values;
+    void _skip;
+    ({ error } = await supabase.from("profiles").update(rest).eq("id", userId));
+  }
 
   if (error) {
     return {

@@ -85,6 +85,22 @@ export type PlanSummary = {
 
 /** Everything the progress card shows, from four numbers and today's date. */
 /**
+ * Your weigh-ins from your starting date on (all of them when there's no starting date).
+ * When you've set a starting weight and date, the chart begins with that point, so it
+ * starts exactly where your goal did.
+ */
+export function weighInsSinceStart(
+  logs: WeighIn[],
+  startDate: string | null,
+  startWeight: number | null,
+): WeighIn[] {
+  if (!startDate) return logs;
+  const since = logs.filter((l) => l.date >= startDate);
+  if (startWeight !== null && since[0]?.date !== startDate) return [{ date: startDate, pounds: startWeight }, ...since];
+  return since;
+}
+
+/**
  * What the weigh-in chart covers: from your first weigh-in (your start) to today across,
  * and from your highest to your lowest weigh-in up and down (with a little room). The
  * target isn't part of the scale, so the line uses the whole chart; the target line shows

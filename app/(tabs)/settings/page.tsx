@@ -79,6 +79,7 @@ export default async function SettingsPage() {
     weight_pace_lb_week: paceRow?.weight_pace_lb_week == null ? null : Number(paceRow.weight_pace_lb_week),
     weekly_walk_miles:
       fullProfile?.weekly_walk_miles == null ? null : Number(fullProfile.weekly_walk_miles),
+    start_date: typeof fullProfile?.start_date === "string" ? fullProfile.start_date : null,
     daily_sunshine_minutes:
       fullProfile?.daily_sunshine_minutes == null ? null : Number(fullProfile.daily_sunshine_minutes),
   } as unknown as Goals;
