@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import BackButton from "@/components/BackButton";
 import GoalsForm from "@/components/GoalsForm";
+import InviteCard from "@/components/InviteCard";
+import PasswordForm from "@/components/PasswordForm";
+import { usernameFromEmail, type InviteRow } from "@/lib/accounts";
 import PriorityLiftsForm from "@/components/PriorityLiftsForm";
 import { priorityChoices, priorityNames } from "@/lib/priorityLifts";
 import type { Goals } from "@/lib/goals";
@@ -30,6 +33,20 @@ export default async function SettingsPage() {
       supabase.from("workout_exercises").select("name"),
     ]);
   const picked = priorityNames(fullProfile);
+
+  // Your account: your username (for username + password accounts) and whether you're the
+  // admin. Each read fails quietly (as "not admin", no invites) before the SQL step is run.
+  const [{ data: claimsData }, { data: adminRow }, { data: inviteRows }] = await Promise.all([
+    supabase.auth.getClaims(),
+    supabase.from("app_admins").select("user_id").eq("user_id", userId ?? "").maybeSingle(),
+    supabase
+      .from("invite_codes")
+      .select("code, created_at, used_at, used_username")
+      .order("created_at", { ascending: false })
+      .limit(10),
+  ]);
+  const username = usernameFromEmail(claimsData?.claims.email);
+  const isAdmin = Boolean(adminRow);
   const choices = priorityChoices(
     (exerciseRows ?? []).map((row) => row.name as string),
     picked,
@@ -62,6 +79,18 @@ export default async function SettingsPage() {
         <h1 className="text-2xl font-bold">Settings</h1>
       </div>
 
+      <section className="flex min-h-14 items-center justify-between gap-3 rounded-2xl bg-card px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-xs text-muted">Signed in as</p>
+          <p className="truncate text-base font-semibold">{username ?? "your Google account"}</p>
+        </div>
+        {isAdmin && (
+          <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-on-accent">
+            Admin
+          </span>
+        )}
+      </section>
+
       <section className="rounded-2xl bg-card p-4">
         <GoalsForm goals={goals} />
       </section>
@@ -69,6 +98,18 @@ export default async function SettingsPage() {
       <section className="rounded-2xl bg-card p-4">
         <PriorityLiftsForm picked={picked} choices={choices} />
       </section>
+
+      {username && (
+        <section className="rounded-2xl bg-card p-4">
+          <PasswordForm username={username} />
+        </section>
+      )}
+
+      {isAdmin && (
+        <section className="rounded-2xl bg-card p-4">
+          <InviteCard invites={(inviteRows ?? []) as InviteRow[]} />
+        </section>
+      )}
 
       <form action={signOut}>
         <button

@@ -7,6 +7,7 @@ import { parseGoalsForm } from "@/lib/goals";
 import { parsePriorityLifts } from "@/lib/priorityLifts";
 import { createClient } from "@/lib/supabase/server";
 import { currentUserId } from "@/lib/actionResult";
+import { isFairCodeByte, makeInviteCode, parsePassword } from "@/lib/accounts";
 
 // "use server" = these functions run on the server when a form is submitted.
 // Never trust what the browser sends: we check everything again here.
@@ -62,4 +63,64 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+/** Settings, "Password": set or change the password you log in with (with your username). */
+export async function savePassword(_previous: SaveResult, formData: FormData): Promise<SaveResult> {
+  const parsed = parsePassword(formData.get("password"));
+  if (!parsed.ok) return { ok: false, message: parsed.message };
+  if (formData.get("password_again") !== parsed.value) {
+    return { ok: false, message: "The two passwords don't match." };
+  }
+
+  const supabase = await createClient();
+  const userId = await currentUserId(supabase);
+  if (!userId) redirect("/login");
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.value });
+  if (error) {
+    if (/different from the old/i.test(error.message)) return { ok: false, message: "That's already your password." };
+    if (/password/i.test(error.message)) return { ok: false, message: error.message };
+    return { ok: false, message: "Couldn't save. Please try again." };
+  }
+  return { ok: true, message: "Password saved. Use it with your username to log in." };
+}
+
+/** 8 evenly random invite characters (bytes that would favor some characters are skipped). */
+function randomInviteCode(): string {
+  const fair: number[] = [];
+  while (fair.length < 8) {
+    for (const byte of crypto.getRandomValues(new Uint8Array(16))) {
+      if (isFairCodeByte(byte) && fair.length < 8) fair.push(byte);
+    }
+  }
+  return makeInviteCode(Uint8Array.from(fair));
+}
+
+export type InviteResult = { ok: true; code: string } | { ok: false; message: string };
+
+/**
+ * Settings, "Invite someone" (the admin only): makes a fresh invite code. The page then
+ * opens Messages with it written out. The database only lets the admin save one
+ * (see the username_invites migration), so this can't be used by anyone else.
+ */
+export async function createInvite(): Promise<InviteResult> {
+  const supabase = await createClient();
+  const userId = await currentUserId(supabase);
+  if (!userId) redirect("/login");
+
+  const code = randomInviteCode();
+  const { error } = await supabase.from("invite_codes").insert({ code, created_by: userId });
+  if (error) {
+    return {
+      ok: false,
+      message: isMissingSchemaError(error)
+        ? DATABASE_BEHIND_MESSAGE
+        : error.code === "42501"
+          ? "Only the admin can send invites."
+          : "Couldn't make an invite. Please try again.",
+    };
+  }
+  revalidatePath("/settings");
+  return { ok: true, code };
 }

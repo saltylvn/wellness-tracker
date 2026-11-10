@@ -1,14 +1,18 @@
 import DemoSignInButton from "@/components/DemoSignInButton";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import PasswordLogin from "@/components/PasswordLogin";
+import { normalizeInviteCode } from "@/lib/accounts";
 import { demoConfigured } from "@/lib/demo";
 import { MAX_USERS } from "@/lib/authErrors";
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; invite?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, invite } = await searchParams;
+  // An invite link from a text message: /login?invite=CODE opens "Create an account".
+  const inviteCode = normalizeInviteCode(invite);
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-8 px-6 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
@@ -18,10 +22,10 @@ export default async function LoginPage({
         <p className="pt-3 text-muted">Calories, macros, workouts, and cardio in one place.</p>
       </div>
 
-      {error === "full" ? (
+      {error === "invite" || error === "full" ? (
         <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-muted">
-          DEVELOP is a personal project limited to {MAX_USERS} accounts, and it&apos;s full. New
-          sign-ups are closed.
+          DEVELOP is invite-only (a personal project of up to {MAX_USERS} accounts). If you were
+          texted an invite, tap its link, or choose Log in with password, then Create an account.
         </p>
       ) : error === "demo" ? (
         <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-danger">
@@ -35,6 +39,7 @@ export default async function LoginPage({
 
       <div className="space-y-3">
         <GoogleSignInButton />
+        <PasswordLogin invite={inviteCode} />
         {demoConfigured(process.env) && <DemoSignInButton />}
       </div>
     </main>
