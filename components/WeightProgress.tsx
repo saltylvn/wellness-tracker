@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { formatDayNumber, formatShortMonth } from "@/lib/dates";
 import { formatWeightLb } from "@/lib/weight";
-import type { PlanSummary } from "@/lib/weightPlan";
+import { changeSoFar, type PlanSummary } from "@/lib/weightPlan";
 
 const shortDate = (key: string) => `${formatShortMonth(key)} ${formatDayNumber(key)}`;
 const signed = (n: number) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(1)}`;
@@ -27,6 +27,7 @@ export default function WeightProgress({
 }) {
   const verb = plan.direction === "gain" || (plan.direction === "done" && target > start) ? "gained" : "lost";
   const percent = Math.round(plan.progress * 100);
+  const change = changeSoFar(start, current);
 
   return (
     <section aria-label="Goal progress" className="space-y-2 rounded-2xl bg-card p-4 pb-1">
@@ -67,6 +68,19 @@ export default function WeightProgress({
           <span className="font-semibold text-foreground">{percent}%</span>
         </p>
       </div>
+
+      {/* The big number: how much you've lost so far (start to your latest weigh-in). */}
+      {change && (
+        <div className="pt-2 text-center">
+          <p className="text-4xl font-extrabold leading-none tracking-tight text-accent tabular-nums">
+            {formatWeightLb(change.lb)}
+            <span className="ml-1 text-xl font-bold">lb</span>
+          </p>
+          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-muted">
+            {change.kind} so far
+          </p>
+        </div>
+      )}
 
       {chart}
 

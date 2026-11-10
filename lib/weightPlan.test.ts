@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  changeSoFar,
   clampPace,
   goalDirection,
   goalNumbers,
@@ -139,5 +140,13 @@ describe("goalNumbers", () => {
   it("is null until there's a target and a weigh-in", () => {
     expect(goalNumbers({ logs, first, startSetting: null, targetSetting: null })).toBeNull();
     expect(goalNumbers({ logs: [], first: null, startSetting: 200, targetSetting: 180 })).toBeNull();
+  });
+});
+
+describe("changeSoFar", () => {
+  it("says how much you've lost or gained since your start", () => {
+    expect(changeSoFar(220, 207.6)).toEqual({ kind: "lost", lb: 12.4 });
+    expect(changeSoFar(180, 182.3)).toEqual({ kind: "gained", lb: 2.3 });
+    expect(changeSoFar(200, 200.02)).toBeNull();
   });
 });
