@@ -10,27 +10,7 @@ import {
   loadPriorityNames,
   loadSunshine,
 } from "./queries";
-
-// A stand-in for the database: each from("table") call hands back the next prepared
-// answer for that table (in the order the page asks), and any query-builder call chains on.
-function fakeSupabase(answers: Record<string, unknown[]>) {
-  const queues = Object.fromEntries(Object.entries(answers).map(([table, rows]) => [table, [...rows]]));
-  return {
-    from(table: string) {
-      const data = queues[table]?.shift() ?? null;
-      const chain: unknown = new Proxy(
-        {},
-        {
-          get: (_target, prop) =>
-            prop === "then"
-              ? (resolve: (value: unknown) => unknown) => Promise.resolve({ data, error: null }).then(resolve)
-              : () => chain,
-        },
-      );
-      return chain;
-    },
-  } as never;
-}
+import { fakeSupabase } from "../testing/fakeSupabase";
 
 describe("loadSunshine", () => {
   it("returns today's minutes, the last earlier day, and the daily target", async () => {
