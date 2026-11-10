@@ -87,7 +87,18 @@ export default async function SettingsPage() {
     <div className="space-y-6">
       <div>
         <BackButton fallback="/workouts" />
-        <h1 className="text-2xl font-bold">Settings</h1>
+        {/* Title on the left, a small orange "Sign out" on the right (like "Done" on Edit plan). */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Settings</h1>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="flex min-h-11 items-center px-1 text-base font-semibold text-accent active:opacity-70"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
 
       <section className="flex min-h-14 items-center justify-between gap-3 rounded-2xl bg-card px-4 py-3">
@@ -128,14 +139,6 @@ export default async function SettingsPage() {
         </section>
       )}
 
-      <form action={signOut}>
-        <button
-          type="submit"
-          className="min-h-12 w-full rounded-xl border border-border text-base font-medium active:opacity-80"
-        >
-          Sign out
-        </button>
-      </form>
     </div>
   );
 }
