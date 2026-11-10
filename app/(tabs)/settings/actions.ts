@@ -124,3 +124,33 @@ export async function createInvite(): Promise<InviteResult> {
   revalidatePath("/settings");
   return { ok: true, code };
 }
+
+/**
+ * Settings, "Invite someone" (the admin only): revokes an invite nobody has used yet, so its
+ * code stops working at once. (Deletes it; the database only lets the admin delete their own
+ * unused invites, see 20261106000000_revoke_invites.sql. A used invite stays: that person
+ * already has their account.)
+ */
+export async function revokeInvite(code: string): Promise<{ ok: true } | { ok: false; message: string }> {
+  const supabase = await createClient();
+  const userId = await currentUserId(supabase);
+  if (!userId) redirect("/login");
+
+  const { data, error } = await supabase
+    .from("invite_codes")
+    .delete()
+    .eq("code", String(code))
+    .is("used_at", null)
+    .select("code");
+  if (error) return { ok: false, message: "Couldn't revoke it. Please try again." };
+  // Nothing deleted: it was just used, or the database step for revoking isn't run yet.
+  if (!data || data.length === 0) {
+    revalidatePath("/settings");
+    return {
+      ok: false,
+      message: "Couldn't revoke it: it may have just been used. If not, run the latest SQL in Supabase, then try again.",
+    };
+  }
+  revalidatePath("/settings");
+  return { ok: true };
+}

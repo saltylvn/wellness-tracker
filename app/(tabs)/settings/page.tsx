@@ -3,6 +3,8 @@ import BackButton from "@/components/BackButton";
 import GoalsForm from "@/components/GoalsForm";
 import InviteCard from "@/components/InviteCard";
 import PasswordForm from "@/components/PasswordForm";
+import UsersCard, { type AppUser } from "@/components/UsersCard";
+import { DATABASE_BEHIND_MESSAGE, isMissingSchemaError } from "@/lib/dbErrors";
 import { usernameFromEmail, type InviteRow } from "@/lib/accounts";
 import PriorityLiftsForm from "@/components/PriorityLiftsForm";
 import { priorityChoices, priorityNames } from "@/lib/priorityLifts";
@@ -47,6 +49,15 @@ export default async function SettingsPage() {
   ]);
   const username = usernameFromEmail(claimsData?.claims.email);
   const isAdmin = Boolean(adminRow);
+
+  // The admin's "Users" list (everyone with an account and their last login).
+  const usersResult = isAdmin ? await supabase.rpc("admin_list_users") : null;
+  const users = (usersResult?.data ?? []) as AppUser[];
+  const usersError = usersResult?.error
+    ? isMissingSchemaError(usersResult.error)
+      ? DATABASE_BEHIND_MESSAGE
+      : "Couldn't load the list of users."
+    : null;
   const choices = priorityChoices(
     (exerciseRows ?? []).map((row) => row.name as string),
     picked,
@@ -108,6 +119,12 @@ export default async function SettingsPage() {
       {isAdmin && (
         <section className="rounded-2xl bg-card p-4">
           <InviteCard invites={(inviteRows ?? []) as InviteRow[]} />
+        </section>
+      )}
+
+      {isAdmin && (
+        <section className="rounded-2xl bg-card p-4">
+          <UsersCard users={users} error={usersError} />
         </section>
       )}
 
