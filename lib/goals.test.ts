@@ -26,6 +26,7 @@ describe("parseGoalsForm", () => {
         weekly_walk_miles: null,
         target_weight_lb: null,
         start_weight_lb: null,
+        start_date: null,
         weight_pace_lb_week: null,
         daily_sunshine_minutes: null,
       },
@@ -49,6 +50,7 @@ describe("parseGoalsForm", () => {
         weekly_walk_miles: null,
         target_weight_lb: null,
         start_weight_lb: null,
+        start_date: null,
         weight_pace_lb_week: null,
         daily_sunshine_minutes: null,
       },
@@ -68,6 +70,7 @@ describe("parseGoalsForm", () => {
         weekly_walk_miles: null,
       target_weight_lb: null,
       start_weight_lb: null,
+      start_date: null,
         weight_pace_lb_week: null,
         daily_sunshine_minutes: null,
       });
@@ -122,6 +125,7 @@ describe("weekly cardio goals", () => {
         weekly_walk_miles: null,
       target_weight_lb: null,
       start_weight_lb: null,
+      start_date: null,
         weight_pace_lb_week: null,
       daily_sunshine_minutes: null,
     });
@@ -199,5 +203,15 @@ describe("target weight", () => {
     for (const bad of ["0", "241", "sunny"]) {
       expect(parseGoalsForm(form({ ...base, daily_sunshine_minutes: bad })).ok).toBe(false);
     }
+  });
+
+  it("takes a starting date from the date picker, or none when blank", () => {
+    const base = { calorie_goal: "2000" };
+    expect(parseGoalsForm(form({ ...base, start_date: "2026-08-04" }))).toMatchObject({
+      ok: true,
+      values: { start_date: "2026-08-04" },
+    });
+    expect(parseGoalsForm(form({ ...base, start_date: "" }))).toMatchObject({ ok: true, values: { start_date: null } });
+    expect(parseGoalsForm(form({ ...base, start_date: "Aug 4" })).ok).toBe(false);
   });
 });

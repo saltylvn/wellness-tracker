@@ -12,6 +12,7 @@ export type WeightData = {
   targetSetting: number | null;
   startSetting: number | null;
   pace: number | null; // your weekly pace from Settings (lb per week), null = the default 2
+  startDate: string | null; // your starting date from Settings; null = your first weigh-in
   databaseBehind: boolean; // true until the weight_plan SQL step has been run
 };
 
@@ -23,7 +24,7 @@ const toWeighIn = (row: { log_date: unknown; weight_lb: unknown }): WeighIn => (
 
 export async function loadWeightData(supabase: SupabaseClient, userId: string, date: string): Promise<WeightData> {
   const week = weekDays(date);
-  const [logs, first, profile, weekLogs] = await Promise.all([
+  const [logs, first, profile, weekLogs, fullProfile] = await Promise.all([
     supabase
       .from("weight_logs")
       .select("log_date, weight_lb")
@@ -42,6 +43,8 @@ export async function loadWeightData(supabase: SupabaseClient, userId: string, d
       .maybeSingle(),
     // The whole week, including days after `date`, so the calendar's rings are all there.
     supabase.from("weight_logs").select("log_date").gte("log_date", week[0]).lte("log_date", week[6]),
+    // The starting date on its own ("*"), so the page still loads before its SQL step.
+    supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
   ]);
 
   // Before the new SQL step is run, the new columns don't exist: still show the target.
@@ -59,6 +62,7 @@ export async function loadWeightData(supabase: SupabaseClient, userId: string, d
     targetSetting: asNumber(row?.target_weight_lb),
     startSetting: asNumber(row?.start_weight_lb),
     pace: asNumber(row?.weight_pace_lb_week),
+    startDate: typeof fullProfile.data?.start_date === "string" ? fullProfile.data.start_date : null,
     databaseBehind,
   };
 }

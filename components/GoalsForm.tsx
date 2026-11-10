@@ -104,53 +104,74 @@ export default function GoalsForm({ goals }: { goals: Goals }) {
         <p className="mt-2 text-xs text-muted">Leave one blank if you don&apos;t want a goal for it.</p>
       </fieldset>
 
-      <fieldset>
+      {/* id: the Weight tab's "Edit goal" link jumps straight here. */}
+      <fieldset id="weight-goal" className="scroll-mt-4">
         <legend className="mb-1 text-sm font-medium text-muted">
           Weight goal <span className="font-normal">(optional, in lb)</span>
         </legend>
+        {/* Starting weight and starting date side by side, then target and weekly pace. */}
         <div className="grid grid-cols-2 gap-3">
-          {(
-            [
-              ["start_weight_lb", "Starting weight", goals.start_weight_lb, "first weigh-in"],
-              ["target_weight_lb", "Target weight", goals.target_weight_lb, "e.g. 175"],
-            ] as const
-          ).map(([name, label, value, placeholder]) => (
-            <div key={name}>
-              <label htmlFor={name} className="mb-1 block text-xs text-muted">
-                {label}
-              </label>
-              <input
-                id={name}
-                name={name}
-                type="text"
-                inputMode="decimal"
-                defaultValue={value ?? ""}
-                placeholder={placeholder}
-                className={inputClass}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="mt-3">
-          <label htmlFor="weight_pace_lb_week" className="mb-1 block text-xs text-muted">
-            Weekly pace
-          </label>
-          <select
-            id="weight_pace_lb_week"
-            name="weight_pace_lb_week"
-            defaultValue={String(chosenPace(goals.weight_pace_lb_week))}
-            className={inputClass}
-          >
-            {PACE_CHOICES.map((pace) => (
-              <option key={pace} value={pace}>
-                {pace} lb per week
-              </option>
-            ))}
-          </select>
+          <div>
+            <label htmlFor="start_weight_lb" className="mb-1 block text-xs text-muted">
+              Starting weight
+            </label>
+            <input
+              id="start_weight_lb"
+              name="start_weight_lb"
+              type="text"
+              inputMode="decimal"
+              defaultValue={goals.start_weight_lb ?? ""}
+              placeholder="first weigh-in"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="start_date" className="mb-1 block text-xs text-muted">
+              Starting date
+            </label>
+            <input
+              id="start_date"
+              name="start_date"
+              type="date"
+              defaultValue={goals.start_date ?? ""}
+              className={`${inputClass} appearance-none`}
+            />
+          </div>
+          <div>
+            <label htmlFor="target_weight_lb" className="mb-1 block text-xs text-muted">
+              Target weight
+            </label>
+            <input
+              id="target_weight_lb"
+              name="target_weight_lb"
+              type="text"
+              inputMode="decimal"
+              defaultValue={goals.target_weight_lb ?? ""}
+              placeholder="e.g. 175"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="weight_pace_lb_week" className="mb-1 block text-xs text-muted">
+              Weekly pace
+            </label>
+            <select
+              id="weight_pace_lb_week"
+              name="weight_pace_lb_week"
+              defaultValue={String(chosenPace(goals.weight_pace_lb_week))}
+              className={inputClass}
+            >
+              {PACE_CHOICES.map((pace) => (
+                <option key={pace} value={pace}>
+                  {pace} lb / week
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <p className="mt-2 text-xs text-muted">
-          Used on the Weight tab for your lb per week, weeks to go and goal date. Leave the starting weight
-          blank to use your first weigh-in. Gaining is capped at 1 lb per week.
+          Used on the Weight tab: your progress and chart start from the starting date. Leave the starting
+          weight or date blank to use your first weigh-in. Gaining is capped at 1 lb per week.
         </p>
       </fieldset>
 

@@ -1,3 +1,4 @@
+import { isValidDateKey } from "./dates";
 import { PACE_CHOICES } from "./weightPlan";
 
 // Goals from the Settings form. The daily calorie goal is required (it drives the
@@ -15,6 +16,7 @@ export type Goals = {
   weekly_walk_miles: number | null;
   target_weight_lb: number | null;
   start_weight_lb: number | null;
+  start_date: string | null; // the day your weight goal started ("YYYY-MM-DD"); null = your first weigh-in
   weight_pace_lb_week: number | null; // your weekly weight pace (one of PACE_CHOICES); null = 2 lb
   daily_sunshine_minutes: number | null; // daily sunshine target; null = none
 };
@@ -105,6 +107,13 @@ export function parseGoalsForm(formData: FormData): GoalsResult {
     return { ok: false, message: "Starting and target weights must be between 70 and 500 lb, or left blank." };
   }
 
+  // The starting date comes from a date picker; blank = start from your first weigh-in.
+  const rawStartDate = formData.get("start_date");
+  const startDate = typeof rawStartDate === "string" && rawStartDate.trim() !== "" ? rawStartDate.trim() : null;
+  if (startDate !== null && !isValidDateKey(startDate)) {
+    return { ok: false, message: "Pick a starting date, or leave it blank." };
+  }
+
   // The weekly pace is picked from a list; anything else is refused.
   const rawPace = formData.get("weight_pace_lb_week");
   const pace = typeof rawPace === "string" && rawPace !== "" ? Number(rawPace) : null;
@@ -129,6 +138,7 @@ export function parseGoalsForm(formData: FormData): GoalsResult {
       weekly_walk_miles: walk,
       target_weight_lb: targetWeight,
       start_weight_lb: startWeight,
+      start_date: startDate,
       weight_pace_lb_week: pace,
       daily_sunshine_minutes: sunshine,
     },

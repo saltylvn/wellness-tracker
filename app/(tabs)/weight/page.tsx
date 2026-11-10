@@ -11,7 +11,7 @@ import WeightWeekStrip from "@/components/WeightWeekStrip";
 import { currentUserId } from "@/lib/actionResult";
 import { DATABASE_BEHIND_MESSAGE } from "@/lib/dbErrors";
 import { isValidDateKey } from "@/lib/dates";
-import { chosenPace, goalNumbers, planSummary, recentTrend } from "@/lib/weightPlan";
+import { chosenPace, goalNumbers, planSummary, recentTrend, weighInsSinceStart } from "@/lib/weightPlan";
 import { loadWeightData } from "@/lib/weightQueries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,7 +31,12 @@ export default async function WeightPage({
   if (!userId) redirect("/login");
 
   const data = await loadWeightData(supabase, userId, date);
-  const numbers = goalNumbers(data);
+  // Your goal's weigh-ins: from your starting date (Settings) on, else all of them.
+  const sinceStart = weighInsSinceStart(data.logs, data.startDate, data.startSetting);
+  const numbers = goalNumbers({
+    ...data,
+    first: data.startDate ? (sinceStart[0] ?? null) : data.first,
+  });
   const latest = data.logs.at(-1) ?? null;
   const trend = recentTrend(data.logs);
 
@@ -39,8 +44,8 @@ export default async function WeightPage({
   const plan = numbers && planSummary({ ...numbers, pace, today: date });
 
   const chart =
-    data.logs.length > 0 ? (
-      <WeightChart logs={data.logs} target={data.targetSetting} today={date} />
+    sinceStart.length > 0 ? (
+      <WeightChart logs={sinceStart} target={data.targetSetting} today={date} />
     ) : null;
 
   return (

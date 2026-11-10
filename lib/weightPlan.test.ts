@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   chartRange,
+  weighInsSinceStart,
   clampPace,
   goalDirection,
   goalNumbers,
@@ -161,5 +162,27 @@ describe("chartRange", () => {
       high: 203,
     });
     expect(chartRange([], "2026-11-10")).toBeNull();
+  });
+});
+
+describe("weighInsSinceStart", () => {
+  const logs = [
+    { date: "2026-07-20", pounds: 235 },
+    { date: "2026-08-04", pounds: 231.4 },
+    { date: "2026-09-15", pounds: 222 },
+  ];
+
+  it("keeps everything without a starting date", () => {
+    expect(weighInsSinceStart(logs, null, null)).toBe(logs);
+  });
+
+  it("drops weigh-ins before the starting date", () => {
+    expect(weighInsSinceStart(logs, "2026-08-01", null)).toEqual(logs.slice(1));
+  });
+
+  it("begins with your starting weight on your starting date", () => {
+    expect(weighInsSinceStart(logs, "2026-08-01", 233)[0]).toEqual({ date: "2026-08-01", pounds: 233 });
+    // A weigh-in on that very day is kept as it is.
+    expect(weighInsSinceStart(logs, "2026-08-04", 233)[0]).toEqual({ date: "2026-08-04", pounds: 231.4 });
   });
 });
