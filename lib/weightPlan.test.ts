@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  chartRange,
+  weighInsSinceStart,
   clampPace,
-  coachKey,
   goalDirection,
   goalNumbers,
   planSummary,
@@ -125,14 +126,6 @@ describe("chosenPace", () => {
   });
 });
 
-describe("coachKey", () => {
-  it("changes when any of the three numbers changes", () => {
-    expect(coachKey(200, 190.5, 180)).toBe("200.0|190.5|180.0|2.0");
-    expect(coachKey(200, 190.4, 180)).not.toBe(coachKey(200, 190.5, 180));
-    expect(coachKey(200, 190.5, 180, 1)).toBe("200.0|190.5|180.0|1.0"); // a new pace asks again
-  });
-});
-
 describe("goalNumbers", () => {
   const first = { date: "2026-09-01", pounds: 205 };
   const logs = [first, { date: "2026-10-01", pounds: 198 }];
@@ -148,5 +141,48 @@ describe("goalNumbers", () => {
   it("is null until there's a target and a weigh-in", () => {
     expect(goalNumbers({ logs, first, startSetting: null, targetSetting: null })).toBeNull();
     expect(goalNumbers({ logs: [], first: null, startSetting: 200, targetSetting: 180 })).toBeNull();
+  });
+});
+
+describe("chartRange", () => {
+  it("runs from your first weigh-in to today, scaled to your weigh-ins", () => {
+    const logs = [
+      { date: "2026-08-04", pounds: 231.4 },
+      { date: "2026-09-15", pounds: 222 },
+      { date: "2026-11-08", pounds: 214.6 },
+    ];
+    expect(chartRange(logs, "2026-11-10")).toEqual({ firstDate: "2026-08-04", lastDate: "2026-11-10", low: 213, high: 233 });
+  });
+
+  it("keeps at least a week and 6 lb of room, and is empty with no weigh-ins", () => {
+    expect(chartRange([{ date: "2026-11-10", pounds: 200 }], "2026-11-10")).toEqual({
+      firstDate: "2026-11-10",
+      lastDate: "2026-11-17",
+      low: 197,
+      high: 203,
+    });
+    expect(chartRange([], "2026-11-10")).toBeNull();
+  });
+});
+
+describe("weighInsSinceStart", () => {
+  const logs = [
+    { date: "2026-07-20", pounds: 235 },
+    { date: "2026-08-04", pounds: 231.4 },
+    { date: "2026-09-15", pounds: 222 },
+  ];
+
+  it("keeps everything without a starting date", () => {
+    expect(weighInsSinceStart(logs, null, null)).toBe(logs);
+  });
+
+  it("drops weigh-ins before the starting date", () => {
+    expect(weighInsSinceStart(logs, "2026-08-01", null)).toEqual(logs.slice(1));
+  });
+
+  it("begins with your starting weight on your starting date", () => {
+    expect(weighInsSinceStart(logs, "2026-08-01", 233)[0]).toEqual({ date: "2026-08-01", pounds: 233 });
+    // A weigh-in on that very day is kept as it is.
+    expect(weighInsSinceStart(logs, "2026-08-04", 233)[0]).toEqual({ date: "2026-08-04", pounds: 231.4 });
   });
 });

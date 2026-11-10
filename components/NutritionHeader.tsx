@@ -4,15 +4,15 @@ import SettingsGear from "@/components/SettingsGear";
 import StreakBadge from "@/components/StreakBadge";
 import TodayPill from "@/components/TodayPill";
 import WeekStrip, { type WeekDay } from "@/components/WeekStrip";
-import { addDays, formatFullDate, formatWeekday } from "@/lib/dates";
+import { addDays } from "@/lib/dates";
 
 const arrowClass =
   "flex h-11 w-11 items-center justify-center rounded-full text-2xl text-muted active:bg-card";
 
-// The top of the Nutrition tab, laid out like the Fitness tab: title on the left,
-// "Today / Jump to today" and settings on the right, your streak, the day's calories card,
-// the macros card, the week strip (orange or red ring per day, against your calorie goal),
-// and a small date line.
+// The top of the Nutrition tab, laid out like the Fitness and Weight tabs: title on the left,
+// "Today / Jump to today" and settings on the right, your streak, then the week strip right
+// under it (orange or red ring per day, against your calorie goal; it also shows which day
+// you're on, so there's no separate date line), then the day's calories card and the macros card.
 export default function NutritionHeader({
   date,
   goal,
@@ -45,10 +45,6 @@ export default function NutritionHeader({
         startHint="Log a meal or snack today to start one."
       />
 
-      {calories}
-
-      {macros}
-
       <div className="flex items-center gap-1">
         <Link href={`/food?date=${addDays(date, -7)}`} aria-label="Previous week" className={arrowClass}>
           ‹
@@ -61,9 +57,9 @@ export default function NutritionHeader({
         </Link>
       </div>
 
-      <p className="text-sm text-muted">
-        <span className="font-semibold text-foreground">{formatWeekday(date)}</span> · {formatFullDate(date)}
-      </p>
+      {calories}
+
+      {macros}
     </header>
   );
 }

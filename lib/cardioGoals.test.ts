@@ -3,7 +3,7 @@ import { DEFAULT_WEEKLY_GOALS, goalProgress, weeklyTotals } from "./cardioGoals"
 
 describe("DEFAULT_WEEKLY_GOALS", () => {
   it("starts at 5 miles running, 10 miles cycling, and no swim goal", () => {
-    expect(DEFAULT_WEEKLY_GOALS).toEqual({ run: 5, cycle: 10, swim: null });
+    expect(DEFAULT_WEEKLY_GOALS).toEqual({ run: 5, cycle: 10, swim: null, walk: null });
   });
 });
 
@@ -16,7 +16,7 @@ describe("weeklyTotals", () => {
       { kind: "swim", distance: 1500, distance_unit: "yd" },
       { kind: "swim", distance: 500, distance_unit: "yd" },
     ]);
-    expect(totals).toEqual({ run: 5.1, cycle: 12.5, swim: 2000 });
+    expect(totals).toEqual({ run: 5.1, cycle: 12.5, swim: 2000, walk: 0 });
   });
 
   it("ignores logs without a distance (time only)", () => {
@@ -24,6 +24,7 @@ describe("weeklyTotals", () => {
       run: 0,
       cycle: 0,
       swim: 0,
+      walk: 0,
     });
   });
 
@@ -33,7 +34,7 @@ describe("weeklyTotals", () => {
       { kind: "swim", distance: 1, distance_unit: "mi" },
       { kind: "row", distance: 3, distance_unit: "mi" },
     ]);
-    expect(totals).toEqual({ run: 0, cycle: 0, swim: 0 });
+    expect(totals).toEqual({ run: 0, cycle: 0, swim: 0, walk: 0 });
   });
 
   it("avoids floating point noise (0.1 + 0.2)", () => {
@@ -45,7 +46,7 @@ describe("weeklyTotals", () => {
   });
 
   it("is all zeros with no logs", () => {
-    expect(weeklyTotals([])).toEqual({ run: 0, cycle: 0, swim: 0 });
+    expect(weeklyTotals([])).toEqual({ run: 0, cycle: 0, swim: 0, walk: 0 });
   });
 });
 

@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useActionState, useRef, useState } from "react";
 import { saveDayPlan, type PlanFormState } from "@/app/(tabs)/workouts/actions";
 import CardioPlanFields from "@/components/CardioPlanFields";
+import RestPlanFields from "@/components/RestPlanFields";
 import type { CardioPlan } from "@/lib/cardioPlan";
+import type { RestPlan } from "@/lib/restPlan";
 import { afterDayEditPath, type PlanExercise } from "@/lib/workouts/plan";
 import { MAX_DAY_NAME_LENGTH } from "@/lib/workouts/weekSetup";
 
@@ -33,6 +35,7 @@ export default function PlanEditor({
   initial,
   lift = true,
   cardio,
+  rest,
 }: {
   dayId: string;
   date: string; // may be empty
@@ -42,6 +45,7 @@ export default function PlanEditor({
   initial: PlanExercise[];
   lift?: boolean; // false for a cardio-only day: no name or exercises
   cardio?: CardioPlan | null; // present for a cardio day: its plan (null = none yet)
+  rest?: RestPlan | null; // present for a rest day: its recovery plan (null = none yet)
 }) {
   const nextKey = useRef(0);
   const newKey = () => `new-${nextKey.current++}`;
@@ -99,6 +103,7 @@ export default function PlanEditor({
       <input type="hidden" name="plan" value={planJson} />
 
       {cardio !== undefined && <CardioPlanFields initial={cardio} />}
+      {rest !== undefined && <RestPlanFields initial={rest} />}
 
       {lift && (
         <>

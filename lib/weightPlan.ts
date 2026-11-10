@@ -1,7 +1,6 @@
 // The Weight tab's goal math: where you started, where you are, where you're going,
 // how fast (lb per week), and how many weeks that takes. Every number on screen is
-// worked out here, so it's always exact (the AI only writes the one-line coaching note:
-// lib/ai/weightCoach.ts). Pure functions, no database, so they're easy to test.
+// worked out here, so it's always exact. Pure functions, no database, so they're easy to test.
 
 /** The weekly pace when you haven't chosen one in Settings: 2 lb a week toward your target. */
 export const WEEKLY_PACE_LB = 2;
@@ -85,6 +84,44 @@ export type PlanSummary = {
 };
 
 /** Everything the progress card shows, from four numbers and today's date. */
+/**
+ * Your weigh-ins from your starting date on (all of them when there's no starting date).
+ * When you've set a starting weight and date, the chart begins with that point, so it
+ * starts exactly where your goal did.
+ */
+export function weighInsSinceStart(
+  logs: WeighIn[],
+  startDate: string | null,
+  startWeight: number | null,
+): WeighIn[] {
+  if (!startDate) return logs;
+  const since = logs.filter((l) => l.date >= startDate);
+  if (startWeight !== null && since[0]?.date !== startDate) return [{ date: startDate, pounds: startWeight }, ...since];
+  return since;
+}
+
+/**
+ * What the weigh-in chart covers: from your first weigh-in (your start) to today across,
+ * and from your highest to your lowest weigh-in up and down (with a little room). The
+ * target isn't part of the scale, so the line uses the whole chart; the target line shows
+ * only when it fits in that range.
+ */
+export function chartRange(
+  logs: WeighIn[],
+  today: string,
+): { firstDate: string; lastDate: string; low: number; high: number } | null {
+  if (logs.length === 0) return null;
+  const firstDate = logs[0].date;
+  const latestDate = logs[logs.length - 1].date;
+  let lastDate = latestDate > today ? latestDate : today;
+  if (daysBetween(firstDate, lastDate) < 7) lastDate = addDays(firstDate, 7); // never squeeze to a dot
+  const pounds = logs.map((l) => l.pounds);
+  let low = Math.floor(Math.min(...pounds) - 1);
+  let high = Math.ceil(Math.max(...pounds) + 1);
+  if (high - low < 6) [low, high] = [low - 2, high + 2];
+  return { firstDate, lastDate, low, high };
+}
+
 export function planSummary(input: {
   start: number;
   current: number;
@@ -108,11 +145,6 @@ export function planSummary(input: {
   const weeks = pace === null ? null : Math.max(1, Math.ceil(remainingLb / pace));
   const goalDate = pace === null ? null : addDays(today, Math.ceil((remainingLb / pace) * 7));
   return { direction, totalLb, doneLb, remainingLb, progress, pace, weeks, goalDate };
-}
-
-/** The numbers a saved coaching note was written for. When any changes, ask the AI again. */
-export function coachKey(start: number, current: number, target: number, pace: number = WEEKLY_PACE_LB): string {
-  return [start, current, target, pace].map((n) => n.toFixed(1)).join("|");
 }
 
 /**

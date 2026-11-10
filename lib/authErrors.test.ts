@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { classifySignInError } from "./authErrors";
 
 describe("classifySignInError", () => {
-  it("treats Supabase's new-account database error as 'full'", () => {
-    expect(classifySignInError("Database error saving new user")).toBe("full");
-    expect(classifySignInError("database error saving new user")).toBe("full");
+  it("treats Supabase's new-account database error as 'invite' (new accounts need one)", () => {
+    expect(classifySignInError("Database error saving new user")).toBe("invite");
+    expect(classifySignInError("database error saving new user")).toBe("invite");
   });
 
   it("treats anything else as a normal sign-in failure", () => {

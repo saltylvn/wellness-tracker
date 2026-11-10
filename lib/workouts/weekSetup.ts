@@ -1,5 +1,5 @@
 // Choosing which weekdays are lifting or cardio days ("Your week" on the Fitness tab).
-// Monday to Saturday can be lift, cardio, both, or neither (rest); Sunday is always a recovery day.
+// Every day, Monday to Sunday, can be lift, cardio, both, or rest (a planned rest day).
 // Each weekday row in workout_days keeps its exercises even when you switch it to cardio
 // or rest, so switching it back to lifting brings them back.
 
@@ -74,12 +74,12 @@ export function isBlankWeek(days: { kind: DayKind }[]): boolean {
   return days.every((day) => day.kind === "rest");
 }
 
-/** Sunday (weekday 7) is always a recovery day; it can't be planned. */
-export const PLANNABLE_WEEKDAYS = [1, 2, 3, 4, 5, 6];
+/** The days you plan in "Your week": Monday (1) to Sunday (7). */
+export const PLANNABLE_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
 
 /**
- * Checks the week sent by the browser: Monday to Saturday (1-6), each lift, cardio, both,
- * or rest. Sunday is added as rest whatever the browser sent.
+ * Checks the week sent by the browser: Monday to Sunday (1-7), each lift, cardio, both,
+ * or rest.
  */
 export function parseWeekKinds(raw: unknown): Map<number, DayKind> | null {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return null;
@@ -89,7 +89,6 @@ export function parseWeekKinds(raw: unknown): Map<number, DayKind> | null {
     if (typeof kind !== "string" || !DAY_KINDS.includes(kind as DayKind)) return null;
     week.set(weekday, kind as DayKind);
   }
-  week.set(7, "rest");
   return week;
 }
 

@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { CARDIO, CARDIO_KINDS, formatDistance } from "@/lib/cardio";
+import { CARDIO, CARDIO_KINDS, formatDistance, type CardioKind } from "@/lib/cardio";
 import { goalProgress, type WeeklyGoals } from "@/lib/cardioGoals";
 
-// "This week" progress toward your weekly distance goals, shown on cardio days.
-// Run and cycle show up while they have a goal; swim shows once it has a goal
+// "This week" progress toward your weekly distance goals, shown on cardio and rest days.
+// Run, cycle and walk show up while they have a goal; swim shows once it has a goal
 // or you've swum this week, one compact line each. The bars stay orange; reaching a goal gets a 🎯.
 export default function WeeklyCardioGoals({
   totals,
   goals,
 }: {
-  totals: Record<"run" | "cycle" | "swim", number>;
+  totals: Record<CardioKind, number>;
   goals: WeeklyGoals;
 }) {
   const rows = CARDIO_KINDS.filter((kind) => goals[kind] !== null || totals[kind] > 0);

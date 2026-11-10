@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import PlanRefresher from "@/components/PlanRefresher";
 import { formatDayNumber, formatShortMonth } from "@/lib/dates";
 import { formatWeightLb } from "@/lib/weight";
 import type { PlanSummary } from "@/lib/weightPlan";
@@ -17,10 +16,6 @@ export default function WeightProgress({
   target,
   plan,
   trend,
-  note,
-  source,
-  refreshing,
-  today,
   chart,
 }: {
   start: number;
@@ -28,10 +23,6 @@ export default function WeightProgress({
   target: number;
   plan: PlanSummary;
   trend: number | null; // your actual lb per week over the last 4 weeks (negative = losing)
-  note: string | null; // the AI's one-line coaching note
-  source: "ai" | "auto" | null;
-  refreshing: boolean; // the plan is out of date and is being updated now
-  today: string;
   chart: ReactNode; // the weigh-in chart (WeightChart), or nothing before your first weigh-in
 }) {
   const verb = plan.direction === "gain" || (plan.direction === "done" && target > start) ? "gained" : "lost";
@@ -67,13 +58,14 @@ export default function WeightProgress({
         >
           <div className="h-full rounded-full bg-accent" style={{ width: `${percent}%` }} />
         </div>
-        <p className="flex justify-between text-xs text-muted tabular-nums">
+        {/* How far you've come, in bold black so it's easy to read at a glance. */}
+        <p className="flex items-baseline justify-between text-sm font-bold text-foreground tabular-nums">
           <span>
             {plan.doneLb >= 0
               ? `${formatWeightLb(plan.doneLb)} of ${formatWeightLb(plan.totalLb)} lb ${verb}`
               : `${formatWeightLb(-plan.doneLb)} lb past your start`}
           </span>
-          <span className="font-semibold text-foreground">{percent}%</span>
+          <span>{percent}%</span>
         </p>
       </div>
 
@@ -98,18 +90,6 @@ export default function WeightProgress({
         </div>
       )}
 
-      {plan.direction !== "done" && (
-        <div className="space-y-1">
-          {refreshing ? (
-            <PlanRefresher today={today} />
-          ) : source === "ai" && note ? (
-            <p className="text-sm">
-              <span aria-hidden="true">✨</span> {note}
-            </p>
-          ) : null}
-        </div>
-      )}
-
       {/* Your recent trend and the Settings link share one line, to keep the card short. */}
       <div className="flex items-center justify-between gap-2">
         <p className="min-w-0 text-xs text-muted tabular-nums">
@@ -122,7 +102,7 @@ export default function WeightProgress({
           )}
         </p>
         <Link
-          href="/settings"
+          href="/settings#weight-goal"
           className="flex min-h-11 shrink-0 items-center text-sm font-medium text-accent active:opacity-70"
         >
           Edit goal

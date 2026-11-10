@@ -1,48 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { addDays, daysBetween, formatDayNumber, formatShortMonth } from "@/lib/dates";
+import { chartRange } from "@/lib/weightPlan";
 import { formatWeightLb } from "@/lib/weight";
 import type { WeighIn } from "@/lib/weightPlan";
 
-// A line chart of your weigh-ins (solid orange), your target (dashed gray line), and,
-// when there's a pace, where you'll be heading (dashed orange, from your latest weigh-in
-// to the target on the goal date). Touch or drag across it to see each weigh-in.
+// A line chart of your weigh-ins (solid orange, with a soft orange fill under it and a small
+// dot on each weigh-in), from your first weigh-in (your start) to today, scaled to your
+// weights (chartRange), plus your target as a dashed gray line when it fits in that range.
+// Your latest weight is labeled on the chart. Touch or drag across it to see each weigh-in.
 
 const W = 340; // drawing size; the SVG scales to the card's width
-const H = 78; // kept short so the weigh-in card below stays high on the screen
-const PAD = { top: 10, right: 12, bottom: 20, left: 34 };
+const H = 140; // the weigh-in card sits above the chart now, so it has room to be taller
+const PAD = { top: 16, right: 14, bottom: 22, left: 34 };
+const MAX_DOTS = 40; // with more weigh-ins than this, the small dots are left off so the line stays clean
 
 const shortDate = (key: string) => `${formatShortMonth(key)} ${formatDayNumber(key)}`;
 
 export default function WeightChart({
   logs,
   target,
-  goalDate,
+  today,
 }: {
-  logs: WeighIn[]; // oldest first
+  logs: WeighIn[]; // oldest first, from your first weigh-in
   target: number | null;
-  goalDate: string | null; // when the projection reaches the target
+  today: string; // the chart runs up to this day
 }) {
   const [active, setActive] = useState<number | null>(null); // index of the weigh-in being touched
+  const fillId = useId(); // a unique id for the fill's gradient (two charts on a page can't share one)
 
-  if (logs.length === 0) return null;
+  const range = chartRange(logs, today);
+  if (!range) return null;
   const latest = logs.at(-1)!;
-  const projection = target !== null && goalDate ? { from: latest, to: { date: goalDate, pounds: target } } : null;
-
-  // The ranges the chart covers: dates across, pounds up.
-  const firstDate = logs[0].date;
-  let lastDate = projection?.to.date ?? latest.date;
-  if (daysBetween(firstDate, lastDate) < 7) lastDate = addDays(firstDate, 7); // never squeeze to a dot
+  const { firstDate, lastDate, low, high } = range;
   const span = daysBetween(firstDate, lastDate);
-  const pounds = [...logs.map((l) => l.pounds), ...(target !== null ? [target] : [])];
-  let low = Math.floor(Math.min(...pounds) - 2);
-  let high = Math.ceil(Math.max(...pounds) + 2);
-  if (high - low < 6) [low, high] = [low - 2, high + 2];
+  const showTarget = target !== null && target >= low && target <= high;
 
   const x = (date: string) => PAD.left + (daysBetween(firstDate, date) / span) * (W - PAD.left - PAD.right);
   const y = (lb: number) => PAD.top + ((high - lb) / (high - low)) * (H - PAD.top - PAD.bottom);
   const line = logs.map((l, i) => `${i === 0 ? "M" : "L"}${x(l.date).toFixed(1)},${y(l.pounds).toFixed(1)}`).join("");
+  // The soft fill: the line, then down to the bottom of the chart and back.
+  const bottom = H - PAD.bottom;
+  const area = `${line}L${x(latest.date).toFixed(1)},${bottom}L${x(firstDate).toFixed(1)},${bottom}Z`;
+  const middleDate = addDays(firstDate, Math.round(span / 2));
 
   // Touch: pick the weigh-in nearest your finger, left to right.
   function pick(event: React.PointerEvent<SVGSVGElement>) {
@@ -79,24 +80,42 @@ export default function WeightChart({
         onPointerMove={(event) => (event.buttons || event.pointerType === "mouse" ? pick(event) : undefined)}
         onPointerLeave={() => setActive(null)}
       >
-        {/* Quiet grid lines and pound labels on the left. */}
+        <defs>
+          <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="var(--accent)" stopOpacity={0.22} />
+            <stop offset="1" stopColor="var(--accent)" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+
+        {/* Quiet dashed grid lines and pound labels on the left. */}
         {ticks.map((lb) => (
           <g key={lb}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={y(lb)} y2={y(lb)} stroke="var(--border)" strokeWidth={1} />
+            <line
+              x1={PAD.left}
+              x2={W - PAD.right}
+              y1={y(lb)}
+              y2={y(lb)}
+              stroke="var(--border)"
+              strokeWidth={1}
+              strokeDasharray="2 4"
+            />
             <text x={PAD.left - 6} y={y(lb) + 4} textAnchor="end" fontSize={10} fill="var(--muted)">
               {lb}
             </text>
           </g>
         ))}
-        {/* Dates along the bottom: the first day and the last day shown. */}
+        {/* Dates along the bottom: the first day, the middle, and the last day shown. */}
         <text x={PAD.left} y={H - 6} fontSize={10} fill="var(--muted)">
           {shortDate(firstDate)}
+        </text>
+        <text x={(PAD.left + W - PAD.right) / 2} y={H - 6} textAnchor="middle" fontSize={10} fill="var(--muted)">
+          {shortDate(middleDate)}
         </text>
         <text x={W - PAD.right} y={H - 6} textAnchor="end" fontSize={10} fill="var(--muted)">
           {shortDate(lastDate)}
         </text>
 
-        {target !== null && (
+        {showTarget && target !== null && (
           <g>
             <line
               x1={PAD.left}
@@ -113,32 +132,11 @@ export default function WeightChart({
           </g>
         )}
 
-        {projection && (
-          <line
-            x1={x(projection.from.date)}
-            y1={y(projection.from.pounds)}
-            x2={x(projection.to.date)}
-            y2={y(projection.to.pounds)}
-            stroke="var(--accent)"
-            strokeOpacity={0.6}
-            strokeWidth={2}
-            strokeDasharray="5 5"
-            strokeLinecap="round"
-          />
-        )}
-        {projection && (
-          // The goal: a ring where the projection meets the target.
-          <circle
-            cx={x(projection.to.date)}
-            cy={y(projection.to.pounds)}
-            r={4}
-            fill="var(--card)"
-            stroke="var(--accent)"
-            strokeWidth={2}
-          />
-        )}
-
-        <path d={line} fill="none" stroke="var(--accent)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        <path d={area} fill={`url(#${fillId})`} />
+        <path d={line} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+        {/* A small dot on every weigh-in (left off when there are lots, to keep the line clean). */}
+        {logs.length <= MAX_DOTS &&
+          logs.map((l) => <circle key={l.date} cx={x(l.date)} cy={y(l.pounds)} r={2} fill="var(--accent)" />)}
 
         {shown && (
           <line
@@ -150,17 +148,24 @@ export default function WeightChart({
             strokeWidth={1}
           />
         )}
-        {/* The latest weigh-in (or the one you're touching) as a dot with a ring of card color. */}
+        {/* The latest weigh-in (or the one you're touching): a dot with a soft halo, and its weight above it. */}
         {(shown ? [shown] : [latest]).map((l) => (
-          <circle
-            key={l.date}
-            cx={x(l.date)}
-            cy={y(l.pounds)}
-            r={4.5}
-            fill="var(--accent)"
-            stroke="var(--card)"
-            strokeWidth={2}
-          />
+          <g key={l.date}>
+            <circle cx={x(l.date)} cy={y(l.pounds)} r={10} fill="var(--accent)" fillOpacity={0.15} />
+            <circle cx={x(l.date)} cy={y(l.pounds)} r={5} fill="var(--accent)" stroke="var(--card)" strokeWidth={2} />
+            {!shown && (
+              <text
+                x={Math.min(x(l.date), W - PAD.right - 14)}
+                y={Math.max(y(l.pounds) - 12, 11)}
+                textAnchor="middle"
+                fontSize={11}
+                fontWeight={700}
+                fill="var(--foreground)"
+              >
+                {formatWeightLb(l.pounds)}
+              </text>
+            )}
+          </g>
         ))}
       </svg>
     </figure>

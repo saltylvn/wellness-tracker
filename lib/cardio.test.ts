@@ -10,17 +10,19 @@ import {
 } from "./cardio";
 
 describe("CARDIO", () => {
-  it("has run, cycle, and swim, with miles for run/cycle and yards for swim", () => {
-    expect(Object.keys(CARDIO)).toEqual(["run", "cycle", "swim"]);
+  it("has run, cycle, swim and walk, with miles for run/cycle/walk and yards for swim", () => {
+    expect(Object.keys(CARDIO)).toEqual(["run", "cycle", "swim", "walk"]);
     expect(CARDIO.run.unit).toBe("mi");
     expect(CARDIO.cycle.unit).toBe("mi");
     expect(CARDIO.swim.unit).toBe("yd");
+    expect(CARDIO.walk.unit).toBe("mi");
   });
 
-  it("parseCardioKind accepts only the three kinds", () => {
+  it("parseCardioKind accepts only the four kinds", () => {
     expect(parseCardioKind("run")).toBe("run");
     expect(parseCardioKind("swim")).toBe("swim");
-    for (const bad of ["Run", "walk", "", null, undefined, 3, {}]) {
+    expect(parseCardioKind("walk")).toBe("walk");
+    for (const bad of ["Run", "yoga", "", null, undefined, 3, {}]) {
       expect(parseCardioKind(bad)).toBeNull();
     }
   });
@@ -44,7 +46,7 @@ describe("validateCardio", () => {
   });
 
   it("rejects an unknown activity", () => {
-    expect(validateCardio("walk", 1, 10).ok).toBe(false);
+    expect(validateCardio("yoga", 1, 10).ok).toBe(false);
     expect(validateCardio(undefined, 1, 10).ok).toBe(false);
   });
 

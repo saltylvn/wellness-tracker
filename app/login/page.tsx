@@ -1,14 +1,23 @@
 import DemoSignInButton from "@/components/DemoSignInButton";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import InviteGoogleForm from "@/components/InviteGoogleForm";
+import PasswordLogin from "@/components/PasswordLogin";
+import { DATABASE_BEHIND_MESSAGE } from "@/lib/dbErrors";
+import { normalizeInviteCode } from "@/lib/accounts";
 import { demoConfigured } from "@/lib/demo";
 import { MAX_USERS } from "@/lib/authErrors";
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; invite?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, invite } = await searchParams;
+  // An invite link from a text message: /login?invite=CODE opens "Create an account".
+  const inviteCode = normalizeInviteCode(invite);
+  // A new person: they opened an invite link, or Google didn't let them in because they're
+  // new. They're asked for their invite code (filled in from the link) before Google.
+  const newcomer = Boolean(inviteCode) || error === "invite" || error === "full" || error === "badinvite";
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-8 px-6 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
@@ -18,10 +27,18 @@ export default async function LoginPage({
         <p className="pt-3 text-muted">Calories, macros, workouts, and cardio in one place.</p>
       </div>
 
-      {error === "full" ? (
+      {error === "invite" || error === "full" ? (
         <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-muted">
-          DEVELOP is a personal project limited to {MAX_USERS} accounts, and it&apos;s full. New
-          sign-ups are closed.
+          You&apos;re new here! DEVELOP is invite-only (a personal project of up to {MAX_USERS}{" "}
+          accounts), so enter the invite code from your text to continue.
+        </p>
+      ) : error === "badinvite" ? (
+        <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-danger">
+          That invite code isn&apos;t valid, was already used, or has expired.
+        </p>
+      ) : error === "setup" ? (
+        <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-danger">
+          {DATABASE_BEHIND_MESSAGE}
         </p>
       ) : error === "demo" ? (
         <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-danger">
@@ -34,7 +51,8 @@ export default async function LoginPage({
       ) : null}
 
       <div className="space-y-3">
-        <GoogleSignInButton />
+        {newcomer ? <InviteGoogleForm invite={inviteCode} /> : <GoogleSignInButton />}
+        <PasswordLogin invite={inviteCode} newcomer={newcomer} />
         {demoConfigured(process.env) && <DemoSignInButton />}
       </div>
     </main>
