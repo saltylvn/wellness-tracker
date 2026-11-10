@@ -14,5 +14,5 @@ Put the rules where every path has to pass through them, in Postgres:
 
 ## Consequences
 - The app code stays simpler: routes call the database and trust its answer.
-- Rules are tested twice: in unit tests for the TypeScript side, and against a local Postgres before each SQL step runs in production.
+- Rules are tested in CI against a real Postgres built from every migration (`supabase/tests/`), so a migration that weakens a rule fails the build. These tests caught a real bug: an older check refused every username sign-up (fixed in `20261108000000_allow_username_signups.sql`).
 - Changing a rule needs a SQL migration, not just a deploy.
