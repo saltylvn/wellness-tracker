@@ -24,7 +24,7 @@ An iPhone-first web app (installable PWA) for body weight, calorie/macro trackin
 - **Tabs:** three bottom tabs, left to right: Weight (`/weight`), Fitness (`/workouts`), Nutrition (`/food`). The app opens on Fitness: `/`, the manifest `start_url`, sign-in (Google and demo) and `/login` when signed in all go to `/workouts`.
 
 ## Showcase images (the owner's taste; follow it for any LinkedIn, portfolio or marketing visuals)
-- Approved reference: `docs/linkedin/DEVELOP-project-cover-4x3.png`; scripts to remake or extend it are in `docs/linkedin/` (see its README).
+- Approved reference: `docs/linkedin/DEVELOP-project-cover-4x3.png` (also the README hero; `DEVELOP-architecture.png` is the README diagram); scripts to remake or extend it are in `docs/linkedin/` (see its README).
 - Tone: subtle, let the work speak. No "AI engineering" or self-promotional labels. Aim at both engineers (real specifics, code-style touches) and hiring teams (scannable proof numbers, a live product).
 - Always real screenshots of the live app via "Try the demo" on an iPhone 15 Pro (393x852 @3x), with the demo banner hidden and room for the status bar; never fake mockups. Phones fanned: the side ones tilted ±6°, the middle one larger and in front.
 - Look: the app's own palette (light grey #f4f4f5 page, white cards, orange #f26b2a, near-black text), Inter / Inter Display for text, JetBrains Mono for the engineering touches: a small orange mono "WEB APPLICATION" eyebrow, `// frontend`-style comment labels, monospace stack lists and stat labels, link buttons in mono (orange "Live demo · URL", black GitHub button with the logo), a faint dot grid background and dashed dividers.
