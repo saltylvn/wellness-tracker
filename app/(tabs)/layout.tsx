@@ -1,4 +1,3 @@
-import DailyCheer from "@/components/DailyCheer";
 import DemoBanner from "@/components/DemoBanner";
 import TabBar from "@/components/TabBar";
 import { isDemoEmail } from "@/lib/demo";
@@ -19,8 +18,6 @@ export default async function TabsLayout({ children }: { children: React.ReactNo
         {children}
       </main>
       <TabBar />
-      {/* "Way to get after it!" on your first visit of the day. */}
-      <DailyCheer />
     </>
   );
 }
