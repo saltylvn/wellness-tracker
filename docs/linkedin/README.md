@@ -12,6 +12,6 @@ and JetBrains Mono fonts):
    (393x852 @3x), hides the demo banner, adds room for the status bar, and saves `ph-*.png`.
 2. `python3 make_slides.py`: writes one HTML page per image (uses `base.css` and the `ph-*.png` files).
 3. `node render.cjs`: renders each page to `out-*.png` at 2x (carousel 1080x1350, wide 1200x627,
-   the 4:3 cover 1200x900, so 2400x1800).
+   the 4:3 cover 1200x900, so 2400x1800; the GitHub social preview at exactly 1280x640, saved as `docs/social-preview.png`).
 
 Update the numbers in `make_slides.py` (tests, tables, migrations) from the repo before re-rendering.

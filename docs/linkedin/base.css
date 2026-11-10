@@ -6,6 +6,7 @@ body{font-family:"Inter",sans-serif;color:var(--ink);-webkit-font-smoothing:anti
 .p{width:1080px;height:1350px;padding:72px 72px 64px}
 .l{width:1200px;height:627px;padding:48px 56px}
 .w{width:1200px;height:900px;padding:0 64px}
+.sp{width:1280px;height:640px;padding:0 64px}
 .eyebrow{font:600 20px/1 "Inter";letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
 .h1{font:800 76px/1.02 "Inter Display";letter-spacing:-.025em}
 .h2{font:800 58px/1.05 "Inter Display";letter-spacing:-.02em}

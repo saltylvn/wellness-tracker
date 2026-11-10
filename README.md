@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml)
 
-![DEVELOP: the Weight, Fitness and Nutrition tabs on iPhone, with the live demo and repository links, three proof numbers (302 automated tests, 15/15 tables with row-level security, about 2 s AI photo estimates) and the tech stack](docs/linkedin/DEVELOP-project-cover-4x3.png)
+![DEVELOP: the Weight, Fitness and Nutrition tabs on iPhone, with the live demo and repository links, three proof numbers (311 automated tests, 15/15 tables with row-level security, about 2 s AI photo estimates) and the tech stack](docs/linkedin/DEVELOP-project-cover-4x3.png)
 
 ## What it does
 
@@ -18,6 +18,36 @@
 - **Nutrition:** add food by **photo** or **description** and Google Gemini estimates calories, protein, carbs and fat (always editable before saving); a calorie ring, macro goals, water tracking and a saved-foods library.
 - **Streaks** for workouts and food, plus a daily sunshine log.
 - **Accounts:** Google sign-in or username and password, invite-only sign-up, and an admin view to text invites and see users.
+
+## Screens (v2.0)
+
+Real screenshots from the live demo on an iPhone 15 Pro.
+
+| Weight | Fitness | Nutrition |
+| :---: | :---: | :---: |
+| <img src="docs/screens/weight.png" width="240" alt="Weight tab: weigh-in status, start / current / target with a progress bar, a chart of weigh-ins and the projected goal date"> | <img src="docs/screens/fitness.png" width="240" alt="Fitness tab on a lifting day: two priority lifts with PRs and the day's exercises with today's logged sets"> | <img src="docs/screens/nutrition.png" width="240" alt="Nutrition tab: food streak, week strip, calorie ring and macro goals"> |
+| <img src="docs/screens/login.png" width="240" alt="Login: Continue with Google, Log in with password, and Try the demo"> | <img src="docs/screens/fitness-week.png" width="240" alt="Fitness tab: workout streak, the week calendar with each day's icon, the Lift / Cardio planner and the gym barcode"> | <img src="docs/screens/nutrition-meals.png" width="240" alt="Nutrition tab: macros, water tracker, Log food button and the day's meals"> |
+
+## Progress: v1.0 → v2.0
+
+DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
+
+| | v1.0 | v2.0 |
+| --- | --- | --- |
+| Design | Dark theme with green accents | Light orange-and-white redesign, consistent layout across all three tabs, new app icon |
+| Weight | Weigh-ins, chart and an AI coaching note | A chart from your chosen starting date to today, a weekly loss streak, and bold progress; the AI note was removed as low value |
+| Fitness | Weekly plan, set logging, cardio | Plus priority lifts with PRs, planned cardio and recovery days you tick off, timed sets, weekly walking goals and a gym barcode |
+| Accounts | Google sign-in and a demo | Plus username and password, invite-only sign-up enforced in the database, and an admin view to text invites and see users |
+| Engineering | 232 tests, 13 tables, 21 RLS policies | 311 tests, 15 tables, 25 RLS policies, decision records, MIT license |
+
+<details>
+<summary>v1.0 screenshots</summary>
+
+![DEVELOP v1.0: the Fitness tab and the Log sheet in the original dark-and-green design](docs/history/v1.0-fitness.png)
+
+![DEVELOP v1.0 overview card](docs/history/v1.0-overview.png)
+
+</details>
 
 ## How it's built
 
@@ -54,7 +84,7 @@
 
 ## Quality
 
-- **302 automated tests** (Vitest) for the pure logic: streaks, goal and weight-plan math, chart ranges, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, account and invite rules, cardio unit conversion, and more.
+- **311 automated tests** (Vitest) for the pure logic: streaks, goal and weight-plan math, chart ranges, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, account and invite rules, cardio unit conversion, the database helpers (against a shared fake Supabase client), and more.
 - **A performance test** times the Fitness page's data loading against a simulated 50 ms database and fails if a day takes more than 2 round trips.
 - **CI on every pull request** (about 30 seconds): production dependency audit, ESLint, TypeScript type check and all tests, plus Vercel's preview build. Both must pass before anything merges.
 
@@ -68,6 +98,8 @@
 - **Migrations that don't break the live app.** New columns are read defensively, so each deploy works before its SQL step has run.
 - **Free tiers by design.** Supabase, Gemini and Vercel free tiers, with per-person limits so one user can't use up the shared quota.
 - **A one-click demo, safely.** "Try the demo" signs in to a shared account on the server (the password never reaches the browser), and a Postgres function rebuilds its sample data around the visitor's date, at most hourly.
+
+Longer write-ups of these choices are in [`docs/decisions/`](docs/decisions/).
 
 ## How I built it
 
@@ -96,3 +128,7 @@ Requires Node.js 24 (see [`.nvmrc`](.nvmrc)) and a free [Supabase](https://supab
 Shipped: PWA shell and deploy, sign-in (Google, username and password, invite-only), food log with macro goals, AI text and photo estimates, streaks, workouts with PRs and priority lifts, planned cardio and recovery days, water and sunshine logs, the Weight tab with a chart and goal date, and an admin view.
 
 Next: real-iPhone testing of photo logging and the scroll wheels, and integration tests for the server actions.
+
+## License
+
+[MIT](LICENSE)

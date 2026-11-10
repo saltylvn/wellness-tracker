@@ -210,7 +210,7 @@ slides["cover-4x3"] = page("w grid-bg", f'''
   </div>
 </div>
 <div style="position:absolute;left:64px;right:64px;bottom:214px;display:grid;grid-template-columns:1fr 1.45fr 1fr;gap:12px">
-  {"".join(f'<div style="display:flex;align-items:baseline;gap:10px;justify-content:center;border-top:1.5px dashed #d4d4da;padding-top:16px"><span style="font:800 34px/1 \'Inter Display\';color:var(--accent);white-space:nowrap">{v}</span><span class="mono" style="font-size:14px;font-weight:500;color:#3a3a40;white-space:nowrap">{k}</span></div>' for v,k in [("302","automated tests"),("15/15","tables with row-level security"),("~2 s","AI photo estimates")])}
+  {"".join(f'<div style="display:flex;align-items:baseline;gap:10px;justify-content:center;border-top:1.5px dashed #d4d4da;padding-top:16px"><span style="font:800 34px/1 \'Inter Display\';color:var(--accent);white-space:nowrap">{v}</span><span class="mono" style="font-size:14px;font-weight:500;color:#3a3a40;white-space:nowrap">{k}</span></div>' for v,k in [("311","automated tests"),("15/15","tables with row-level security"),("~2 s","AI photo estimates")])}
 </div>
 <div style="position:absolute;left:64px;right:64px;bottom:44px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
   {"".join(f'<div class="card" style="padding:16px 16px;border:1px solid var(--line)"><div class="mono" style="font-size:13px;color:var(--accent)">// {g.lower()}</div><div class="mono" style="font-size:13px;line-height:1.65;font-weight:500;margin-top:8px;color:var(--ink)">{x}</div></div>' for g,x in [
@@ -219,6 +219,26 @@ slides["cover-4x3"] = page("w grid-bg", f'''
     ("AI","Google Gemini<br>text + vision<br>server-side only"),
     ("Security","Nonce-based CSP<br>Invite-only auth<br>Per-user rate limits"),
     ("Delivery","Vercel<br>GitHub Actions CI<br>Vitest · Dependabot")])}
+</div>''')
+
+slides["social-preview"] = page("sp grid-bg", f'''
+<div style="display:grid;grid-template-columns:1fr 520px;height:100%;align-items:center">
+  <div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="eyebrow" style="font:600 16px/1 'JetBrains Mono';letter-spacing:.12em">Web Application</div>
+      <span style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--accent);color:var(--accent);border-radius:999px;padding:5px 10px;font:700 12px/1 Inter"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>v2.0 · live</span>
+    </div>
+    <div class="h1" style="margin-top:14px;font-size:92px;letter-spacing:.06em">DEVELOP</div>
+    <div style="margin-top:6px;font:700 30px/1.1 'Inter Display';color:var(--accent)">Wellness Tracker</div>
+    <div class="lede" style="margin-top:14px;font-size:21px;max-width:520px;color:#3a3a40">Weight, workouts and nutrition on iPhone, with calorie estimates from a photo.</div>
+    <div class="mono" style="margin-top:20px;font-size:15px;font-weight:500;color:#3a3a40">Next.js · TypeScript · Supabase · Gemini · Vercel</div>
+    <div style="margin-top:20px;display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:#fff;border-radius:999px;padding:12px 18px;font:600 15px/1 'JetBrains Mono';white-space:nowrap"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>github.com/saltylvn/wellness-tracker</div>
+  </div>
+  <div style="position:relative;height:100%">
+    <div class="phone" style="position:absolute;width:196px;left:10px;top:118px;transform:rotate(-6deg);border-radius:33px;padding:7px"><img src="ph-weight-chart.png" style="border-radius:27px"></div>
+    <div class="phone" style="position:absolute;width:216px;left:158px;top:66px;z-index:2;border-radius:35px;padding:8px"><img src="ph-fitness-lifts.png" style="border-radius:28px"></div>
+    <div class="phone" style="position:absolute;width:196px;left:326px;top:118px;transform:rotate(6deg);border-radius:33px;padding:7px"><img src="ph-nutrition-top.png" style="border-radius:27px"></div>
+  </div>
 </div>''')
 
 def lbox(t, s, dark=False):
