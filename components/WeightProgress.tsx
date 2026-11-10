@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { formatDayNumber, formatShortMonth } from "@/lib/dates";
 import { formatWeightLb } from "@/lib/weight";
-import { changeSoFar, type PlanSummary } from "@/lib/weightPlan";
+import type { PlanSummary } from "@/lib/weightPlan";
 
 const shortDate = (key: string) => `${formatShortMonth(key)} ${formatDayNumber(key)}`;
 const signed = (n: number) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(1)}`;
@@ -27,7 +27,6 @@ export default function WeightProgress({
 }) {
   const verb = plan.direction === "gain" || (plan.direction === "done" && target > start) ? "gained" : "lost";
   const percent = Math.round(plan.progress * 100);
-  const change = changeSoFar(start, current);
 
   return (
     <section aria-label="Goal progress" className="space-y-2 rounded-2xl bg-card p-4 pb-1">
@@ -59,23 +58,16 @@ export default function WeightProgress({
         >
           <div className="h-full rounded-full bg-accent" style={{ width: `${percent}%` }} />
         </div>
-        <p className="flex justify-between text-xs text-muted tabular-nums">
+        {/* How far you've come, in bold black so it's easy to read at a glance. */}
+        <p className="flex items-baseline justify-between text-sm font-bold text-foreground tabular-nums">
           <span>
             {plan.doneLb >= 0
               ? `${formatWeightLb(plan.doneLb)} of ${formatWeightLb(plan.totalLb)} lb ${verb}`
               : `${formatWeightLb(-plan.doneLb)} lb past your start`}
           </span>
-          <span className="font-semibold text-foreground">{percent}%</span>
+          <span>{percent}%</span>
         </p>
       </div>
-
-      {/* The big number: how much you're down since your start ("12.1 lb down"; "up" if above it). */}
-      {change && (
-        <p className="pt-2 text-center text-4xl font-extrabold leading-none tracking-tight text-accent tabular-nums">
-          {formatWeightLb(change.lb)}
-          <span className="ml-1.5 text-xl font-bold">lb {change.kind === "lost" ? "down" : "up"}</span>
-        </p>
-      )}
 
       {chart}
 

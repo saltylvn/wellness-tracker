@@ -85,16 +85,6 @@ export type PlanSummary = {
 
 /** Everything the progress card shows, from four numbers and today's date. */
 /**
- * How much you've changed since your start, for the Weight tab's big orange number:
- * "lost" when you're down from your start, "gained" when you're up, null when it's the same.
- */
-export function changeSoFar(start: number, current: number): { kind: "lost" | "gained"; lb: number } | null {
-  const diff = tenth(start - current);
-  if (diff === 0) return null;
-  return diff > 0 ? { kind: "lost", lb: diff } : { kind: "gained", lb: -diff };
-}
-
-/**
  * What the weigh-in chart covers: from your first weigh-in (your start) to today across,
  * and from your highest to your lowest weigh-in up and down (with a little room). The
  * target isn't part of the scale, so the line uses the whole chart; the target line shows
