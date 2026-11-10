@@ -23,7 +23,7 @@ export default function WeightStreakBadge({ logs }: { logs: WeighInPoint[] }) {
     <section aria-label="Weight loss streak" className={STREAK_CARD}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-lg font-bold">
-          <span aria-hidden="true">🔥</span>{" "}
+          <span aria-hidden="true" data-streak-flame className="inline-block">🔥</span>{" "}
           {current > 0 ? `${current}-week streak` : "No streak yet"}
         </p>
         <p className="text-sm font-medium text-muted">Best: {longest}</p>
