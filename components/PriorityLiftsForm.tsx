@@ -12,7 +12,8 @@ export default function PriorityLiftsForm({ picked, choices }: { picked: string[
   const [result, formAction, pending] = useActionState<SaveResult, FormData>(savePriorityLifts, null);
 
   return (
-    <form action={formAction} className="space-y-3">
+    // The key redraws the form with your saved picks after Save (see GoalsForm).
+    <form key={picked.join("|")} action={formAction} className="space-y-3">
       <fieldset>
         <legend className="mb-1 text-sm font-medium text-muted">
           Priority lifts <span className="font-normal">(optional, up to 2)</span>
