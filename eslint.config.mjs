@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone scripts for the LinkedIn images (run by hand, not part of the app).
+    "docs/**",
   ]),
 ]);
 
