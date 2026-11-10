@@ -32,6 +32,7 @@ export async function saveGoals(_previous: SaveResult, formData: FormData): Prom
     };
   }
 
+  revalidatePath("/settings"); // so this page shows what you just saved
   revalidatePath("/food");
   revalidatePath("/weight");
   revalidatePath("/workouts");

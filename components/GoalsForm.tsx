@@ -14,8 +14,11 @@ export default function GoalsForm({ goals }: { goals: Goals }) {
   // useActionState connects the form to the server action and gives us its reply.
   const [result, formAction, pending] = useActionState<SaveResult, FormData>(saveGoals, null);
 
+  // After Save, React clears the form back to the values it started with, and a picker
+  // (like Weekly pace) doesn't pick up new values on its own, so it would jump back to the
+  // old choice. The key redraws the form with your saved values instead.
   return (
-    <form action={formAction} className="space-y-5">
+    <form key={JSON.stringify(goals)} action={formAction} className="space-y-5">
       <div>
         <label htmlFor="calorie_goal" className={labelClass}>
           Daily calorie goal
