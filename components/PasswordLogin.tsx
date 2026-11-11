@@ -1,40 +1,31 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createAccount, signInWithUsername, type LoginState } from "@/app/login/actions";
+import { signInWithUsername, type LoginState } from "@/app/login/actions";
 
 // text-base = 16px: smaller text makes iPhone Safari zoom in when you tap a field.
 const inputClass = "min-h-12 w-full rounded-xl border border-border bg-card px-4 text-base";
 const mainButton =
   "flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-4 text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60";
-const linkButton = "min-h-11 w-full text-center text-sm font-medium text-accent active:opacity-70";
-
-type Mode = "closed" | "login" | "create";
 
 // The second way in, under "Continue with Google": "Log in with password" opens a username
-// and password form. From there, "Create an account" (for people with an invite code) swaps
-// in the sign-up form. For a new person (`newcomer`: they opened an invite link, or Google
-// didn't let them in yet), the button offers "Use a username and password instead" and opens
-// the sign-up form, with their code filled in when the link had one.
-export default function PasswordLogin({ invite, newcomer = false }: { invite: string | null; newcomer?: boolean }) {
-  const [mode, setMode] = useState<Mode>("closed");
+// and password form. After a login that fails, a quiet link offers the new-person card
+// (/login?join=1: an invite code, or the wait-list).
+export default function PasswordLogin() {
+  const [open, setOpen] = useState(false);
 
-  if (mode === "closed") {
+  if (!open) {
     return (
       <button
         type="button"
-        onClick={() => setMode(newcomer ? "create" : "login")}
+        onClick={() => setOpen(true)}
         className="flex min-h-12 w-full items-center justify-center rounded-full border border-border bg-card px-4 text-base font-semibold active:opacity-80"
       >
-        {newcomer ? "Use a username and password instead" : "Log in with password"}
+        Log in with password
       </button>
     );
   }
-  return mode === "login" ? (
-    <LoginForm onCreate={() => setMode("create")} />
-  ) : (
-    <CreateForm invite={invite} onLogin={() => setMode("login")} />
-  );
+  return <LoginForm />;
 }
 
 function Message({ state }: { state: LoginState }) {
@@ -46,7 +37,7 @@ function Message({ state }: { state: LoginState }) {
   );
 }
 
-function LoginForm({ onCreate }: { onCreate: () => void }) {
+function LoginForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(signInWithUsername, null);
   return (
     <form action={action} className="space-y-3 rounded-2xl bg-card p-4">
@@ -75,70 +66,11 @@ function LoginForm({ onCreate }: { onCreate: () => void }) {
       <button type="submit" disabled={pending} className={mainButton}>
         {pending ? "Logging in…" : "Log in"}
       </button>
-      <button type="button" onClick={onCreate} className={linkButton}>
-        Have an invite code? Create an account
-      </button>
-    </form>
-  );
-}
-
-function CreateForm({ invite, onLogin }: { invite: string | null; onLogin: () => void }) {
-  const [state, action, pending] = useActionState<LoginState, FormData>(createAccount, null);
-  return (
-    <form action={action} className="space-y-3 rounded-2xl bg-card p-4">
-      <div>
-        <p className="text-sm font-semibold">Create an account</p>
-        <p className="text-xs text-muted">DEVELOP is invite-only: you need the code from your invite text.</p>
-      </div>
-      <input
-        name="invite"
-        aria-label="Invite code"
-        placeholder="Invite code"
-        defaultValue={invite ?? ""}
-        autoComplete="one-time-code"
-        autoCapitalize="characters"
-        autoCorrect="off"
-        spellCheck={false}
-        required
-        className={`${inputClass} uppercase tracking-widest`}
-      />
-      <input
-        name="username"
-        aria-label="Pick a username"
-        placeholder="Pick a username"
-        autoComplete="username"
-        autoCapitalize="none"
-        autoCorrect="off"
-        spellCheck={false}
-        required
-        className={inputClass}
-      />
-      <input
-        name="password"
-        type="password"
-        aria-label="Password (8+ characters)"
-        placeholder="Password (8+ characters)"
-        autoComplete="new-password"
-        required
-        className={inputClass}
-      />
-      <input
-        name="password_again"
-        type="password"
-        aria-label="Password again"
-        placeholder="Password again"
-        autoComplete="new-password"
-        required
-        className={inputClass}
-      />
-      <p className="text-xs text-muted">Usernames: 3-20 letters, numbers, dots or underscores.</p>
-      <Message state={state} />
-      <button type="submit" disabled={pending} className={mainButton}>
-        {pending ? "Creating…" : "Create account"}
-      </button>
-      <button type="button" onClick={onLogin} className={linkButton}>
-        Already have an account? Log in
-      </button>
+      {state && (
+        <a href="/login?join=1" className="flex min-h-11 items-center justify-center text-sm font-medium text-muted active:opacity-70">
+          New here? Get access
+        </a>
+      )}
     </form>
   );
 }

@@ -86,6 +86,10 @@ describe("invite codes", () => {
     expect(body).toContain("invite code ABCDEFGH");
   });
 
+  it("can address the text to someone from the wait-list", () => {
+    expect(inviteSmsHref("https://example.app", "ABCDEFGH", "+15551234567").startsWith("sms:+15551234567&body=")).toBe(true);
+  });
+
   it("tells used, waiting and expired invites apart", () => {
     const now = new Date("2026-11-20T12:00:00Z");
     const base = { code: "ABCDEFGH", used_at: null, used_username: null };

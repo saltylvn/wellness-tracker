@@ -92,14 +92,15 @@ export function normalizeInviteCode(raw: unknown): string | null {
 
 /**
  * The text-message link for an invite: opens Messages with the invite written out, so you
- * only pick who to send it to. (iPhones read "sms:&body=", which Android also accepts.)
+ * only pick who to send it to, or addressed to `phone` (someone from the wait-list).
+ * (iPhones read "sms:&body=" and "sms:+15551234567&body=", which Android also accepts.)
  */
-export function inviteSmsHref(origin: string, code: string): string {
+export function inviteSmsHref(origin: string, code: string, phone?: string): string {
   const link = `${origin.replace(/\/$/, "")}/login?invite=${code}`;
   const body =
     `You're invited to DEVELOP, my wellness tracker. Tap to make your account: ${link} ` +
     `(invite code ${code}, works once, for ${INVITE_DAYS} days)`;
-  return `sms:&body=${encodeURIComponent(body)}`;
+  return `sms:${phone ?? ""}&body=${encodeURIComponent(body)}`;
 }
 
 export type InviteRow = { code: string; created_at: string; used_at: string | null; used_username: string | null };

@@ -4,6 +4,8 @@ import GoalsForm from "@/components/GoalsForm";
 import InviteCard from "@/components/InviteCard";
 import PasswordForm from "@/components/PasswordForm";
 import UsersCard, { type AppUser } from "@/components/UsersCard";
+import WaitlistCard from "@/components/WaitlistCard";
+import type { WaitlistEntry } from "@/lib/waitlist";
 import { DATABASE_BEHIND_MESSAGE, isMissingSchemaError } from "@/lib/dbErrors";
 import { usernameFromEmail, type InviteRow } from "@/lib/accounts";
 import PriorityLiftsForm from "@/components/PriorityLiftsForm";
@@ -51,7 +53,23 @@ export default async function SettingsPage() {
   const isAdmin = Boolean(adminRow);
 
   // The admin's "Users" list (everyone with an account and their last login).
-  const usersResult = isAdmin ? await supabase.rpc("admin_list_users") : null;
+  const [usersResult, waitlistResult] = isAdmin
+    ? await Promise.all([
+        supabase.rpc("admin_list_users"),
+        // Only people not invited yet, oldest first.
+        supabase
+          .from("access_requests")
+          .select("id, name, phone, created_at")
+          .is("invited_at", null)
+          .order("created_at", { ascending: true }),
+      ])
+    : [null, null];
+  const waitlist = (waitlistResult?.data ?? []) as WaitlistEntry[];
+  const waitlistError = waitlistResult?.error
+    ? isMissingSchemaError(waitlistResult.error)
+      ? DATABASE_BEHIND_MESSAGE
+      : "Couldn't load the wait-list."
+    : null;
   const users = (usersResult?.data ?? []) as AppUser[];
   const usersError = usersResult?.error
     ? isMissingSchemaError(usersResult.error)
@@ -131,6 +149,12 @@ export default async function SettingsPage() {
       {isAdmin && (
         <section className="rounded-2xl bg-card p-4">
           <InviteCard invites={(inviteRows ?? []) as InviteRow[]} />
+        </section>
+      )}
+
+      {isAdmin && (
+        <section className="rounded-2xl bg-card p-4">
+          <WaitlistCard entries={waitlist} error={waitlistError} />
         </section>
       )}
 
