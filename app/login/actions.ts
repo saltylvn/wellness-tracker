@@ -7,6 +7,7 @@ import { demoConfigured, demoToday } from "@/lib/demo";
 import { isNewAccountRefused } from "@/lib/authErrors";
 import { isMissingSchemaError, DATABASE_BEHIND_MESSAGE } from "@/lib/dbErrors";
 import { normalizeInviteCode, parsePassword, parseUsername, usernameToEmail } from "@/lib/accounts";
+import { parseWaitlistForm } from "@/lib/waitlist";
 
 /** What the password forms show after a try that didn't work (null before any try). */
 export type LoginState = { message: string } | null;
@@ -134,4 +135,29 @@ export async function createAccount(_previous: LoginState, formData: FormData): 
     return { message: "Your account was made but can't sign in yet. Ask the admin to turn off \"Confirm email\" in Supabase." };
   }
   redirect("/workouts");
+}
+
+/** What the "Join the wait-list" form shows after a try. */
+export type WaitlistState = { ok: boolean; message: string } | null;
+
+// "Join the wait-list" (offered only after a login didn't let someone in): their name and
+// phone number go to request_access(), which checks them again and keeps one entry per
+// number. Only the admin can read the list (Settings), and texts each person an invite.
+export async function joinWaitlist(_previous: WaitlistState, formData: FormData): Promise<WaitlistState> {
+  // A hidden field people never fill in; simple bots do, so their request is quietly dropped.
+  if (formData.get("website")) return { ok: true, message: "You're on the wait-list." };
+
+  const parsed = parseWaitlistForm(formData.get("name"), formData.get("phone"));
+  if (!parsed.ok) return { ok: false, message: parsed.message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("request_access", { p_name: parsed.value.name, p_phone: parsed.value.phone });
+  if (error) {
+    if (isMissingSchemaError(error)) return { ok: false, message: DATABASE_BEHIND_MESSAGE };
+    if (/wait-list is full/i.test(error.message)) {
+      return { ok: false, message: "The wait-list is full right now. Please try again later." };
+    }
+    return { ok: false, message: "Couldn't add you just now. Please try again." };
+  }
+  return { ok: true, message: "You're on the wait-list! You'll get a text with an invite when a spot opens." };
 }

@@ -2,6 +2,7 @@ import DemoSignInButton from "@/components/DemoSignInButton";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import InviteGoogleForm from "@/components/InviteGoogleForm";
 import PasswordLogin from "@/components/PasswordLogin";
+import WaitlistForm from "@/components/WaitlistForm";
 import { DATABASE_BEHIND_MESSAGE } from "@/lib/dbErrors";
 import { normalizeInviteCode } from "@/lib/accounts";
 import { demoConfigured } from "@/lib/demo";
@@ -53,6 +54,8 @@ export default async function LoginPage({
       <div className="space-y-3">
         {newcomer ? <InviteGoogleForm invite={inviteCode} /> : <GoogleSignInButton />}
         <PasswordLogin invite={inviteCode} newcomer={newcomer} />
+        {/* Only after a login didn't let someone in (Google refused a new person, or a bad code). */}
+        {(error === "invite" || error === "full" || error === "badinvite") && <WaitlistForm />}
         {demoConfigured(process.env) && <DemoSignInButton />}
       </div>
     </main>

@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml)
 
-![DEVELOP: the Weight, Fitness and Nutrition tabs on iPhone, with the live demo and repository links, three proof numbers (328 automated tests, 15/15 tables with row-level security, about 2 s AI photo estimates) and the tech stack](docs/linkedin/DEVELOP-project-cover-4x3.png)
+![DEVELOP: the Weight, Fitness and Nutrition tabs on iPhone, with the live demo and repository links, three proof numbers (339 automated tests, 16/16 tables with row-level security, about 2 s AI photo estimates) and the tech stack](docs/linkedin/DEVELOP-project-cover-4x3.png)
 
 ## What it does
 
@@ -17,7 +17,7 @@
   - A gym check-in barcode, read from a screenshot in the browser and redrawn on the server.
 - **Nutrition:** add food by **photo** or **description** and Google Gemini estimates calories, protein, carbs and fat (always editable before saving); a calorie ring, macro goals, water tracking and a saved-foods library.
 - **Streaks** for workouts and food, plus a daily sunshine log.
-- **Accounts:** Google sign-in or username and password, invite-only sign-up, and an admin view to text invites and see users.
+- **Accounts:** Google sign-in or username and password, invite-only sign-up, a wait-list offered only when a login is refused, and an admin view to text invites (to wait-list people directly) and see users.
 
 ## Screens (v2.0)
 
@@ -38,7 +38,7 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 | Weight | Weigh-ins, chart and an AI coaching note | A chart from your chosen starting date to today, a weekly loss streak, and bold progress; the AI note was removed as low value |
 | Fitness | Weekly plan, set logging, cardio | Plus priority lifts with PRs, planned cardio and recovery days you tick off, timed sets, weekly walking goals and a gym barcode |
 | Accounts | Google sign-in and a demo | Plus username and password, invite-only sign-up enforced in the database, and an admin view to text invites and see users |
-| Engineering | 232 tests, 13 tables, 21 RLS policies | 328 tests (including the database rules on a real Postgres), 15 tables, 25 RLS policies, decision records, MIT license |
+| Engineering | 232 tests, 13 tables, 21 RLS policies | 339 tests (including the database rules on a real Postgres), 16 tables, 28 RLS policies, decision records, MIT license |
 
 <details>
 <summary>v1.0 screenshots</summary>
@@ -61,7 +61,7 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 | AI                | Google Gemini (server-side only), JSON-schema output, raced model chain            | Photo and text nutrition estimates on the free tier                         |
 | Hosting and CI    | Vercel (Node 24), GitHub Actions, Dependabot                                       | Every pull request is checked and previewed; every merge to `main` deploys  |
 
-**Data model:** 15 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, sunshine, AI request log, demo state, invite codes, admins), created by 27 versioned SQL migrations in [`supabase/migrations/`](supabase/migrations/), written so the app keeps working before and after each one runs.
+**Data model:** 16 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, sunshine, AI request log, demo state, invite codes, admins, the wait-list), created by 28 versioned SQL migrations in [`supabase/migrations/`](supabase/migrations/), written so the app keeps working before and after each one runs.
 
 ## AI features
 
@@ -75,7 +75,7 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 
 ## Security
 
-- **Row-level security on all 15 tables** (25 policies): every row belongs to one signed-in user, enforced by Postgres.
+- **Row-level security on all 16 tables** (28 policies): every row belongs to one signed-in user, enforced by Postgres.
 - **Invite-only accounts:** a `BEFORE INSERT` trigger on `auth.users` refuses any new account without an unused, unexpired invite code, including Google sign-ups. Only the admin can create or revoke codes; the admin role lives in a table with no write policies.
 - **Server-side secrets only:** the Gemini key never reaches the browser; AI replies are treated as untrusted input and validated before use. Google sign-in starts on the server (PKCE).
 - **Strict Content Security Policy** with a fresh nonce per request (`strict-dynamic`, `frame-ancestors 'none'`, `object-src 'none'`), plus a Permissions-Policy, cross-origin window isolation, nosniff, no framing and a strict referrer policy. HTTPS everywhere (HSTS on Vercel).
@@ -84,8 +84,8 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 
 ## Quality
 
-- **328 automated tests** (Vitest). Most cover the pure logic: streaks, goal and weight-plan math, chart ranges, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, account and invite rules, cardio unit conversion, the database helpers (against a shared fake Supabase client), and more.
-- **The database rules are tested on a real Postgres.** Every migration is applied in order to an in-memory Postgres ([PGlite](https://pglite.dev)) with a small stand-in for Supabase's auth schema, then tests check that row-level security is on for every table and keeps each person's rows private, that sign-up refuses missing, used and expired invite codes (and accepts an armed one for Google), that only the admin can list users or create invites, the 25-account cap, and the AI daily limit ([`supabase/tests/`](supabase/tests/)). They run in about a second on every pull request.
+- **339 automated tests** (Vitest). Most cover the pure logic: streaks, goal and weight-plan math, chart ranges, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, account and invite rules, cardio unit conversion, the database helpers (against a shared fake Supabase client), and more.
+- **The database rules are tested on a real Postgres.** Every migration is applied in order to an in-memory Postgres ([PGlite](https://pglite.dev)) with a small stand-in for Supabase's auth schema, then tests check that row-level security is on for every table and keeps each person's rows private, that sign-up refuses missing, used and expired invite codes (and accepts an armed one for Google), that only the admin can list users or create invites, the 25-account cap, the wait-list (visitors can join but never read it), and the AI daily limit ([`supabase/tests/`](supabase/tests/)). They run in about a second on every pull request.
 - **A performance test** times the Fitness page's data loading against a simulated 50 ms database and fails if a day takes more than 2 round trips.
 - **CI on every pull request** (about 30 seconds): production dependency audit, ESLint, TypeScript type check and all tests, plus Vercel's preview build. Both must pass before anything merges.
 

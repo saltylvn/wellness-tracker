@@ -162,3 +162,42 @@ export async function revokeInvite(code: string): Promise<{ ok: true } | { ok: f
   revalidatePath("/settings");
   return { ok: true };
 }
+
+export type WaitlistInviteResult = { ok: true; code: string; phone: string } | { ok: false; message: string };
+
+/**
+ * Settings, "Wait-list" (the admin only): makes an invite code for this person and marks
+ * them invited, then the page opens Messages addressed to their number. Row-level security
+ * lets only the admin read or change the wait-list, and only the admin can create codes.
+ */
+export async function inviteFromWaitlist(id: string): Promise<WaitlistInviteResult> {
+  const supabase = await createClient();
+  const userId = await currentUserId(supabase);
+  if (!userId) redirect("/login");
+
+  const { data: person, error: readError } = await supabase
+    .from("access_requests")
+    .select("phone")
+    .eq("id", String(id))
+    .maybeSingle();
+  if (readError) return { ok: false, message: isMissingSchemaError(readError) ? DATABASE_BEHIND_MESSAGE : "Couldn't load the wait-list." };
+  if (!person) return { ok: false, message: "That person isn't on the wait-list any more." };
+
+  const invite = await createInvite();
+  if (!invite.ok) return invite;
+
+  await supabase.from("access_requests").update({ invited_at: new Date().toISOString() }).eq("id", String(id));
+  return { ok: true, code: invite.code, phone: person.phone as string };
+}
+
+/** Settings, "Wait-list" (the admin only): takes someone off the list without inviting them. */
+export async function removeFromWaitlist(id: string): Promise<{ ok: true } | { ok: false; message: string }> {
+  const supabase = await createClient();
+  const userId = await currentUserId(supabase);
+  if (!userId) redirect("/login");
+
+  const { error } = await supabase.from("access_requests").delete().eq("id", String(id));
+  if (error) return { ok: false, message: "Couldn't remove them. Please try again." };
+  revalidatePath("/settings");
+  return { ok: true };
+}

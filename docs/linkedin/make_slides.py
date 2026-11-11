@@ -210,7 +210,7 @@ slides["cover-4x3"] = page("w grid-bg", f'''
   </div>
 </div>
 <div style="position:absolute;left:64px;right:64px;bottom:214px;display:grid;grid-template-columns:1fr 1.45fr 1fr;gap:12px">
-  {"".join(f'<div style="display:flex;align-items:baseline;gap:10px;justify-content:center;border-top:1.5px dashed #d4d4da;padding-top:16px"><span style="font:800 34px/1 \'Inter Display\';color:var(--accent);white-space:nowrap">{v}</span><span class="mono" style="font-size:14px;font-weight:500;color:#3a3a40;white-space:nowrap">{k}</span></div>' for v,k in [("328","automated tests"),("15/15","tables with row-level security"),("~2 s","AI photo estimates")])}
+  {"".join(f'<div style="display:flex;align-items:baseline;gap:10px;justify-content:center;border-top:1.5px dashed #d4d4da;padding-top:16px"><span style="font:800 34px/1 \'Inter Display\';color:var(--accent);white-space:nowrap">{v}</span><span class="mono" style="font-size:14px;font-weight:500;color:#3a3a40;white-space:nowrap">{k}</span></div>' for v,k in [("339","automated tests"),("16/16","tables with row-level security"),("~2 s","AI photo estimates")])}
 </div>
 <div style="position:absolute;left:64px;right:64px;bottom:44px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
   {"".join(f'<div class="card" style="padding:16px 16px;border:1px solid var(--line)"><div class="mono" style="font-size:13px;color:var(--accent)">// {g.lower()}</div><div class="mono" style="font-size:13px;line-height:1.65;font-weight:500;margin-top:8px;color:var(--ink)">{x}</div></div>' for g,x in [

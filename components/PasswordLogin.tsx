@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { createAccount, signInWithUsername, type LoginState } from "@/app/login/actions";
+import WaitlistForm from "@/components/WaitlistForm";
 
 // text-base = 16px: smaller text makes iPhone Safari zoom in when you tap a field.
 const inputClass = "min-h-12 w-full rounded-xl border border-border bg-card px-4 text-base";
@@ -78,6 +79,8 @@ function LoginForm({ onCreate }: { onCreate: () => void }) {
       <button type="button" onClick={onCreate} className={linkButton}>
         Have an invite code? Create an account
       </button>
+      {/* After a failed log in, people without an account can ask for one. */}
+      {state && <WaitlistForm />}
     </form>
   );
 }

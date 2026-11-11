@@ -41,7 +41,7 @@ describe("migrations", () => {
     const { rows } = await db.query<{ count: number }>(
       "select count(*)::int as count from pg_tables where schemaname = 'public'",
     );
-    expect(rows[0].count).toBe(15);
+    expect(rows[0].count).toBe(16);
   });
 
   it("give every new account a profile", async () => {
@@ -176,6 +176,43 @@ describe("admin", () => {
     await expect(
       asUser(db, ALICE, () => db.query("insert into public.app_admins (user_id) values ($1)", [ALICE])),
     ).rejects.toThrow();
+  });
+});
+
+describe("wait-list", () => {
+  it("lets a visitor who isn't signed in ask for access, without seeing the list", async () => {
+    await db.exec("set role anon");
+    try {
+      await db.query("select public.request_access('Sam', '(555) 123-4567')");
+      const seen = await db.query("select * from public.access_requests");
+      expect(seen.rows).toEqual([]); // row-level security hides every row from visitors
+    } finally {
+      await db.exec("reset role");
+    }
+  });
+
+  it("stores one row per phone number, normalized, and refreshes it when asked again", async () => {
+    await db.query("select public.request_access('Sam R', '555-123-4567')");
+    const { rows } = await db.query<{ name: string; phone: string }>("select name, phone from public.access_requests");
+    expect(rows).toEqual([{ name: "Sam R", phone: "+15551234567" }]);
+  });
+
+  it("refuses an empty name or a bad phone number", async () => {
+    await expect(db.query("select public.request_access('', '5551234567')")).rejects.toThrow(/check your name/);
+    await expect(db.query("select public.request_access('Pat', '12345')")).rejects.toThrow(/check your name/);
+  });
+
+  it("is visible and editable only to the admin", async () => {
+    const alice = await asUser(db, ALICE, () => db.query("select * from public.access_requests"));
+    expect(alice.rows).toEqual([]);
+    const removed = await asUser(db, ALICE, () => db.query("delete from public.access_requests"));
+    expect(removed.affectedRows ?? 0).toBe(0);
+    const admin = await asUser(db, ADMIN, () => db.query<{ name: string }>("select name from public.access_requests"));
+    expect(admin.rows).toEqual([{ name: "Sam R" }]);
+    const marked = await asUser(db, ADMIN, () =>
+      db.query("update public.access_requests set invited_at = now() where phone = '+15551234567'"),
+    );
+    expect(marked.affectedRows).toBe(1);
   });
 });
 
