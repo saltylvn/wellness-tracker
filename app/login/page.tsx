@@ -6,7 +6,6 @@ import WaitlistForm from "@/components/WaitlistForm";
 import { DATABASE_BEHIND_MESSAGE } from "@/lib/dbErrors";
 import { normalizeInviteCode } from "@/lib/accounts";
 import { demoConfigured } from "@/lib/demo";
-import { MAX_USERS } from "@/lib/authErrors";
 
 export default async function LoginPage({
   searchParams,
@@ -30,8 +29,8 @@ export default async function LoginPage({
 
       {error === "invite" || error === "full" ? (
         <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-muted">
-          You&apos;re new here! DEVELOP is invite-only (a personal project of up to {MAX_USERS}{" "}
-          accounts), so enter the invite code from your text to continue.
+          You&apos;re new here! DEVELOP is invite-only, so enter the invite code from your text to
+          continue.
         </p>
       ) : error === "badinvite" ? (
         <p role="alert" className="rounded-xl bg-card p-3 text-center text-sm text-danger">

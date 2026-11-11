@@ -123,8 +123,9 @@ export async function createAccount(_previous: LoginState, formData: FormData): 
       return { message: "That username is taken. Please pick another." };
     }
     if (isNewAccountRefused(error.message)) {
-      // The code was fine a moment ago, so the account limit is the likely cause.
-      return { message: "DEVELOP is full right now, so new accounts can't be made. Sorry!" };
+      // The code was fine a moment ago, so the account limit is the likely cause. The limit
+      // itself isn't mentioned to visitors.
+      return { message: "New accounts can't be made right now. Please try again later." };
     }
     if (/password/i.test(error.message)) return { message: error.message };
     return { message: "Couldn't create the account. Please try again." };
