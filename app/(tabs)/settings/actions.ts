@@ -46,16 +46,26 @@ export async function saveGoals(_previous: SaveResult, formData: FormData): Prom
   return { ok: true, message: "Saved." };
 }
 
-/** Your two priority lifts (shown at the top of lifting days). */
+/** Your priority lifts, up to three (shown at the top of lifting days). */
 export async function savePriorityLifts(_previous: SaveResult, formData: FormData): Promise<SaveResult> {
-  const parsed = parsePriorityLifts(formData.get("priority_lift_1"), formData.get("priority_lift_2"));
+  const parsed = parsePriorityLifts([
+    formData.get("priority_lift_1"),
+    formData.get("priority_lift_2"),
+    formData.get("priority_lift_3"),
+  ]);
   if (!parsed.ok) return { ok: false, message: parsed.message };
 
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
   if (!userId) redirect("/login");
 
-  const { error } = await supabase.from("profiles").update(parsed.values).eq("id", userId);
+  let { error } = await supabase.from("profiles").update(parsed.values).eq("id", userId);
+  // Before the SQL step adds priority_lift_3, two picks still save (like start_date in saveGoals).
+  if (isMissingSchemaError(error) && parsed.values.priority_lift_3 === null) {
+    const { priority_lift_3: _skip, ...firstTwo } = parsed.values;
+    void _skip;
+    ({ error } = await supabase.from("profiles").update(firstTwo).eq("id", userId));
+  }
   if (error) {
     return {
       ok: false,

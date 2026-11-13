@@ -50,6 +50,17 @@ describe("migrations", () => {
   });
 });
 
+describe("priority lifts", () => {
+  it("keep three names of 1-80 characters each", async () => {
+    await asUser(db, ALICE, () =>
+      db.query("update public.profiles set priority_lift_1 = 'Squats', priority_lift_2 = 'Deadlift', priority_lift_3 = 'Bench' where id = $1", [ALICE]),
+    );
+    await expect(
+      db.query("update public.profiles set priority_lift_3 = $1 where id = $2", ["x".repeat(81), ALICE]),
+    ).rejects.toThrow(/check constraint/);
+  });
+});
+
 describe("row-level security", () => {
   it("is switched on for every table in the public schema", async () => {
     const { rows } = await db.query<{ relname: string }>(
