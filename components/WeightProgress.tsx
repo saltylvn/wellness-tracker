@@ -39,7 +39,7 @@ export default function WeightProgress({
           ] as const
         ).map(([label, lb]) => (
           <div key={label}>
-            <p className="text-xs text-muted">{label}</p>
+            <p className="eyebrow">{label}</p>
             <p className={`tabular-nums ${label === "Current" ? "text-xl font-bold" : "text-base font-semibold"}`}>
               {formatWeightLb(lb)}
             </p>

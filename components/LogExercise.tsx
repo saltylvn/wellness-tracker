@@ -95,7 +95,7 @@ export default function LogExercise({
       ✓ Today:{" "}
       {todaySets.map((set, index) => (
         <span key={set.id}>
-          {index > 0 && <span className="font-bold text-black"> + </span>}
+          {index > 0 && <span className="font-bold text-foreground"> + </span>}
           {formatSet(set)}
         </span>
       ))}
@@ -129,7 +129,7 @@ export default function LogExercise({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="min-h-11 shrink-0 rounded-full bg-accent px-5 text-base font-semibold text-on-accent active:opacity-80"
+          className="min-h-11 shrink-0 rounded-lg bg-accent px-5 text-base font-semibold text-on-accent active:opacity-80"
         >
           Log
         </button>
@@ -238,7 +238,7 @@ export default function LogExercise({
           type="button"
           onClick={addSet}
           disabled={pending}
-          className="min-h-14 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+          className="min-h-14 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
         >
           {pending
             ? "Saving…"

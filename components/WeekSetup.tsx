@@ -64,7 +64,7 @@ export default function WeekSetup({
       {ROWS.map((row) => (
         // One line per row: the label, then the seven days left to right.
         <div key={row.kind} className="flex items-center gap-2">
-          <p className="w-12 shrink-0 text-xs font-semibold text-muted">{row.label}</p>
+          <p className="eyebrow w-12 shrink-0">{row.label}</p>
           <div className="grid flex-1 grid-cols-7 gap-1">
             {LETTERS.map((letter, i) => {
               const on = row.kind === "lift" ? hasLift(kinds[i]) : hasCardio(kinds[i]);

@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml)
 
-![DEVELOP: the Weight, Fitness and Nutrition tabs on iPhone, with the live demo and repository links, three proof numbers (339 automated tests, 16/16 tables with row-level security, about 2 s AI photo estimates) and the tech stack](docs/linkedin/DEVELOP-project-cover-4x3.png)
+![DEVELOP: the Weight, Fitness and Nutrition tabs on iPhone, with the live demo and repository links, three proof numbers (359 automated tests, 16/16 tables with row-level security, about 2 s AI photo estimates) and the tech stack](docs/linkedin/DEVELOP-project-cover-4x3.png)
 
 ## What it does
 

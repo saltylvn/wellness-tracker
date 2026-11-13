@@ -68,7 +68,7 @@ export default function WeighInCard({
       <button
         type="button"
         onClick={openSheet}
-        className="min-h-11 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80"
+        className="min-h-11 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80"
       >
         {saved !== null ? "✓ Weighed in" : "Weigh in"}
       </button>
@@ -134,7 +134,7 @@ export default function WeighInCard({
           type="button"
           onClick={() => run(() => saveWeight({ date, weight: picked }), "Saved.")}
           disabled={pending || unchanged}
-          className="min-h-14 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-50"
+          className="min-h-14 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-50"
         >
           {pending ? "Saving…" : unchanged ? "✓ Saved" : `Save ${formatWeightLb(picked)} lb`}
         </button>

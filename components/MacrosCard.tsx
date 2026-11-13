@@ -17,7 +17,7 @@ export default function MacrosCard({ macros }: { macros: Macro[] }) {
       <div className="grid grid-cols-3 gap-3 px-1">
         {macros.map(({ label, grams, goal }) => (
           <div key={label} className="min-w-0 space-y-1">
-            <p className="text-xs font-semibold text-muted">{label}</p>
+            <p className="eyebrow">{label}</p>
             <p className="truncate tabular-nums">
               <span className="text-lg font-bold">{fmt(grams)}</span>
               <span className="text-xs text-muted">{goal ? ` / ${fmt(goal)} g` : " g"}</span>

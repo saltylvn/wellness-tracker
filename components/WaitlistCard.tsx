@@ -68,7 +68,7 @@ export default function WaitlistCard({ entries, error }: { entries: WaitlistEntr
                   <a
                     href={inviteSmsHref(origin, invite.code, invite.phone)}
                     onClick={() => setGone((g) => new Set(g).add(entry.id))}
-                    className="flex min-h-11 shrink-0 items-center rounded-full bg-accent px-4 text-sm font-semibold text-on-accent active:opacity-80"
+                    className="flex min-h-11 shrink-0 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-on-accent active:opacity-80"
                   >
                     Text invite ›
                   </a>

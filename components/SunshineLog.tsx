@@ -95,7 +95,7 @@ export default function SunshineLog({
           type="button"
           onClick={() => run(() => saveSunshine({ date, minutes: picked }))}
           disabled={pending}
-          className="min-h-14 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+          className="min-h-14 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save"}
         </button>

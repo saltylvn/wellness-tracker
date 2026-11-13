@@ -22,7 +22,7 @@ export default function Error({ error, retry }: { error: unknown; retry: () => v
         <button
           type="button"
           onClick={() => retry()}
-          className="flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-4 text-base font-semibold text-on-accent active:opacity-80"
+          className="flex min-h-12 w-full items-center justify-center rounded-lg bg-accent px-4 text-base font-semibold text-on-accent active:opacity-80"
         >
           Try again
         </button>

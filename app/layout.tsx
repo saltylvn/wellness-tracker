@@ -1,13 +1,20 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 import SplashScreen from "@/components/SplashScreen";
 import "./globals.css";
 import { ICON_VERSION } from "@/lib/iconVersion";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// The fonts are files in this repo (app/fonts, free to use: see LICENSES.txt), served from
+// this site, so a build never depends on reaching Google Fonts. Inter is for text, Manrope
+// for headings, and Source Code Pro for the small capital-letter labels.
+const inter = localFont({ src: "./fonts/inter-latin.woff2", weight: "100 900", variable: "--font-inter", display: "swap" });
+const manrope = localFont({ src: "./fonts/manrope-latin.woff2", weight: "500 700", variable: "--font-manrope", display: "swap" });
+const sourceCode = localFont({
+  src: "./fonts/source-code-pro-latin.woff2",
+  weight: "400 500",
+  variable: "--font-source-code",
+  display: "swap",
 });
 
 // <head> info: the browser tab title, and the settings iPhone Safari reads
@@ -37,7 +44,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover", // let the page extend under the notch / home bar
-  themeColor: "#f4f4f5", // light grey status bar, matching the page: the app is always light
+  // The status bar matches the page: light, or near-black when the phone is in dark mode.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
+    { media: "(prefers-color-scheme: dark)", color: "#141414" },
+  ],
 };
 
 // Runs before the page paints. The launch splash should show once each time the app
@@ -52,7 +63,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     // suppressHydrationWarning: the script above adds a class to <html> before React starts.
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${manrope.variable} ${sourceCode.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: SPLASH_ONCE_SCRIPT }} />
       </head>

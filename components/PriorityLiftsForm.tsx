@@ -28,7 +28,7 @@ export default function PriorityLiftsForm({ picked, choices }: { picked: string[
           <div className="space-y-2">
             {SLOT_LABELS.map((label, slot) => (
               <div key={slot} className="flex items-center gap-3">
-                <label htmlFor={`priority_lift_${slot + 1}`} className="w-14 shrink-0 text-xs text-muted">
+                <label htmlFor={`priority_lift_${slot + 1}`} className="eyebrow w-14 shrink-0">
                   {label}
                 </label>
                 <select
@@ -49,7 +49,7 @@ export default function PriorityLiftsForm({ picked, choices }: { picked: string[
           </div>
         )}
         <p className="mt-2 text-xs text-muted">
-          Shown as slim pills at the top of your lifting days, with your PR (heaviest weight) for each.
+          Shown as slim rows at the top of your lifting days, with your PR (heaviest weight) for each.
         </p>
       </fieldset>
 
@@ -57,7 +57,7 @@ export default function PriorityLiftsForm({ picked, choices }: { picked: string[
         <button
           type="submit"
           disabled={pending}
-          className="min-h-12 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+          className="min-h-12 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save priority lifts"}
         </button>
