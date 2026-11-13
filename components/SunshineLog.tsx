@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
 import WheelPicker from "@/components/WheelPicker";
 import { deleteSunshine, saveSunshine } from "@/app/(tabs)/workouts/sunshine-actions";
-import { reachedSunshineGoal, SUNSHINE_MINUTE_OPTIONS, wheelStart } from "@/lib/sunshine";
+import { reachedSunshineGoal, sunshineRowText, SUNSHINE_MINUTE_OPTIONS, wheelStart } from "@/lib/sunshine";
 
 // A quiet row every day: "☀️ Sunshine 10 / 20 min" (orange once you reach your daily target
-// from Settings). Tap it to pick 5 to 60 minutes on a scroll wheel, which starts on what you
+// from Settings), with "Last time: 5 minutes" until you log today. Tap it to pick 5 to 60 minutes on a scroll wheel, which starts on what you
 // did last time. It's plain text with no card, so it doesn't pull attention from the workout.
 export default function SunshineLog({
   date,
@@ -58,15 +58,7 @@ export default function SunshineLog({
       >
         <span aria-hidden="true">☀️</span>
         <span>Sunshine</span>
-        <span className="tabular-nums">
-          {goal !== null
-            ? `${minutes ?? 0} / ${goal} min${reached ? " ✓" : ""}`
-            : minutes !== null
-              ? `${minutes} min`
-              : lastMinutes !== null
-                ? `Last time: ${lastMinutes} min`
-                : ""}
-        </span>
+        <span className="tabular-nums">{sunshineRowText(minutes, lastMinutes, goal)}</span>
       </button>
 
       <BottomSheet open={open} onClose={() => setOpen(false)} label="Sunshine">

@@ -30,3 +30,21 @@ export function wheelStart(minutes: number | null, lastMinutes: number | null): 
 export function reachedSunshineGoal(minutes: number | null, goal: number | null): boolean {
   return goal !== null && minutes !== null && minutes >= goal;
 }
+
+/**
+ * The text on the Sunshine row: today's minutes (against the daily target, if one is set),
+ * plus "Last time: 5 minutes" from your most recent earlier day while today has nothing yet.
+ */
+export function sunshineRowText(minutes: number | null, lastMinutes: number | null, goal: number | null): string {
+  const today =
+    goal !== null
+      ? `${minutes ?? 0} / ${goal} min${reachedSunshineGoal(minutes, goal) ? " ✓" : ""}`
+      : minutes !== null
+        ? `${minutes} min`
+        : "";
+  const last =
+    minutes === null && lastMinutes !== null
+      ? `Last time: ${lastMinutes} ${lastMinutes === 1 ? "minute" : "minutes"}`
+      : "";
+  return [today, last].filter(Boolean).join(" · ");
+}

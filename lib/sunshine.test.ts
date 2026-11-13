@@ -4,6 +4,7 @@ import {
   parseSunshineMinutes,
   reachedSunshineGoal,
   SUNSHINE_MINUTE_OPTIONS,
+  sunshineRowText,
   wheelStart,
 } from "./sunshine";
 
@@ -39,5 +40,16 @@ describe("reachedSunshineGoal", () => {
     expect(reachedSunshineGoal(15, 20)).toBe(false);
     expect(reachedSunshineGoal(null, 20)).toBe(false);
     expect(reachedSunshineGoal(30, null)).toBe(false); // no target set
+  });
+});
+
+describe("sunshineRowText", () => {
+  it("shows last time's minutes until today is logged", () => {
+    expect(sunshineRowText(null, 5, 20)).toBe("0 / 20 min · Last time: 5 minutes");
+    expect(sunshineRowText(null, 5, null)).toBe("Last time: 5 minutes");
+    expect(sunshineRowText(10, 5, 20)).toBe("10 / 20 min");
+    expect(sunshineRowText(20, 5, 20)).toBe("20 / 20 min ✓");
+    expect(sunshineRowText(10, 5, null)).toBe("10 min");
+    expect(sunshineRowText(null, null, null)).toBe("");
   });
 });
