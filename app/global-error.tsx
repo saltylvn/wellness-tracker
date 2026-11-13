@@ -18,8 +18,8 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#f4f4f5",
-          color: "#1c1c1e",
+          background: "#fcfcfc",
+          color: "#171717",
           fontFamily: "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
           textAlign: "center",
           padding: 24,
@@ -29,7 +29,7 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
         <main style={{ maxWidth: 360 }}>
           <p style={{ fontWeight: 800, letterSpacing: "0.2em", fontSize: 14 }}>DEVELOP</p>
           <h1 style={{ fontSize: 24, margin: "8px 0" }}>Something went wrong</h1>
-          <p style={{ color: "#6b6b72", margin: "0 0 24px" }}>The app couldn&apos;t load. Please try again.</p>
+          <p style={{ color: "#6b6b6b", margin: "0 0 24px" }}>The app couldn&apos;t load. Please try again.</p>
           <button
             type="button"
             onClick={() => retry()}
@@ -37,7 +37,7 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
               minHeight: 48,
               width: "100%",
               border: 0,
-              borderRadius: 999,
+              borderRadius: 8,
               background: "#f26b2a",
               color: "#fff",
               fontSize: 16,

@@ -1,21 +1,39 @@
 @import "tailwindcss";
 
+/*
+  The look: neutral greys with no tint, thin hairline borders instead of shadows, squarer
+  corners, and one accent color (orange). It follows the phone: light by default, near-black
+  when the phone is in dark mode. Every color is a token here, so the two themes stay in step.
+*/
 :root {
-  /* The app is always light (white with orange), even when the phone is in dark mode.
-     color-scheme tells the browser too, so its own parts (inputs, scroll bars) stay light. */
   color-scheme: light;
-  /* Minimal orange and white: a very light grey page with white cards floating on it. */
-  --background: #f4f4f5;
-  --foreground: #1c1c1e;
-  --muted: #8a8a8e;
+  --background: #fcfcfc; /* the page */
+  --foreground: #171717; /* text */
+  --muted: #6b6b6b; /* quieter text */
   --card: #ffffff;
-  --border: #e7e7ea;
+  --card-2: #f4f4f4; /* inset areas inside a card */
+  --border: #e6e6e6;
+  --border-strong: #d4d4d4;
   /* Orange for accents and "under goal", red for "over goal". */
   --accent: #f26b2a;
   --on-accent: #ffffff; /* text on the orange is white */
   --danger: #e5383b;
-  /* The soft shadow under every card, so white cards stand out on the light grey page. */
-  --card-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 20px rgb(0 0 0 / 0.05);
+  --card-shadow: none; /* cards are flat, with a hairline border */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --background: #141414;
+    --foreground: #ededed;
+    --muted: #a1a1a1;
+    --card: #1a1a1a;
+    --card-2: #232323;
+    --border: #2a2a2a;
+    --border-strong: #3a3a3a;
+    --accent: #f5722f;
+    --danger: #ec5d5e;
+  }
 }
 
 @theme inline {
@@ -26,10 +44,16 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-card: var(--card);
+  --color-card-2: var(--card-2);
   --color-border: var(--border);
-  --font-sans: var(--font-geist-sans);
-  /* Rounder cards (rounded-2xl), like the design. */
-  --radius-2xl: 1.5rem;
+  --color-border-strong: var(--border-strong);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-source-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Squarer shapes: cards (rounded-2xl) 12px; buttons and fields (rounded-xl, rounded-lg) 8px. */
+  --radius-2xl: 12px;
+  --radius-xl: 8px;
+  --radius-lg: 8px;
 }
 
 /* Keyboard/tap focus outline in the accent color */
@@ -38,17 +62,40 @@
   outline-offset: 2px;
 }
 
-/* Every card (bg-card) gets the same soft shadow. */
+/* Every card (bg-card) is flat with a hairline border. */
 .bg-card {
+  border: 1px solid var(--border);
   box-shadow: var(--card-shadow);
+}
+
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
   /* No grey flash when tapping, and no accidental text selection on buttons */
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Headings use the display font (Manrope), slightly tightened. */
+h1,
+h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* Small section labels: mono capitals, quiet. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 /* ---- Launch splash (see components/SplashScreen.tsx) ----
@@ -67,21 +114,24 @@ body {
 .splash-logo {
   width: 104px;
   height: 104px;
-  border-radius: 24px;
+  border-radius: 12px;
   animation: splash-pop 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 .splash-name {
   margin: 22px 0 0;
   padding-left: 0.22em; /* balances the letter-spacing so the word is truly centered */
+  font-family: var(--font-display);
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.22em;
   color: var(--foreground);
 }
 .splash-sub {
   margin: 6px 0 0;
-  font-size: 14px;
-  letter-spacing: 0.12em;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 /* After the app has been opened once, later page loads skip the splash. */

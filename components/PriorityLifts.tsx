@@ -12,7 +12,7 @@ export default function PriorityLifts({ lifts }: { lifts: PriorityLift[] }) {
       {lifts.map((lift) => (
         <div
           key={lift.name}
-          className="flex min-w-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm"
+          className="flex min-w-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm"
         >
           <span aria-hidden="true" className="text-xs text-accent">
             ★

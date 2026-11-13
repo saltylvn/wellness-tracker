@@ -179,7 +179,7 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
             <button
               type="submit"
               disabled={pending || typed.trim() === ""}
-              className="min-h-14 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+              className="min-h-14 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
             >
               {pending ? "Saving…" : "Save barcode"}
             </button>
@@ -204,7 +204,7 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
               type="button"
               onClick={() => run(() => saveGymBarcode(found))}
               disabled={pending}
-              className="min-h-14 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+              className="min-h-14 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
             >
               {pending ? "Saving…" : "Save barcode"}
             </button>
@@ -223,7 +223,7 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
               type="button"
               onClick={() => fileInput.current?.click()}
               disabled={reading}
-              className="min-h-14 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+              className="min-h-14 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
             >
               {reading ? "Reading barcode…" : "Choose screenshot"}
             </button>

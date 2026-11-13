@@ -92,7 +92,7 @@ export default async function FoodPage({
 
       <Link
         href={`/food/add?date=${date}`}
-        className="flex min-h-12 items-center justify-center rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80"
+        className="flex min-h-12 items-center justify-center rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80"
       >
         + Log food
       </Link>

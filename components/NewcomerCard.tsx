@@ -13,7 +13,7 @@ import {
 // text-base = 16px: smaller text makes iPhone Safari zoom in when you tap a field.
 const inputClass = "min-h-12 w-full rounded-xl border border-border bg-background px-4 text-base";
 const mainButton =
-  "flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-4 text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60";
+  "flex min-h-12 w-full items-center justify-center rounded-lg bg-accent px-4 text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60";
 const quietLink = "min-h-11 w-full text-center text-sm font-medium text-muted active:opacity-70";
 const switchLink = "min-h-11 w-full border-t border-border pt-2 text-center text-sm font-semibold text-accent active:opacity-70";
 

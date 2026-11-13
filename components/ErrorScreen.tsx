@@ -24,7 +24,7 @@ export default function ErrorScreen({
         {action}
         <Link
           href="/workouts"
-          className="flex min-h-12 w-full items-center justify-center rounded-full border border-border bg-card px-4 text-base font-semibold active:opacity-80"
+          className="flex min-h-12 w-full items-center justify-center rounded-lg border border-border bg-card px-4 text-base font-semibold active:opacity-80"
         >
           Go to Fitness
         </Link>

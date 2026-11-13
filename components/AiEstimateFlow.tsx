@@ -203,7 +203,7 @@ export default function AiEstimateFlow({ mode, date }: Props) {
         type="button"
         onClick={estimate}
         disabled={loading}
-        className="min-h-12 w-full rounded-full bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
+        className="min-h-12 w-full rounded-lg bg-accent text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60"
       >
         {loading ? "Estimating…" : "Estimate calories & macros"}
       </button>
