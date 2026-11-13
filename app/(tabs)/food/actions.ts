@@ -25,7 +25,7 @@ export async function saveFoodEntry(
   const id = formData.get("id");
   const { error } =
     typeof id === "string" && id !== ""
-      ? await supabase.from("food_entries").update(parsed.values).eq("id", id)
+      ? await supabase.from("food_entries").update(parsed.values).eq("id", id).eq("user_id", userId)
       : await supabase
           .from("food_entries")
           .insert({ ...parsed.values, user_id: userId, source: parseSource(formData.get("source")) });
@@ -52,8 +52,10 @@ export async function deleteFoodEntry(formData: FormData) {
 
   if (typeof id === "string" && id !== "") {
     const supabase = await createClient();
-    // Row Level Security means this can only ever delete your own entry.
-    await supabase.from("food_entries").delete().eq("id", id);
+    const userId = await currentUserId(supabase);
+    if (!userId) redirect("/login");
+    // Only your own entry (the database's row-level security enforces this too).
+    await supabase.from("food_entries").delete().eq("id", id).eq("user_id", userId);
   }
 
   revalidatePath("/food");

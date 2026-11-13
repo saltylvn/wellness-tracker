@@ -15,6 +15,9 @@ const SUPABASE_STUB = `
   create table auth.users (
     id uuid primary key default gen_random_uuid(),
     email text unique,
+    encrypted_password text,
+    phone text,
+    email_change text,
     raw_user_meta_data jsonb default '{}'::jsonb,
     raw_app_meta_data jsonb default '{}'::jsonb,
     created_at timestamptz default now(),
@@ -30,6 +33,8 @@ const SUPABASE_STUB = `
   grant usage on schema public to anon, authenticated;
   alter default privileges in schema public grant all on tables to anon, authenticated;
   alter default privileges in schema public grant all on sequences to anon, authenticated;
+  -- Like Supabase: new functions are callable by the API roles unless a migration revokes that.
+  alter default privileges in schema public grant execute on functions to anon, authenticated;
 `;
 
 export function migrationFiles(): string[] {

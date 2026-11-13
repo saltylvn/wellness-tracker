@@ -6,7 +6,8 @@ import { DATABASE_BEHIND_MESSAGE, isMissingSchemaError } from "@/lib/dbErrors";
 import { parseGoalsForm } from "@/lib/goals";
 import { parsePriorityLifts } from "@/lib/priorityLifts";
 import { createClient } from "@/lib/supabase/server";
-import { currentUserId } from "@/lib/actionResult";
+import { ADMIN_ONLY, currentUserId, isAdmin } from "@/lib/actionResult";
+import { isDemoEmail } from "@/lib/demo";
 import { isFairCodeByte, makeInviteCode, parsePassword } from "@/lib/accounts";
 
 // "use server" = these functions run on the server when a form is submitted.
@@ -79,7 +80,9 @@ export async function savePriorityLifts(_previous: SaveResult, formData: FormDat
 
 export async function signOut() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  // "local" = sign out this phone or browser only. (The default signs the account out
+  // everywhere, which in the shared demo would log out every other visitor too.)
+  await supabase.auth.signOut({ scope: "local" });
   redirect("/login");
 }
 
@@ -92,8 +95,13 @@ export async function savePassword(_previous: SaveResult, formData: FormData): P
   }
 
   const supabase = await createClient();
-  const userId = await currentUserId(supabase);
-  if (!userId) redirect("/login");
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims.sub) redirect("/login");
+  // The shared demo account's password stays put, or one visitor could lock everyone else
+  // out. (The database refuses it too: see the security_hardening migration.)
+  if (isDemoEmail(claims.claims.email, process.env.DEMO_EMAIL)) {
+    return { ok: false, message: "The demo account's password can't be changed." };
+  }
 
   const { error } = await supabase.auth.updateUser({ password: parsed.value });
   if (error) {
@@ -126,6 +134,7 @@ export async function createInvite(): Promise<InviteResult> {
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
   if (!userId) redirect("/login");
+  if (!(await isAdmin(supabase))) return ADMIN_ONLY;
 
   const code = randomInviteCode();
   const { error } = await supabase.from("invite_codes").insert({ code, created_by: userId });
@@ -153,6 +162,7 @@ export async function revokeInvite(code: string): Promise<{ ok: true } | { ok: f
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
   if (!userId) redirect("/login");
+  if (!(await isAdmin(supabase))) return ADMIN_ONLY;
 
   const { data, error } = await supabase
     .from("invite_codes")
@@ -184,6 +194,7 @@ export async function inviteFromWaitlist(id: string): Promise<WaitlistInviteResu
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
   if (!userId) redirect("/login");
+  if (!(await isAdmin(supabase))) return ADMIN_ONLY;
 
   const { data: person, error: readError } = await supabase
     .from("access_requests")
@@ -205,6 +216,7 @@ export async function removeFromWaitlist(id: string): Promise<{ ok: true } | { o
   const supabase = await createClient();
   const userId = await currentUserId(supabase);
   if (!userId) redirect("/login");
+  if (!(await isAdmin(supabase))) return ADMIN_ONLY;
 
   const { error } = await supabase.from("access_requests").delete().eq("id", String(id));
   if (error) return { ok: false, message: "Couldn't remove them. Please try again." };

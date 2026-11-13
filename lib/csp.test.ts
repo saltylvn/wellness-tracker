@@ -23,6 +23,7 @@ describe("buildCsp", () => {
   it("blocks framing, plugins and other sites in the browser", () => {
     expect(prod).toContain("frame-ancestors 'none'");
     expect(prod).toContain("object-src 'none'");
+    expect(prod).toContain("frame-src 'none'");
     expect(directive(prod, "connect-src")).toBe("connect-src 'self'");
   });
 

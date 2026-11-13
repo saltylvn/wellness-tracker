@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { secureCookieOptions } from "./cookieSecurity";
 import { getSupabaseEnv } from "./env";
 
 // For server code: pages, server actions, route handlers.
@@ -18,8 +19,9 @@ export async function createClient() {
       },
       setAll(cookiesToSet) {
         try {
+          // Login cookies are hidden from page scripts (see cookieSecurity.ts).
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
+            cookieStore.set(name, value, secureCookieOptions(options, process.env.NODE_ENV === "production")),
           );
         } catch {
           // Pages can't write cookies. That's fine: proxy.ts refreshes the

@@ -25,6 +25,9 @@ export function buildCsp(options: { nonce: string; isDev: boolean; supabaseUrl?:
     "font-src 'self'",
     "connect-src 'self'", // the browser only talks to this app; Supabase and Gemini are server-side
     "object-src 'none'",
+    "frame-src 'none'", // the app never shows another site inside itself
+    "worker-src 'self'",
+    "manifest-src 'self'",
     "base-uri 'self'",
     // Google sign-in posts a form here, then redirects to Supabase and on to Google.
     `form-action 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""} https://accounts.google.com`,
