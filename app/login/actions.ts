@@ -9,6 +9,8 @@ import { isMissingSchemaError, DATABASE_BEHIND_MESSAGE } from "@/lib/dbErrors";
 import { normalizeInviteCode, parsePassword, parseUsername, usernameToEmail } from "@/lib/accounts";
 import { parseWaitlistForm } from "@/lib/waitlist";
 
+const SIGN_IN_PASSWORD_MAX = 256;
+
 /** What the password forms show after a try that didn't work (null before any try). */
 export type LoginState = { message: string } | null;
 
@@ -78,6 +80,10 @@ export async function signInWithUsername(_previous: LoginState, formData: FormDa
   if (!username.ok || typeof password !== "string" || password === "") {
     return { message: "Enter your username and password." };
   }
+  // No real password is this long; don't pass an oversized one on to be checked.
+  if (password.length > SIGN_IN_PASSWORD_MAX) {
+    return { message: "That username and password don't match. Please try again." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
@@ -133,7 +139,7 @@ export async function createAccount(_previous: LoginState, formData: FormData): 
   // With "Confirm email" turned on in Supabase, no session comes back (it would wait for
   // an email nobody can receive). It must be off for username accounts.
   if (!data.session) {
-    return { message: "Your account was made but can't sign in yet. Ask the admin to turn off \"Confirm email\" in Supabase." };
+    return { message: "Your account was made but can't sign in yet. Please let the person who invited you know." };
   }
   redirect("/workouts");
 }

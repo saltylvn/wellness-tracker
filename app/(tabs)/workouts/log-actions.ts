@@ -84,8 +84,10 @@ export async function deleteSet(setId: string): Promise<ActionResult> {
   if (typeof setId !== "string" || setId === "") return SAVE_FAILED;
 
   const supabase = await createClient();
-  // Row Level Security means this can only ever delete your own set.
-  const { error } = await supabase.from("workout_sets").delete().eq("id", setId);
+  const userId = await currentUserId(supabase);
+  if (!userId) return SIGN_IN_AGAIN;
+  // Only your own set (the database's row-level security enforces this too).
+  const { error } = await supabase.from("workout_sets").delete().eq("id", setId).eq("user_id", userId);
   if (error) return SAVE_FAILED;
 
   revalidatePath("/workouts");

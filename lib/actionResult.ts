@@ -15,6 +15,18 @@ export async function currentUserId(supabase: SupabaseClient): Promise<string | 
   return data?.claims.sub ?? null;
 }
 
+/**
+ * True when the signed-in person is the admin. The database enforces this too (row-level
+ * security on invites and the wait-list); admin actions also ask first, so a non-admin
+ * gets a clear "no" instead of a quiet nothing.
+ */
+export async function isAdmin(supabase: SupabaseClient): Promise<boolean> {
+  const { data, error } = await supabase.rpc("is_admin");
+  return !error && data === true;
+}
+
+export const ADMIN_ONLY = { ok: false as const, message: "Only the admin can do that." };
+
 /** The reply for a failed database write: a missing SQL step gets its own clear message. */
 export function failedSave(error: { code?: string | null } | null | undefined): ActionResult {
   return isMissingSchemaError(error) ? { ok: false, message: DATABASE_BEHIND_MESSAGE } : SAVE_FAILED;

@@ -30,8 +30,10 @@ export async function deleteWeight(date: string): Promise<ActionResult> {
   if (!isValidDateKey(date)) return INVALID_DATE;
 
   const supabase = await createClient();
-  // Row Level Security means this can only ever delete your own weigh-in.
-  const { error } = await supabase.from("weight_logs").delete().eq("log_date", date);
+  const userId = await currentUserId(supabase);
+  if (!userId) return SIGN_IN_AGAIN;
+  // Only your own weigh-in (the database's row-level security enforces this too).
+  const { error } = await supabase.from("weight_logs").delete().eq("log_date", date).eq("user_id", userId);
   if (error) return SAVE_FAILED;
 
   revalidatePath("/weight");

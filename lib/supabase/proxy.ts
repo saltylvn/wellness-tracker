@@ -39,7 +39,7 @@ export async function updateSession(request: NextRequest, requestHeaders: Record
   const { data } = await supabase.auth.getClaims();
   const isLoggedIn = Boolean(data?.claims);
   const { pathname } = request.nextUrl;
-  const isAuthPage = pathname === "/login" || pathname.startsWith("/auth");
+  const isAuthPage = pathname === "/login" || pathname === "/auth/callback";
 
   if (!isLoggedIn && !isAuthPage) {
     return redirectWithCookies(request, response, "/login");

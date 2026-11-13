@@ -25,9 +25,10 @@ export async function updateSavedFood(
   if (typeof id !== "string" || id === "") return { message: "Couldn't save. Please try again." };
 
   const supabase = await createClient();
-  if (!(await currentUserId(supabase))) return { message: "Please sign in again." };
-  // Row Level Security means this can only ever change your own saved food.
-  const { error } = await supabase.from("saved_foods").update(parsed.values).eq("id", id);
+  const userId = await currentUserId(supabase);
+  if (!userId) return { message: "Please sign in again." };
+  // Only your own saved food (the database's row-level security enforces this too).
+  const { error } = await supabase.from("saved_foods").update(parsed.values).eq("id", id).eq("user_id", userId);
 
   if (error) {
     // 23505 = unique violation: another saved food already has this name.
@@ -47,8 +48,9 @@ export async function deleteSavedFood(formData: FormData) {
   const id = formData.get("id");
   if (typeof id === "string" && id !== "") {
     const supabase = await createClient();
-    if (!(await currentUserId(supabase))) redirect("/login");
-    await supabase.from("saved_foods").delete().eq("id", id);
+    const userId = await currentUserId(supabase);
+    if (!userId) redirect("/login");
+    await supabase.from("saved_foods").delete().eq("id", id).eq("user_id", userId);
   }
   revalidatePath("/food/saved");
   redirect(backToList(formData.get("date")));
