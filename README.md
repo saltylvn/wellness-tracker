@@ -12,7 +12,7 @@
 
 - **Weight:** daily weigh-ins on scroll wheels, start / current / target with a progress bar, a hand-built SVG chart from your starting date to today, weekly pace, weeks to go and a projected goal date, and a weekly weight-loss streak.
 - **Fitness:** a week calendar drives the page. Toggle which days are for lifting, cardio, both or rest.
-  - **Lifting:** your own exercises with sets and rep ranges, supersets, rest reminders, weight / reps or timed sets on scroll wheels, and your PR on every card. Two "priority lifts" sit at the top with their PRs.
+  - **Lifting:** your own exercises with sets and rep ranges, supersets, rest reminders, weight / reps or timed sets on scroll wheels, and your PR on every card. Up to three "priority lifts" sit at the top with their PRs.
   - **Cardio and recovery:** plan a run, ride, swim or walk (or a walk, bike ride or yoga on rest days) with a target, then tick **Completed**; distances convert to count toward weekly goals.
   - A gym check-in barcode, read from a screenshot in the browser and redrawn on the server.
 - **Nutrition:** add food by **photo** or **description** and Google Gemini estimates calories, protein, carbs and fat (always editable before saving); a calorie ring, macro goals, water tracking and a saved-foods library.
