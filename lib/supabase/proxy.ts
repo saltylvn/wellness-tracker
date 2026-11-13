@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { secureCookieOptions } from "./cookieSecurity";
 import { getSupabaseEnv } from "./env";
 
 // Runs on every page request (via /proxy.ts) to:
@@ -23,8 +24,9 @@ export async function updateSession(request: NextRequest, requestHeaders: Record
       setAll(cookiesToSet, headers) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request: forwarded() });
+        // Login cookies are hidden from page scripts (see cookieSecurity.ts).
         cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options),
+          response.cookies.set(name, value, secureCookieOptions(options, process.env.NODE_ENV === "production")),
         );
         // Stops CDNs from caching responses that carry login cookies.
         Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
