@@ -32,9 +32,16 @@ jobs:
         with:
           node-version-file: .nvmrc # same Node major as Vercel (24)
           cache: npm # reuse downloaded packages between runs (faster)
-      - run: npm ci
-      # Fails on any high or critical advisory in packages that ship to users.
+      # --ignore-scripts: a package can't run its own install code on this machine
+      # (the checks below don't need any, and it closes a common supply-chain trick).
+      - run: npm ci --ignore-scripts
+      # Checks every installed package against the npm registry's signatures, so a
+      # tampered or swapped download is caught.
+      - run: npm audit signatures
+      # Fails on any high or critical advisory in packages that ship to users...
       - run: npm audit --omit=dev --audit-level=high
+      # ...and on any critical one in the development tools too.
+      - run: npm audit --audit-level=critical
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm test
