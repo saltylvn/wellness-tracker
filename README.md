@@ -17,7 +17,7 @@
   - A gym check-in barcode, read from a screenshot in the browser and redrawn on the server.
 - **Nutrition:** add food by **photo** or **description** and Google Gemini estimates calories, protein, carbs and fat (always editable before saving); a calorie ring, macro goals, water tracking and a saved-foods library.
 - **Streaks** for workouts and food, plus a daily sunshine log.
-- **Coach:** a **Coach** button at the top of every tab drops down a short coaching note each morning (yesterday vs plan, the week so far, today's focus) and a weekly review every Sunday, with 👍/👎. The notes are written by an AI agent on a Raspberry Pi 5 at home (see [The coach](#the-coach)).
+- **Coach:** a **Coach** button at the top of every tab drops down a short coaching note each morning (yesterday vs plan, the week so far, today's focus) and a weekly review every Sunday, with 👍/👎. On **Wednesdays and Sundays** it also recommends workouts: 2 to 5 articles from fitness publishers, with links, a summary of each and how they'd fit your plan, and the Coach window opens on them by itself the first time you open the app after 5 am. Everything is written by an AI agent on a Raspberry Pi 5 at home (see [The coach](#the-coach)).
 - **Accounts:** Google sign-in or username and password, invite-only sign-up, a wait-list offered only when a login is refused, and an admin view to text invites (to wait-list people directly) and see users.
 
 ## Screens
@@ -61,9 +61,9 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 | Database and auth | Supabase: Postgres with row-level security, Google OAuth and password sign-in       | Real relational data; the database itself enforces who can see what        |
 | AI                | Google Gemini (server-side only), JSON-schema output, raced model chain            | Photo and text nutrition estimates on the free tier                         |
 | Hosting and CI    | Vercel (Node 24), GitHub Actions, Dependabot                                       | Every pull request is checked and previewed; every merge to `main` deploys  |
-| Coach agent       | Raspberry Pi 5: Python 3.13, systemd timers, `psycopg`, Gemini REST, pytest and mypy | Runs on its own at home, for $0; holds only two single-function database logins |
+| Coach agent       | Raspberry Pi 5: Python 3.13, systemd timers, `psycopg`, Gemini REST, RSS feeds, pytest and mypy | Runs on its own at home, for $0; holds only two single-function database logins |
 
-**Data model:** 18 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, sunshine, AI request log, demo state, invite codes, admins, the wait-list, and the coach's config and notes), created by 32 versioned SQL migrations in [`supabase/migrations/`](supabase/migrations/), written so the app keeps working before and after each one runs.
+**Data model:** 18 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, sunshine, AI request log, demo state, invite codes, admins, the wait-list, and the coach's config and notes), created by 33 versioned SQL migrations in [`supabase/migrations/`](supabase/migrations/), written so the app keeps working before and after each one runs.
 
 ## AI features
 
@@ -74,7 +74,7 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 | Speed             | Fastest free models first; if one hasn't answered in 1.5 s a backup starts alongside it and the first valid answer wins (`raceModels`). Measured: **12.5 s → 1.3–2.5 s**               |
 | Reliability       | Overloaded or retired models fall through to the next, a bad key stops at once, per-model timeouts and a total time budget; every in-flight request is cancelled once there's an answer |
 | Cost control      | A 40-a-day limit per person, taken atomically in Postgres before the AI is called                                                                                                       |
-| Coach notes       | Written off-site by the Raspberry Pi agent below; the app only reads and displays them, as plain text                                                                                  |
+| Coach notes       | Written off-site by the Raspberry Pi agent below (daily, weekly, and workout picks with links); the app only reads and displays them, as plain text plus allowlisted links                                                                                  |
 
 ## The coach
 
@@ -85,21 +85,23 @@ An always-on **Raspberry Pi 5** at home writes the coaching notes. The agent's c
  coach.weekly_data()  ──read──▶   compute stats in Python                 writes the words
                                   filter: totals only, no dates or ids ──▶ from the numbers
  coach.save_note()   ◀──save──    check every number, then save        ◀── only
-        │
+        │                         Wed + Sun: 7 fitness RSS feeds ──▶ picks by number,
+        │                         code inserts the real links       summaries
         ▼
  Coach window in the app  (my_coach_panel, rate_coach_note)
 ```
 
 - **Code does the math; the model only writes the words.** Every number is computed and tested in Python, and a checker rejects any note with a number the code didn't produce, medical or diet advice, links or markup. One retry, then a plain-stats note written by code.
 - **Two locked-down database logins.** `coach_reader` can call one function that returns one configured person's data (food and water as daily totals only: no food names, photos or barcode) in read-only transactions. `coach_writer` can call one function that saves one note for today or this week, re-checked for shape and size. Neither can read a table, neither can see other users, both refuse the demo account, and neither is exposed through the REST API ([`20261116000000_coach_access.sql`](supabase/migrations/20261116000000_coach_access.sql), [`20261117000000_coach_notes.sql`](supabase/migrations/20261117000000_coach_notes.sql)).
+- **Workout picks without risky links.** On Wednesdays and Sundays the Pi reads the RSS feeds of 7 fitness publishers (Men's Health, Men's Journal, Muscle & Fitness, BOXROX, Nerd Fitness, Stronger By Science, Legion), keeps articles about training, and ranks them against the plan. The model picks articles **by number** and code inserts each real link, so it never writes a URL. The database (`coach.allowed_link`) and the app (`allowedLink`) both accept only https links on those 7 sites, rejecting look-alike domains, `http`, `javascript:` and quotes ([`20261118000000_coach_workouts.sql`](supabase/migrations/20261118000000_coach_workouts.sql)).
 - **In the app,** people see and rate only their own notes, which are rendered as plain text, never HTML. A note loads only when Coach is tapped, so no page waits on it.
-- **On the Pi:** a sandboxed systemd service on a dedicated user, timers at 6 am Mon–Sat and 6 pm Sunday, secrets in a root-only store, key-only SSH and a LAN-only firewall.
+- **On the Pi:** a sandboxed systemd service on a dedicated user, timers at 6 am Mon–Sat, 6 pm Sunday and 4:30 am Wednesday and Sunday, secrets in a root-only store, key-only SSH and a LAN-only firewall.
 
 ## Security
 
 - **Row-level security on all 16 tables** (28 policies): every row belongs to one signed-in user, enforced by Postgres.
 - **Invite-only accounts:** a `BEFORE INSERT` trigger on `auth.users` refuses any new account without an unused, unexpired invite code, including Google sign-ups. Only the admin can create or revoke codes; the admin role lives in a table with no write policies.
-- **The coach's database logins** can each call one function and nothing else (see [The coach](#the-coach)); both are tested on Postgres.
+- **The coach's database logins** can each call one function and nothing else, and workout links must be on an allowlist enforced in the database (see [The coach](#the-coach)); all tested on Postgres.
 - **Server-side secrets only:** the Gemini key never reaches the browser; AI replies are treated as untrusted input and validated before use. Google sign-in starts on the server (PKCE).
 - **Strict Content Security Policy** with a fresh nonce per request (`strict-dynamic`, `frame-ancestors 'none'`, `object-src 'none'`), plus a Permissions-Policy, cross-origin window isolation, nosniff, no framing and a strict referrer policy. HTTPS everywhere (HSTS on Vercel).
 - **Limits under concurrency:** the 25-account cap and the AI daily limit use Postgres advisory locks, so two requests at once can't both slip past.
@@ -107,8 +109,8 @@ An always-on **Raspberry Pi 5** at home writes the coaching notes. The agent's c
 
 ## Quality
 
-- **397 automated tests** (Vitest). Most cover the pure logic: streaks, goal and weight-plan math, chart ranges, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, account and invite rules, cardio unit conversion, the database helpers (against a shared fake Supabase client), and more.
-- **The database rules are tested on a real Postgres.** Every migration is applied in order to an in-memory Postgres ([PGlite](https://pglite.dev)) with a small stand-in for Supabase's auth schema, then tests check that row-level security is on for every table and keeps each person's rows private, that sign-up refuses missing, used and expired invite codes (and accepts an armed one for Google), that only the admin can list users or create invites, the 25-account cap, the wait-list (visitors can join but never read it or flood it), the AI daily limit, that the shared demo login can't be changed, that the coach's two logins can't reach anything beyond their one function each, and exactly which functions each API role may call ([`supabase/tests/`](supabase/tests/)). They run in about a second on every pull request.
+- **421 automated tests** (Vitest). Most cover the pure logic: streaks, goal and weight-plan math, chart ranges, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, account and invite rules, cardio unit conversion, the database helpers (against a shared fake Supabase client), and more.
+- **The database rules are tested on a real Postgres.** Every migration is applied in order to an in-memory Postgres ([PGlite](https://pglite.dev)) with a small stand-in for Supabase's auth schema, then tests check that row-level security is on for every table and keeps each person's rows private, that sign-up refuses missing, used and expired invite codes (and accepts an armed one for Google), that only the admin can list users or create invites, the 25-account cap, the wait-list (visitors can join but never read it or flood it), the AI daily limit, that the shared demo login can't be changed, that the coach's two logins can't reach anything beyond their one function each, that workout links off the allowlist are refused, and exactly which functions each API role may call ([`supabase/tests/`](supabase/tests/)). They run in about a second on every pull request.
 - **A performance test** times the Fitness page's data loading against a simulated 50 ms database and fails if a day takes more than 2 round trips.
 - **CI on every pull request** (about 30 seconds): package signature check, dependency audit, ESLint, TypeScript type check and all tests, plus Vercel's preview build. Both must pass before anything merges.
 
@@ -132,7 +134,7 @@ Longer write-ups of these choices are in [`docs/decisions/`](docs/decisions/).
 | Frontend | Next.js App Router, React Server Components and Server Actions, TypeScript, Tailwind CSS v4, PWA, mobile-first UI in light and dark themes |
 | Backend and data | Postgres schema design, row-level security, triggers, `SECURITY DEFINER` functions, dedicated login roles, versioned migrations, Supabase Auth (OAuth with PKCE) |
 | AI | Gemini text and vision with JSON-schema output, hedged model racing, prompt design, output validation, evals with a prompt-injection scenario, a privacy filter for model inputs |
-| AI agent | A Python agent on a Raspberry Pi: scheduled jobs, deterministic stats with the model limited to writing, retries and fallbacks, a sandboxed systemd service |
+| AI agent | A Python agent on a Raspberry Pi: scheduled jobs, deterministic stats with the model limited to writing, RSS ingestion with link safety (the model picks by id, code inserts links), retries and fallbacks, a sandboxed systemd service |
 | Security | Content Security Policy with nonces, least-privilege database access, secrets handling, host hardening (key-only SSH, firewall), threat modeling |
 | Quality and delivery | Vitest, tests against a real Postgres (PGlite), pytest, mypy, ESLint, GitHub Actions, CodeQL, Dependabot, Vercel preview deploys |
 
@@ -160,7 +162,7 @@ Requires Node.js 24 (see [`.nvmrc`](.nvmrc)) and a free [Supabase](https://supab
 
 ## Roadmap
 
-Shipped: PWA shell and deploy, sign-in (Google, username and password, invite-only), food log with macro goals, AI text and photo estimates, streaks, workouts with PRs and priority lifts, planned cardio and recovery days, water and sunshine logs, the Weight tab with a chart and goal date, an admin view, and the coach with daily notes and weekly reviews from a Raspberry Pi agent.
+Shipped: PWA shell and deploy, sign-in (Google, username and password, invite-only), food log with macro goals, AI text and photo estimates, streaks, workouts with PRs and priority lifts, planned cardio and recovery days, water and sunshine logs, the Weight tab with a chart and goal date, an admin view, and the coach with daily notes, weekly reviews and twice-weekly workout picks from a Raspberry Pi agent.
 
 Next: real-iPhone testing of photo logging and the scroll wheels, integration tests for the server actions, and a "last note is N days old" warning in the coach window when a scheduled run fails.
 
