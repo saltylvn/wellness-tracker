@@ -14,7 +14,7 @@ slides = {}
 slides["01-hero"] = page("p", f'''
 <div class="eyebrow">Case study · Full-stack web app</div>
 <div class="h1" style="margin-top:22px;font-size:104px;letter-spacing:.06em">DEVELOP</div>
-<div class="lede" style="margin-top:18px;max-width:880px;font-size:30px;color:#3a3a40">An iPhone-first wellness tracker for <b style="color:var(--ink)">weight</b>, <b style="color:var(--ink)">workouts</b> and <b style="color:var(--ink)">nutrition</b>, with AI calorie estimates from a photo or a sentence.</div>
+<div class="lede" style="margin-top:18px;max-width:880px;font-size:30px;color:var(--muted)">An iPhone-first wellness tracker for <b style="color:var(--ink)">weight</b>, <b style="color:var(--ink)">workouts</b> and <b style="color:var(--ink)">nutrition</b>, with AI calorie estimates from a photo or a sentence.</div>
 <div style="position:absolute;left:0;right:0;top:440px;height:680px">
   <div class="phone" style="position:absolute;width:268px;left:120px;top:56px;transform:rotate(-6deg)"><img src="ph-weight-chart.png"></div>
   <div class="phone" style="position:absolute;width:296px;left:392px;top:0;z-index:2"><img src="ph-fitness-lifts.png"></div>
@@ -38,7 +38,7 @@ slides["02-weight"] = page("p", f'''
   ])}</div>
 </div>
 <div class="card" style="position:absolute;left:72px;right:72px;bottom:120px;padding:22px 28px;display:flex;gap:16px;align-items:center">
-  <span class="tag">data</span><span style="font:500 21px/1.35 Inter;color:#3a3a40">Dates are stored as the user's <b style="color:var(--ink)">local calendar day</b>, with a unique (user, day) constraint: no duplicate weigh-ins, no midnight-UTC bugs.</span>
+  <span class="tag">data</span><span style="font:500 21px/1.35 Inter;color:var(--muted)">Dates are stored as the user's <b style="color:var(--ink)">local calendar day</b>, with a unique (user, day) constraint: no duplicate weigh-ins, no midnight-UTC bugs.</span>
 </div>''', n=2)
 
 # 3. Fitness
@@ -56,7 +56,7 @@ slides["03-fitness"] = page("p", f'''
   ])}</div>
 </div>
 <div class="card" style="position:absolute;left:72px;right:72px;bottom:120px;padding:22px 28px;display:flex;gap:16px;align-items:center">
-  <span class="tag">perf</span><span style="font:500 21px/1.35 Inter;color:#3a3a40">Every Fitness page loads in <b style="color:var(--ink)">2 parallel query rounds</b>, guarded by a test that fails the build if a day type needs a third.</span>
+  <span class="tag">perf</span><span style="font:500 21px/1.35 Inter;color:var(--muted)">Every Fitness page loads in <b style="color:var(--ink)">2 parallel query rounds</b>, guarded by a test that fails the build if a day type needs a third.</span>
 </div>''', n=3)
 
 # 4. Nutrition
@@ -74,13 +74,13 @@ slides["04-nutrition"] = page("p", f'''
   ])}</div>
 </div>
 <div class="card" style="position:absolute;left:72px;right:72px;bottom:120px;padding:22px 28px;display:flex;gap:16px;align-items:center">
-  <span class="tag">cost control</span><span style="font:500 21px/1.35 Inter;color:#3a3a40"><b style="color:var(--ink)">40 AI requests per user per day</b>, enforced atomically in Postgres with a per-user lock; runs on the free tier.</span>
+  <span class="tag">cost control</span><span style="font:500 21px/1.35 Inter;color:var(--muted)"><b style="color:var(--ink)">40 AI requests per user per day</b>, enforced atomically in Postgres with a per-user lock; runs on the free tier.</span>
 </div>''', n=4)
 
 # 5. Architecture
 def box(title, sub, extra="", accent=False, w=None):
     st = f"width:{w}px;" if w else ""
-    bg = "background:var(--ink);color:#fff;" if accent else ""
+    bg = "background:var(--card-2);border-color:var(--line-strong);" if accent else ""
     sc = "color:#c9c9cf" if accent else "color:var(--muted)"
     return f'<div class="card" style="{st}{bg}padding:20px 22px"><div style="font:700 23px/1.2 Inter">{title}</div><div style="font:400 17px/1.4 Inter;{sc};margin-top:6px">{sub}</div>{extra}</div>'
 arrow_d = '<div style="text-align:center;font:700 26px/1 Inter;color:var(--accent);margin:10px 0">↓</div>'
@@ -90,7 +90,7 @@ slides["05-architecture"] = page("p", f'''
 <div style="margin-top:44px;display:grid;gap:0">
   {box("📱 iPhone PWA", "Installable from Safari · React 19 client islands · loading skeletons for instant taps")}
   {arrow_d}
-  <div style="border:2px dashed #d7d7dc;border-radius:28px;padding:22px;position:relative">
+  <div style="border:2px dashed var(--line-strong);border-radius:28px;padding:22px;position:relative">
     <div class="mono" style="position:absolute;top:-13px;left:24px;background:var(--bg);padding:0 10px;font-size:16px;color:var(--muted)">Vercel</div>
     {box("proxy.ts · edge of every request", "Per-request CSP nonce · session refresh · sign-in redirects")}
     {arrow_d}
@@ -102,7 +102,7 @@ slides["05-architecture"] = page("p", f'''
   </div>
   {arrow_d}
   <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:14px">
-    {box("Supabase", "Postgres · 15 tables · Row-Level Security on all · triggers & SECURITY DEFINER functions · 26 versioned SQL migrations<br>Auth · Google OAuth (PKCE) + username/password · invite-only", accent=True)}
+    {box("Supabase", "Postgres · 18 tables · Row-Level Security on all · triggers & SECURITY DEFINER functions · 32 versioned SQL migrations<br>Auth · Google OAuth (PKCE) + username/password · invite-only", accent=True)}
     {box("Google Gemini", "Text + vision models, free tier · called only from the server")}
   </div>
 </div>
@@ -111,7 +111,7 @@ slides["05-architecture"] = page("p", f'''
 </div>
 <div class="card" style="margin-top:22px;padding:22px 26px;display:grid;gap:16px">
   <div class="mono" style="font-size:15px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em">Request lifecycles</div>
-  <div style="display:grid;grid-template-columns:170px 1fr;gap:14px;align-items:baseline"><b style="font:700 19px/1.3 Inter">Save a set</b><span style="font:400 17px/1.45 Inter;color:#4a4a52">Tap Log → Server Action → validate input → Postgres (RLS checks the owner) → revalidate → fresh page</span></div><div style="display:grid;grid-template-columns:170px 1fr;gap:14px;align-items:baseline"><b style="font:700 19px/1.3 Inter">AI food photo</b><span style="font:400 17px/1.45 Inter;color:#4a4a52">Resize to 768 px in the browser → /api/estimate-food → daily limit (Postgres function) → Gemini race → validate JSON → editable form</span></div>
+  <div style="display:grid;grid-template-columns:170px 1fr;gap:14px;align-items:baseline"><b style="font:700 19px/1.3 Inter">Save a set</b><span style="font:400 17px/1.45 Inter;color:var(--muted)">Tap Log → Server Action → validate input → Postgres (RLS checks the owner) → revalidate → fresh page</span></div><div style="display:grid;grid-template-columns:170px 1fr;gap:14px;align-items:baseline"><b style="font:700 19px/1.3 Inter">AI food photo</b><span style="font:400 17px/1.45 Inter;color:var(--muted)">Resize to 768 px in the browser → /api/estimate-food → daily limit (Postgres function) → Gemini race → validate JSON → editable form</span></div>
 </div>''', n=5)
 
 # 6. Security
@@ -133,14 +133,14 @@ slides["06-security"] = page("p", f'''
 </div>''', n=6)
 
 # 7. Automation & quality
-steps = ["Pull request","npm ci","npm audit","ESLint","tsc --noEmit","Vitest · 302 tests","Vercel preview","Merge → prod"]
+steps = ["Pull request","npm ci","npm audit","ESLint","tsc --noEmit","Vitest · 397 tests","Vercel preview","Merge → prod"]
 flow = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">' + "".join(
   f'<div class="card" style="padding:22px 16px;text-align:center"><div class="mono" style="font-size:16px;color:var(--accent)">{i+1:02d}</div><div style="font:700 21px/1.25 Inter;margin-top:8px">{s}</div></div>' for i,s in enumerate(steps)) + '</div>'
 auto = [
  ("CI on every PR (~30 s)", "Lint, type-check, unit tests and a dependency audit must pass; main is protected and force-push is blocked."),
  ("Preview deploys", "Vercel builds every PR to its own URL before anything reaches production."),
  ("Dependabot", "Weekly grouped updates for packages and GitHub Actions; security fixes open immediately."),
- ("Schema as code", "26 versioned SQL migrations; new columns are read defensively so the app never breaks mid-rollout."),
+ ("Schema as code", "32 versioned SQL migrations; new columns are read defensively so the app never breaks mid-rollout."),
  ("Self-healing demo", "A Postgres function rebuilds the recruiter demo around each visitor's date, at most hourly."),
  ("Integrations", "Gemini AI · Google OAuth · SMS invite deep links · barcode decode/encode · installable PWA."),
 ]
@@ -166,10 +166,10 @@ slides["08-stack"] = page("p", f'''
   {"".join(f'<div class="card" style="padding:24px"><div class="mono" style="font-size:16px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em">{g}</div><div style="margin-top:14px;display:grid;gap:10px">' + "".join(f'<div style="font:600 21px/1.25 Inter">{x}</div>' for x in xs) + '</div></div>' for g,xs in groups)}
 </div>
 <div style="margin-top:26px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
-  {"".join(f'<div class="card" style="padding:18px;text-align:center"><div style="font:800 40px/1 Inter Display;color:var(--accent)">{v}</div><div style="font:500 16px/1.3 Inter;color:var(--muted);margin-top:8px">{k}</div></div>' for v,k in [("302","unit tests"),("15","Postgres tables"),("26","SQL migrations"),("3","tabs, 1 PWA")])}
+  {"".join(f'<div class="card" style="padding:18px;text-align:center"><div style="font:800 40px/1 Inter Display;color:var(--accent)">{v}</div><div style="font:500 16px/1.3 Inter;color:var(--muted);margin-top:8px">{k}</div></div>' for v,k in [("397","unit tests"),("18","Postgres tables"),("32","SQL migrations"),("3","tabs, 1 PWA")])}
 </div>
-<div class="card" style="margin-top:26px;padding:28px 30px;background:var(--ink);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:20px">
-  <div><div style="font:800 32px/1.1 Inter Display">Try the live demo</div><div style="font:400 19px/1.4 Inter;color:#c9c9cf;margin-top:8px">No sign-up: tap <b style="color:#fff">“Try the demo”</b> for a full sample account.</div></div>
+<div class="card" style="margin-top:26px;padding:28px 30px;background:var(--card-2);display:flex;justify-content:space-between;align-items:center;gap:20px">
+  <div><div style="font:800 32px/1.1 Inter Display">Try the live demo</div><div style="font:400 19px/1.4 Inter;color:var(--muted);margin-top:8px">No sign-up: tap <b style="color:var(--ink)">“Try the demo”</b> for a full sample account.</div></div>
   <div class="pill" style="font-size:21px;white-space:nowrap">{URL}</div>
 </div>''', n=8)
 
@@ -179,7 +179,7 @@ slides["project-cover"] = page("l", f'''
   <div>
     <div class="eyebrow" style="font-size:16px">Full-stack web app</div>
     <div class="h1" style="margin-top:14px;font-size:72px;letter-spacing:.06em">DEVELOP</div>
-    <div class="lede" style="margin-top:14px;font-size:21px;max-width:520px;color:#3a3a40">iPhone-first wellness tracker: weight, workouts and nutrition with AI calorie estimates from a photo.</div>
+    <div class="lede" style="margin-top:14px;font-size:21px;max-width:520px;color:var(--muted)">iPhone-first wellness tracker: weight, workouts and nutrition with AI calorie estimates from a photo.</div>
     <div style="margin-top:22px;display:flex;gap:8px;flex-wrap:wrap;max-width:560px">{"".join(f'<span class="chip" style="font-size:15px;padding:8px 12px"><span class="dot" style="width:8px;height:8px"></span>{t}</span>' for t in ["Next.js 16","TypeScript","Supabase","Gemini AI","Vercel"])}</div>
     <div class="pill" style="margin-top:26px;font-size:17px;padding:12px 18px">Live demo · {URL}</div>
   </div>
@@ -190,73 +190,95 @@ slides["project-cover"] = page("l", f'''
   </div>
 </div>''')
 
+
+GH = '<svg width="{w}" height="{w}" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>'
+def gh(w): return GH.replace("{w}", str(w))
+
+STATS = [("397","automated tests"),("18/18","tables with row-level security"),("~2 s","AI photo estimates"),("6 am","daily AI coach note")]
+STACK = [
+    ("frontend",       "Next.js 16 · React 19 · TypeScript<br>Tailwind v4 · Server Actions · PWA"),
+    ("backend & data", "Supabase Postgres · Auth<br>Row-Level Security · 32 migrations"),
+    ("ai",             "Google Gemini · text + vision<br>schema-checked · hedged racing"),
+    ("ai agent",       "Raspberry Pi 5 · Python · systemd<br>evals · least-privilege SQL roles"),
+    ("security",       "Nonce CSP · invite-only auth<br>rate limits · hardened host"),
+    ("delivery",       "Vercel · GitHub Actions · CodeQL<br>Vitest · pytest · mypy"),
+]
+
 slides["cover-4x3"] = page("w grid-bg", f'''
-<div style="display:grid;grid-template-columns:1fr 600px;height:610px;align-items:center;gap:10px">
+<div class="glow" style="width:620px;height:620px;right:-80px;top:-120px"></div>
+<div style="display:grid;grid-template-columns:1fr 600px;height:575px;align-items:center;gap:10px;position:relative">
   <div style="padding-top:40px">
     <div style="display:flex;align-items:center;gap:14px">
       <div class="eyebrow" style="font:600 18px/1 'JetBrains Mono';letter-spacing:.12em">Web Application</div>
-      <span style="display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--accent);color:var(--accent);border-radius:999px;padding:6px 11px;font:700 13px/1 Inter;letter-spacing:.02em"><span style="width:7px;height:7px;border-radius:50%;background:var(--accent)"></span>Live · in daily use</span>
+      <span style="display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:6px 11px;font:700 13px/1 Inter;letter-spacing:.02em"><span style="width:7px;height:7px;border-radius:50%;background:var(--accent)"></span>Live · in daily use</span>
     </div>
     <div class="h1" style="margin-top:16px;font-size:84px;letter-spacing:.06em">DEVELOP</div>
-    <div style="margin-top:8px;font:700 28px/1.1 'Inter Display';letter-spacing:.01em;color:var(--accent)">Wellness Tracker</div>
-    <div class="lede" style="margin-top:16px;font-size:24px;max-width:480px;color:#3a3a40">An iPhone-first wellness tracker for <b style="color:var(--ink)">weight</b>, <b style="color:var(--ink)">workouts</b> and <b style="color:var(--ink)">nutrition</b>, with calorie estimates from a photo.</div>
-    <div class="pill" style="margin-top:30px;font:600 15px/1 'JetBrains Mono';padding:15px 18px;white-space:nowrap">Live demo · {URL}</div>
-    <div style="margin-top:12px;display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border-radius:999px;padding:13px 20px;font:600 16px/1 'JetBrains Mono';white-space:nowrap"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>github.com/saltylvn/wellness-tracker</div>
+    <div style="margin-top:8px;font:700 28px/1.1 'Inter Tight','Inter';letter-spacing:.01em;color:var(--accent)">Wellness Tracker</div>
+    <div class="lede" style="margin-top:16px;font-size:23px;max-width:500px">An iPhone-first tracker for <b style="color:var(--ink)">weight</b>, <b style="color:var(--ink)">workouts</b> and <b style="color:var(--ink)">nutrition</b>, with AI photo estimates and a <b style="color:var(--ink)">daily AI coach</b> running on a Raspberry Pi.</div>
+    <div class="pill" style="margin-top:28px;font:600 15px/1 'JetBrains Mono';padding:15px 18px;white-space:nowrap">Live demo · {URL}</div>
+    <div style="margin-top:12px;display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#111;border-radius:999px;padding:13px 20px;font:600 16px/1 'JetBrains Mono';white-space:nowrap">{gh(20)}github.com/saltylvn/wellness-tracker</div>
   </div>
   <div style="position:relative;height:100%">
     <div class="phone" style="position:absolute;width:220px;left:6px;top:92px;transform:rotate(-6deg);border-radius:37px;padding:8px"><img src="ph-weight-chart.png" style="border-radius:30px"></div>
-    <div class="phone" style="position:absolute;width:246px;left:180px;top:30px;z-index:2;border-radius:39px;padding:9px"><img src="ph-fitness-lifts.png" style="border-radius:31px"></div>
-    <div class="phone" style="position:absolute;width:220px;left:384px;top:92px;transform:rotate(6deg);border-radius:37px;padding:8px"><img src="ph-nutrition-top.png" style="border-radius:30px"></div>
+    <div class="phone" style="position:absolute;width:246px;left:180px;top:30px;z-index:2;border-radius:39px;padding:9px"><img src="ph-coach.png" style="border-radius:31px"></div>
+    <div class="phone" style="position:absolute;width:220px;left:384px;top:92px;transform:rotate(6deg);border-radius:37px;padding:8px"><img src="ph-fitness-lifts.png" style="border-radius:30px"></div>
   </div>
 </div>
-<div style="position:absolute;left:64px;right:64px;bottom:214px;display:grid;grid-template-columns:1fr 1.45fr 1fr;gap:12px">
-  {"".join(f'<div style="display:flex;align-items:baseline;gap:10px;justify-content:center;border-top:1.5px dashed #d4d4da;padding-top:16px"><span style="font:800 34px/1 \'Inter Display\';color:var(--accent);white-space:nowrap">{v}</span><span class="mono" style="font-size:14px;font-weight:500;color:#3a3a40;white-space:nowrap">{k}</span></div>' for v,k in [("359","automated tests"),("16/16","tables with row-level security"),("~2 s","AI photo estimates")])}
+<div style="position:absolute;left:64px;right:64px;bottom:252px;display:grid;grid-template-columns:1fr 1.55fr 1.15fr 1.25fr;gap:12px">
+  {"".join(f'<div style="display:flex;align-items:baseline;gap:9px;justify-content:center;border-top:1.5px dashed var(--line-strong);padding-top:16px"><span style="font:800 32px/1 \'Inter Tight\',\'Inter\';color:var(--accent);white-space:nowrap">{v}</span><span class="mono" style="font-size:13px;font-weight:500;color:var(--muted);white-space:nowrap">{k}</span></div>' for v,k in STATS)}
 </div>
-<div style="position:absolute;left:64px;right:64px;bottom:44px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
-  {"".join(f'<div class="card" style="padding:16px 16px;border:1px solid var(--line)"><div class="mono" style="font-size:13px;color:var(--accent)">// {g.lower()}</div><div class="mono" style="font-size:13px;line-height:1.65;font-weight:500;margin-top:8px;color:var(--ink)">{x}</div></div>' for g,x in [
-    ("Frontend","Next.js 16 · React 19<br>TypeScript · Tailwind<br>Server Actions · PWA"),
-    ("Backend & data","Supabase Postgres<br>Supabase Auth<br>Row-Level Security"),
-    ("AI","Google Gemini<br>text + vision<br>server-side only"),
-    ("Security","Nonce-based CSP<br>Invite-only auth<br>Per-user rate limits"),
-    ("Delivery","Vercel<br>GitHub Actions CI<br>Vitest · Dependabot")])}
+<div style="position:absolute;left:64px;right:64px;bottom:42px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+  {"".join(f'<div class="card" style="padding:14px 16px;border-radius:16px"><div class="mono" style="font-size:13px;color:var(--accent)">// {g}</div><div class="mono" style="font-size:12.5px;line-height:1.65;font-weight:500;margin-top:7px;color:var(--ink)">{x}</div></div>' for g,x in STACK)}
 </div>''')
 
 slides["social-preview"] = page("sp grid-bg", f'''
-<div style="display:grid;grid-template-columns:1fr 520px;height:100%;align-items:center">
+<div class="glow" style="width:560px;height:560px;right:-60px;top:-140px"></div>
+<div style="display:grid;grid-template-columns:1fr 520px;height:100%;align-items:center;position:relative">
   <div>
     <div style="display:flex;align-items:center;gap:12px">
       <div class="eyebrow" style="font:600 16px/1 'JetBrains Mono';letter-spacing:.12em">Web Application</div>
-      <span style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--accent);color:var(--accent);border-radius:999px;padding:5px 10px;font:700 12px/1 Inter"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>v2.0 · live</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:5px 10px;font:700 12px/1 Inter"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>live · AI coach</span>
     </div>
     <div class="h1" style="margin-top:14px;font-size:92px;letter-spacing:.06em">DEVELOP</div>
-    <div style="margin-top:6px;font:700 30px/1.1 'Inter Display';color:var(--accent)">Wellness Tracker</div>
-    <div class="lede" style="margin-top:14px;font-size:21px;max-width:520px;color:#3a3a40">Weight, workouts and nutrition on iPhone, with calorie estimates from a photo.</div>
-    <div class="mono" style="margin-top:20px;font-size:15px;font-weight:500;color:#3a3a40">Next.js · TypeScript · Supabase · Gemini · Vercel</div>
-    <div style="margin-top:20px;display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:#fff;border-radius:999px;padding:12px 18px;font:600 15px/1 'JetBrains Mono';white-space:nowrap"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>github.com/saltylvn/wellness-tracker</div>
+    <div style="margin-top:6px;font:700 30px/1.1 'Inter Tight','Inter';color:var(--accent)">Wellness Tracker</div>
+    <div class="lede" style="margin-top:14px;font-size:21px;max-width:540px">Weight, workouts and nutrition on iPhone, with AI photo estimates and a daily coach on a Raspberry Pi.</div>
+    <div class="mono" style="margin-top:20px;font-size:14.5px;font-weight:500;color:var(--muted)">Next.js · TypeScript · Supabase · Gemini · Python · Vercel</div>
+    <div style="margin-top:20px;display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:#111;border-radius:999px;padding:12px 18px;font:600 15px/1 'JetBrains Mono';white-space:nowrap">{gh(17)}github.com/saltylvn/wellness-tracker</div>
   </div>
   <div style="position:relative;height:100%">
     <div class="phone" style="position:absolute;width:196px;left:10px;top:118px;transform:rotate(-6deg);border-radius:33px;padding:7px"><img src="ph-weight-chart.png" style="border-radius:27px"></div>
-    <div class="phone" style="position:absolute;width:216px;left:158px;top:66px;z-index:2;border-radius:35px;padding:8px"><img src="ph-fitness-lifts.png" style="border-radius:28px"></div>
-    <div class="phone" style="position:absolute;width:196px;left:326px;top:118px;transform:rotate(6deg);border-radius:33px;padding:7px"><img src="ph-nutrition-top.png" style="border-radius:27px"></div>
+    <div class="phone" style="position:absolute;width:216px;left:158px;top:66px;z-index:2;border-radius:35px;padding:8px"><img src="ph-coach.png" style="border-radius:28px"></div>
+    <div class="phone" style="position:absolute;width:196px;left:326px;top:118px;transform:rotate(6deg);border-radius:33px;padding:7px"><img src="ph-fitness-lifts.png" style="border-radius:27px"></div>
   </div>
 </div>''')
 
-def lbox(t, s, dark=False):
-    bg = "background:var(--ink);color:#fff;" if dark else ""
-    sc = "#c9c9cf" if dark else "var(--muted)"
-    return f'<div class="card" style="{bg}padding:14px 16px"><div style="font:700 17px/1.2 Inter">{t}</div><div style="font:400 13px/1.35 Inter;color:{sc};margin-top:4px">{s}</div></div>'
-arr = '<div style="display:grid;place-items:center;font:800 22px/1 Inter;color:var(--accent)">→</div>'
-slides["project-architecture"] = page("l", f'''
-<div class="eyebrow" style="font-size:15px">DEVELOP · Architecture</div>
-<div class="h2" style="font-size:38px;margin-top:10px">Server-first Next.js on Vercel, Postgres with RLS, server-only AI.</div>
-<div style="margin-top:30px;display:grid;grid-template-columns:1fr 26px 1.2fr 26px 1.25fr;gap:10px;align-items:center">
-  {lbox("📱 iPhone PWA","React 19 client islands")}
+def lbox(t, s, strong=False, tag=None):
+    st = "background:var(--card-2);border-color:var(--line-strong);" if strong else ""
+    tg = f'<span class="mono" style="float:right;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:3px 7px;border-radius:6px">{tag}</span>' if tag else ""
+    return f'<div class="card" style="{st}border-radius:14px;padding:13px 15px">{tg}<div style="font:700 16.5px/1.2 Inter">{t}</div><div style="font:400 12.5px/1.4 Inter;color:var(--muted);margin-top:4px">{s}</div></div>'
+arr = '<div style="display:grid;place-items:center;font:800 20px/1 Inter;color:var(--accent)">→</div>'
+larr = '<div style="display:grid;place-items:center;font:800 20px/1 Inter;color:var(--accent)">←</div>'
+def lane(label): return f'<div class="mono" style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:0 0 9px 2px">// {label}</div>'
+slides["project-architecture"] = page("a grid-bg", f'''
+<div class="eyebrow" style="font:600 15px/1 'JetBrains Mono';letter-spacing:.12em">DEVELOP · Architecture</div>
+<div class="h2" style="font-size:36px;margin-top:12px;max-width:1080px">Server-first Next.js on Vercel, Postgres with RLS, and an AI coach on a Raspberry Pi.</div>
+<div style="margin-top:28px">{lane("the app")}</div>
+<div style="display:grid;grid-template-columns:1fr 26px 1.2fr 26px 1.25fr;gap:10px;align-items:center">
+  {lbox("iPhone PWA","React 19 client islands · dark and light")}
   {arr}
-  <div style="display:grid;gap:10px">{lbox("proxy.ts","Nonce CSP · session refresh")}{lbox("RSC pages + Server Actions","Parallel reads · validated writes")}{lbox("/api/estimate-food","Rate limit → Gemini → validate")}</div>
+  <div style="display:grid;gap:9px">{lbox("proxy.ts","Nonce CSP · session refresh")}{lbox("RSC pages + Server Actions","Parallel reads · validated writes")}{lbox("/api/estimate-food","Rate limit → Gemini → validate")}</div>
   {arr}
-  <div style="display:grid;gap:10px">{lbox("Supabase Postgres","15 tables · RLS on all · triggers",True)}{lbox("Supabase Auth","Google OAuth (PKCE) · password · invites",True)}{lbox("Google Gemini","Hedged text + vision models")}</div>
+  <div style="display:grid;gap:9px">{lbox("Supabase Postgres","18 tables · RLS on all · 32 migrations",True)}{lbox("Supabase Auth","Google OAuth (PKCE) · password · invites",True)}{lbox("Google Gemini","Hedged text + vision models")}</div>
 </div>
-<div style="margin-top:22px;display:flex;gap:8px;flex-wrap:wrap">{"".join(f'<span class="chip" style="font-size:14px;padding:7px 12px"><span class="dot" style="width:8px;height:8px"></span>{t}</span>' for t in ["GitHub Actions CI: audit · lint · tsc · 302 tests","Vercel preview per PR","Protected main","Dependabot"])}</div>''')
+<div style="margin-top:22px;border-top:1.5px dashed var(--line-strong);padding-top:18px">{lane("the coach agent · runs at home")}</div>
+<div style="display:grid;grid-template-columns:1fr 26px 1.2fr 26px 1.25fr;gap:10px;align-items:center">
+  {lbox("Raspberry Pi 5","Python · systemd timers 6 am / Sun 6 pm · sandboxed","",tag="agent")}
+  {arr}
+  <div style="display:grid;gap:9px">{lbox("Stats in code → Gemini → checker","Privacy filter · every number verified · evals")}</div>
+  {arr}
+  <div style="display:grid;gap:9px">{lbox("coach_reader / coach_writer","One function each · no table access",True)}</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">{"".join(f'<span class="chip" style="font-size:13.5px;padding:7px 12px"><span class="dot" style="width:7px;height:7px"></span>{t}</span>' for t in ["CI: audit · lint · tsc · 397 tests","Pi: pytest · mypy --strict · pip-audit","Vercel preview per PR","Protected main","Coach button on every tab"])}</div>''')
 
 for name, html in slides.items():
     open(f"{name}.html","w").write(html)

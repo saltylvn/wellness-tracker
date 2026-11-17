@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml)
 
-![DEVELOP: the Weight, Fitness and Nutrition tabs on iPhone, with the live demo and repository links, three proof numbers (359 automated tests, 16/16 tables with row-level security, about 2 s AI photo estimates) and the tech stack](docs/linkedin/DEVELOP-project-cover-4x3.png)
+![DEVELOP in dark mode: the Weight tab, the Coach window and the Fitness tab on iPhone, with the live demo and repository links, four proof numbers (397 automated tests, 18/18 tables with row-level security, about 2 s AI photo estimates, a 6 am daily AI coach note) and the tech stack, including the Raspberry Pi agent](docs/linkedin/DEVELOP-project-cover-4x3.png)
 
 ## What it does
 
@@ -20,14 +20,14 @@
 - **Coach:** a **Coach** button at the top of every tab drops down a short coaching note each morning (yesterday vs plan, the week so far, today's focus) and a weekly review every Sunday, with 👍/👎. The notes are written by an AI agent on a Raspberry Pi 5 at home (see [The coach](#the-coach)).
 - **Accounts:** Google sign-in or username and password, invite-only sign-up, a wait-list offered only when a login is refused, and an admin view to text invites (to wait-list people directly) and see users.
 
-## Screens (v2.0)
+## Screens
 
-Real screenshots from the live demo on an iPhone 15 Pro.
+Real screenshots from the live demo on an iPhone 15 Pro, in dark mode (the app follows the phone's light or dark setting).
 
-| Weight | Fitness | Nutrition |
-| :---: | :---: | :---: |
-| <img src="docs/screens/weight.png" width="240" alt="Weight tab: weigh-in status, start / current / target with a progress bar, a chart of weigh-ins and the projected goal date"> | <img src="docs/screens/fitness.png" width="240" alt="Fitness tab on a lifting day: two priority lifts with PRs and the day's exercises with today's logged sets"> | <img src="docs/screens/nutrition.png" width="240" alt="Nutrition tab: food streak, week strip, calorie ring and macro goals"> |
-| <img src="docs/screens/login.png" width="240" alt="Login: Continue with Google, Log in with password, and Try the demo"> | <img src="docs/screens/fitness-week.png" width="240" alt="Fitness tab: workout streak, the week calendar with each day's icon, the Lift / Cardio planner and the gym barcode"> | <img src="docs/screens/nutrition-meals.png" width="240" alt="Nutrition tab: macros, water tracker, Log food button and the day's meals"> |
+| Weight | Fitness | Coach | Nutrition |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screens/weight.png" width="200" alt="Weight tab: weigh-in status, start / current / target with a progress bar, a chart of weigh-ins and the projected goal date"> | <img src="docs/screens/fitness.png" width="200" alt="Fitness tab on a lifting day: two priority lifts with PRs and the day's exercises with today's logged sets"> | <img src="docs/screens/coach.png" width="200" alt="The Coach window dropped down from the Coach button: today's note with yesterday vs plan, the week so far, today's focus and thumbs up or down"> | <img src="docs/screens/nutrition.png" width="200" alt="Nutrition tab: food streak, week strip, calorie ring and macro goals"> |
+| <img src="docs/screens/login.png" width="200" alt="Login: Continue with Google, Log in with password, and Try the demo"> | <img src="docs/screens/fitness-week.png" width="200" alt="Fitness tab: workout streak, the week calendar with each day's icon, the Lift / Cardio planner and the gym barcode"> | | <img src="docs/screens/nutrition-meals.png" width="200" alt="Nutrition tab: macros, water tracker, Log food button and the day's meals"> |
 
 ## Progress: v1.0 → v2.0
 
@@ -52,7 +52,7 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 
 ## How it's built
 
-![Architecture: iPhone PWA → Next.js on Vercel (proxy with a per-request CSP nonce, Server Components and Server Actions, an AI route) → Supabase Postgres and Auth, and the Gemini API; CI and preview deploys on every pull request](docs/linkedin/DEVELOP-architecture.png)
+![Architecture: the app (iPhone PWA → Next.js on Vercel with a per-request CSP nonce, Server Components, Server Actions and an AI route → Supabase Postgres and Auth, and Gemini) and the coach agent (a Raspberry Pi 5 running Python on systemd timers → stats in code, Gemini and a checker → two single-function database logins); CI on both](docs/linkedin/DEVELOP-architecture.png)
 
 | Layer             | Choice                                                                             | Why                                                                         |
 | ----------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -61,8 +61,9 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 | Database and auth | Supabase: Postgres with row-level security, Google OAuth and password sign-in       | Real relational data; the database itself enforces who can see what        |
 | AI                | Google Gemini (server-side only), JSON-schema output, raced model chain            | Photo and text nutrition estimates on the free tier                         |
 | Hosting and CI    | Vercel (Node 24), GitHub Actions, Dependabot                                       | Every pull request is checked and previewed; every merge to `main` deploys  |
+| Coach agent       | Raspberry Pi 5: Python 3.13, systemd timers, `psycopg`, Gemini REST, pytest and mypy | Runs on its own at home, for $0; holds only two single-function database logins |
 
-**Data model:** 16 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, sunshine, AI request log, demo state, invite codes, admins, the wait-list), created by 30 versioned SQL migrations in [`supabase/migrations/`](supabase/migrations/), written so the app keeps working before and after each one runs.
+**Data model:** 18 tables (profiles, food entries, saved foods, water, weigh-ins, workout days / exercises / sessions / sets, cardio, sunshine, AI request log, demo state, invite codes, admins, the wait-list, and the coach's config and notes), created by 32 versioned SQL migrations in [`supabase/migrations/`](supabase/migrations/), written so the app keeps working before and after each one runs.
 
 ## AI features
 
@@ -123,6 +124,17 @@ An always-on **Raspberry Pi 5** at home writes the coaching notes. The agent's c
 - **A one-click demo, safely.** "Try the demo" signs in to a shared account on the server (the password never reaches the browser), and a Postgres function rebuilds its sample data around the visitor's date, at most hourly.
 
 Longer write-ups of these choices are in [`docs/decisions/`](docs/decisions/).
+
+## Skills
+
+| Area | What this project uses |
+| --- | --- |
+| Frontend | Next.js App Router, React Server Components and Server Actions, TypeScript, Tailwind CSS v4, PWA, mobile-first UI in light and dark themes |
+| Backend and data | Postgres schema design, row-level security, triggers, `SECURITY DEFINER` functions, dedicated login roles, versioned migrations, Supabase Auth (OAuth with PKCE) |
+| AI | Gemini text and vision with JSON-schema output, hedged model racing, prompt design, output validation, evals with a prompt-injection scenario, a privacy filter for model inputs |
+| AI agent | A Python agent on a Raspberry Pi: scheduled jobs, deterministic stats with the model limited to writing, retries and fallbacks, a sandboxed systemd service |
+| Security | Content Security Policy with nonces, least-privilege database access, secrets handling, host hardening (key-only SSH, firewall), threat modeling |
+| Quality and delivery | Vitest, tests against a real Postgres (PGlite), pytest, mypy, ESLint, GitHub Actions, CodeQL, Dependabot, Vercel preview deploys |
 
 ## How I built it
 
