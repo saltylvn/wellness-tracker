@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import CoachButton from "@/components/CoachButton";
 import SettingsGear from "@/components/SettingsGear";
 import StreakBadge from "@/components/StreakBadge";
 import TodayPill from "@/components/TodayPill";
@@ -37,6 +38,7 @@ export default function FitnessHeader({
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Fitness</h1>
         <div className="flex items-center gap-1">
+          <CoachButton />
           <TodayPill dateKey={date} href={basePath} />
           <SettingsGear />
         </div>

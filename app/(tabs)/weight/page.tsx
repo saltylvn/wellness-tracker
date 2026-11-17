@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import GoToToday from "@/components/GoToToday";
+import CoachButton from "@/components/CoachButton";
 import SettingsGear from "@/components/SettingsGear";
 import TodayPill from "@/components/TodayPill";
 import WeighInCard from "@/components/WeighInCard";
@@ -56,6 +57,7 @@ export default async function WeightPage({
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Weight</h1>
           <div className="flex items-center gap-1">
+            <CoachButton />
             <TodayPill dateKey={date} href="/weight" />
             <SettingsGear />
           </div>
