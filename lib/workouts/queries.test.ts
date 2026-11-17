@@ -178,6 +178,8 @@ describe("loadFitnessPage round trips", () => {
   }));
   const slowDb = () =>
     ({
+      // The coach panel's one RPC, also 50 ms.
+      rpc: () => new Promise((r) => setTimeout(r, LATENCY)).then(() => ({ data: null, error: null })),
       from(table: string) {
         let single = false;
         const rows =
@@ -215,6 +217,7 @@ describe("loadFitnessPage round trips", () => {
     expect(page.lift?.exercises).toHaveLength(1);
     expect(page.gymBarcode).toBeNull();
     expect(page.priorityLifts.map((p) => p.name)).toEqual(["Squat"]);
+    expect(page.coach).toEqual({ daily: null, weekly: null, lastWeek: null }); // read in round 1
     expect(count).toBe(2);
   });
 
