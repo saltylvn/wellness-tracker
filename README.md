@@ -17,6 +17,7 @@
   - A gym check-in barcode, read from a screenshot in the browser and redrawn on the server.
 - **Nutrition:** add food by **photo** or **description** and Google Gemini estimates calories, protein, carbs and fat (always editable before saving); a calorie ring, macro goals, water tracking and a saved-foods library.
 - **Streaks** for workouts and food, plus a daily sunshine log.
+- **Coach:** a 🎯 button at the top of every tab drops down a short coaching note each morning (yesterday vs plan, the week so far, today's focus) and a weekly review every Sunday, with 👍/👎. The notes are written by an AI agent on a Raspberry Pi 5 at home (see [The coach](#the-coach)).
 - **Accounts:** Google sign-in or username and password, invite-only sign-up, a wait-list offered only when a login is refused, and an admin view to text invites (to wait-list people directly) and see users.
 
 ## Screens (v2.0)
@@ -72,11 +73,32 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 | Speed             | Fastest free models first; if one hasn't answered in 1.5 s a backup starts alongside it and the first valid answer wins (`raceModels`). Measured: **12.5 s → 1.3–2.5 s**               |
 | Reliability       | Overloaded or retired models fall through to the next, a bad key stops at once, per-model timeouts and a total time budget; every in-flight request is cancelled once there's an answer |
 | Cost control      | A 40-a-day limit per person, taken atomically in Postgres before the AI is called                                                                                                       |
+| Coach notes       | Written off-site by the Raspberry Pi agent below; the app only reads and displays them, as plain text                                                                                  |
+
+## The coach
+
+An always-on **Raspberry Pi 5** at home writes the coaching notes. The agent's code lives in a separate private repository; the app side is here.
+
+```
+ Supabase                         Raspberry Pi 5                         Gemini (free tier)
+ coach.weekly_data()  ──read──▶   compute stats in Python                 writes the words
+                                  filter: totals only, no dates or ids ──▶ from the numbers
+ coach.save_note()   ◀──save──    check every number, then save        ◀── only
+        │
+        ▼
+ 🎯 Coach window in the app  (my_coach_panel, rate_coach_note)
+```
+
+- **Code does the math; the model only writes the words.** Every number is computed and tested in Python, and a checker rejects any note with a number the code didn't produce, medical or diet advice, links or markup. One retry, then a plain-stats note written by code.
+- **Two locked-down database logins.** `coach_reader` can call one function that returns one configured person's data (food and water as daily totals only: no food names, photos or barcode) in read-only transactions. `coach_writer` can call one function that saves one note for today or this week, re-checked for shape and size. Neither can read a table, neither can see other users, both refuse the demo account, and neither is exposed through the REST API ([`20261116000000_coach_access.sql`](supabase/migrations/20261116000000_coach_access.sql), [`20261117000000_coach_notes.sql`](supabase/migrations/20261117000000_coach_notes.sql)).
+- **In the app,** people see and rate only their own notes, which are rendered as plain text, never HTML. A note loads only when 🎯 is tapped, so no page waits on it.
+- **On the Pi:** a sandboxed systemd service on a dedicated user, timers at 6 am Mon–Sat and 6 pm Sunday, secrets in a root-only store, key-only SSH and a LAN-only firewall.
 
 ## Security
 
 - **Row-level security on all 16 tables** (28 policies): every row belongs to one signed-in user, enforced by Postgres.
 - **Invite-only accounts:** a `BEFORE INSERT` trigger on `auth.users` refuses any new account without an unused, unexpired invite code, including Google sign-ups. Only the admin can create or revoke codes; the admin role lives in a table with no write policies.
+- **The coach's database logins** can each call one function and nothing else (see [The coach](#the-coach)); both are tested on Postgres.
 - **Server-side secrets only:** the Gemini key never reaches the browser; AI replies are treated as untrusted input and validated before use. Google sign-in starts on the server (PKCE).
 - **Strict Content Security Policy** with a fresh nonce per request (`strict-dynamic`, `frame-ancestors 'none'`, `object-src 'none'`), plus a Permissions-Policy, cross-origin window isolation, nosniff, no framing and a strict referrer policy. HTTPS everywhere (HSTS on Vercel).
 - **Limits under concurrency:** the 25-account cap and the AI daily limit use Postgres advisory locks, so two requests at once can't both slip past.
@@ -84,8 +106,8 @@ DEVELOP v1.0 shipped in October 2026; v2.0 is what's live now.
 
 ## Quality
 
-- **359 automated tests** (Vitest). Most cover the pure logic: streaks, goal and weight-plan math, chart ranges, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, account and invite rules, cardio unit conversion, the database helpers (against a shared fake Supabase client), and more.
-- **The database rules are tested on a real Postgres.** Every migration is applied in order to an in-memory Postgres ([PGlite](https://pglite.dev)) with a small stand-in for Supabase's auth schema, then tests check that row-level security is on for every table and keeps each person's rows private, that sign-up refuses missing, used and expired invite codes (and accepts an armed one for Google), that only the admin can list users or create invites, the 25-account cap, the wait-list (visitors can join but never read it or flood it), the AI daily limit, that the shared demo login can't be changed, and exactly which functions each API role may call ([`supabase/tests/`](supabase/tests/)). They run in about a second on every pull request.
+- **397 automated tests** (Vitest). Most cover the pure logic: streaks, goal and weight-plan math, chart ranges, AI reply validation, the model race (slow model gets a backup, failures hand off, time budget), the Content Security Policy, account and invite rules, cardio unit conversion, the database helpers (against a shared fake Supabase client), and more.
+- **The database rules are tested on a real Postgres.** Every migration is applied in order to an in-memory Postgres ([PGlite](https://pglite.dev)) with a small stand-in for Supabase's auth schema, then tests check that row-level security is on for every table and keeps each person's rows private, that sign-up refuses missing, used and expired invite codes (and accepts an armed one for Google), that only the admin can list users or create invites, the 25-account cap, the wait-list (visitors can join but never read it or flood it), the AI daily limit, that the shared demo login can't be changed, that the coach's two logins can't reach anything beyond their one function each, and exactly which functions each API role may call ([`supabase/tests/`](supabase/tests/)). They run in about a second on every pull request.
 - **A performance test** times the Fitness page's data loading against a simulated 50 ms database and fails if a day takes more than 2 round trips.
 - **CI on every pull request** (about 30 seconds): package signature check, dependency audit, ESLint, TypeScript type check and all tests, plus Vercel's preview build. Both must pass before anything merges.
 
@@ -126,9 +148,9 @@ Requires Node.js 24 (see [`.nvmrc`](.nvmrc)) and a free [Supabase](https://supab
 
 ## Roadmap
 
-Shipped: PWA shell and deploy, sign-in (Google, username and password, invite-only), food log with macro goals, AI text and photo estimates, streaks, workouts with PRs and priority lifts, planned cardio and recovery days, water and sunshine logs, the Weight tab with a chart and goal date, and an admin view.
+Shipped: PWA shell and deploy, sign-in (Google, username and password, invite-only), food log with macro goals, AI text and photo estimates, streaks, workouts with PRs and priority lifts, planned cardio and recovery days, water and sunshine logs, the Weight tab with a chart and goal date, an admin view, and the 🎯 coach with daily notes and weekly reviews from a Raspberry Pi agent.
 
-Next: real-iPhone testing of photo logging and the scroll wheels, and integration tests for the server actions.
+Next: real-iPhone testing of photo logging and the scroll wheels, integration tests for the server actions, and a "last note is N days old" warning in the coach window when a scheduled run fails.
 
 ## License
 
