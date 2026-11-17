@@ -351,6 +351,8 @@ describe("what the API roles can call", () => {
       "arm_invite_code",
       "invite_code_ok",
       "is_admin",
+      "my_coach_panel", // your own coach notes only (coachNotes.test.ts)
+      "rate_coach_note", // thumbs up/down on your own notes only
       "request_access",
       "reset_demo_data",
       "take_ai_request",

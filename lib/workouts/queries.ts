@@ -3,6 +3,7 @@ import type { CardioLogRow } from "../cardio";
 import { weeklyTotals, type WeeklyGoals } from "../cardioGoals";
 import { addDays, isoWeekday, weekDays } from "../dates";
 import { planFromRow, type CardioPlan } from "../cardioPlan";
+import { EMPTY_PANEL, parseCoachPanel, type CoachPanelData } from "../coach";
 import { parseGymBarcode, type GymBarcode } from "../gymBarcode";
 import { priorityNames, type PriorityLift } from "../priorityLifts";
 import { restPlanFromRow, type RestPlan } from "../restPlan";
@@ -277,6 +278,12 @@ export async function loadDayPlans(
   return { cardioPlan: planFromRow(data), restPlan: restPlanFromRow(data) };
 }
 
+/** The coach's notes for this day (pull-up panel). Before the coach SQL step is run, simply none. */
+export async function loadCoachPanel(supabase: SupabaseClient, date: string): Promise<CoachPanelData> {
+  const { data, error } = await supabase.rpc("my_coach_panel", { p_day: date });
+  return error ? EMPTY_PANEL : parseCoachPanel(data);
+}
+
 export type FitnessPageData = {
   days: WorkoutDay[]; // your weekly plan
   doneDates: string[]; // every day you logged a workout or cardio (streak and orange rings)
@@ -288,18 +295,20 @@ export type FitnessPageData = {
   cardioPlan: CardioPlan | null; // this weekday's planned cardio, if any
   restPlan: RestPlan | null; // this weekday's recovery plan on a rest day (walk, bike ride or yoga), if any
   priorityLifts: PriorityLift[]; // your priority lifts (lifting days only), with their best weights
+  coach: CoachPanelData; // the coach's notes for this day (pull-up panel)
 };
 
 /**
  * Everything the Fitness page reads, in as few trips to the database as possible:
  *   1. your plan, the days you logged, this weekday's exercises, sunshine, your
- *      gym barcode, this weekday's cardio and rest day plans, and your priority lifts' names, together;
+ *      gym barcode, this weekday's cardio and rest day plans, your priority lifts' names, and the
+ *      coach's notes, together;
  *   2. then what this kind of day needs (lifting, and the priority lifts' bests; cardio logs and
  *      weekly goals on cardio and rest days), together.
  */
 export async function loadFitnessPage(supabase: SupabaseClient, userId: string, date: string): Promise<FitnessPageData> {
   const weekday = isoWeekday(date);
-  const [days, doneDates, planExercises, sunshine, gymBarcode, dayPlans, priority] = await Promise.all([
+  const [days, doneDates, planExercises, sunshine, gymBarcode, dayPlans, priority, coach] = await Promise.all([
     loadWorkoutDays(supabase, userId),
     loadDoneDates(supabase, addDays(date, -400)),
     loadPlanExercises(supabase, weekday),
@@ -307,6 +316,7 @@ export async function loadFitnessPage(supabase: SupabaseClient, userId: string, 
     loadGymBarcode(supabase, userId),
     loadDayPlans(supabase, weekday),
     loadPriorityNames(supabase, userId),
+    loadCoachPanel(supabase, date),
   ]);
   const today = days.find((d) => d.weekday === weekday);
 
@@ -319,5 +329,5 @@ export async function loadFitnessPage(supabase: SupabaseClient, userId: string, 
     liftDay ? loadPriorityBests(supabase, priority) : [],
   ]);
 
-  return { days, doneDates, today, lift, cardio, sunshine, gymBarcode, ...dayPlans, priorityLifts };
+  return { days, doneDates, today, lift, cardio, sunshine, gymBarcode, ...dayPlans, priorityLifts, coach };
 }

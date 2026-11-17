@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import CoachPanel from "@/components/CoachPanel";
 import FitnessHeader from "@/components/FitnessHeader";
 import GymBarcodeCard from "@/components/GymBarcodeCard";
 import GoToToday from "@/components/GoToToday";
@@ -12,8 +13,10 @@ import SunshineLog from "@/components/SunshineLog";
 import WeeklyCardioGoals from "@/components/WeeklyCardioGoals";
 import { currentUserId } from "@/lib/actionResult";
 import { completingLog } from "@/lib/cardioPlan";
+import { DEMO_PANEL, panelView } from "@/lib/coach";
+import { isDemoEmail } from "@/lib/demo";
 import { restPlanDone } from "@/lib/restPlan";
-import { formatFullDate, formatWeekday, isValidDateKey } from "@/lib/dates";
+import { formatFullDate, formatWeekday, isoWeekday, isValidDateKey } from "@/lib/dates";
 import { gymBarcodeSvg } from "@/lib/gymBarcodeSvg";
 import { createClient } from "@/lib/supabase/server";
 import { connectorAfter, formatRest, formatSetsReps } from "@/lib/workouts/plan";
@@ -37,11 +40,21 @@ export default async function WorkoutsPage({
 
   // Everything this page reads, in two rounds (see loadFitnessPage).
   // (Don't put key={date} on the cards below: switching days then left stale copies on screen.)
-  const { days, doneDates, today, lift, cardio, sunshine, gymBarcode, cardioPlan, restPlan, priorityLifts } =
+  const { days, doneDates, today, lift, cardio, sunshine, gymBarcode, cardioPlan, restPlan, priorityLifts, coach } =
     await loadFitnessPage(
     supabase,
     userId,
     date,
+  );
+
+  // The coach's pull-up panel. The demo account never gets real notes, so it shows a fixed sample.
+  // (getClaims reads the signed login token: no extra trip to the database.)
+  const { data: claims } = await supabase.auth.getClaims();
+  const demo = isDemoEmail(claims?.claims.email, process.env.DEMO_EMAIL);
+  const coachView = panelView(
+    date,
+    demo && DEMO_PANEL.daily ? { ...DEMO_PANEL, daily: { ...DEMO_PANEL.daily, forDate: date } } : coach,
+    isoWeekday(date),
   );
 
   return (
@@ -204,6 +217,9 @@ export default async function WorkoutsPage({
 
       {/* Every day, at the very bottom: minutes of sunshine toward your daily target (Settings). */}
       <SunshineLog date={date} minutes={sunshine.minutes} lastMinutes={sunshine.lastMinutes} goal={sunshine.goal} />
+
+      {/* Pinned above the tab bar: today's focus from the coach; tap to pull up the full note. */}
+      <CoachPanel view={coachView} demo={demo} />
     </div>
   );
 }
