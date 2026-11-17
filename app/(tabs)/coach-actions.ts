@@ -1,9 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { currentUserId, INVALID_DATE, SAVE_FAILED, SIGN_IN_AGAIN, type ActionResult } from "@/lib/actionResult";
+import { DEMO_PANEL, EMPTY_PANEL, type CoachPanelData } from "@/lib/coach";
 import { isValidDateKey } from "@/lib/dates";
+import { isDemoEmail } from "@/lib/demo";
 import { createClient } from "@/lib/supabase/server";
+import { loadCoachPanel } from "@/lib/workouts/queries";
 
 // Thumbs up or down on one of your coach's notes. The database only lets you rate your own.
 export async function rateCoachNote(input: {
@@ -27,6 +29,18 @@ export async function rateCoachNote(input: {
   });
   if (error || data !== true) return SAVE_FAILED;
 
-  revalidatePath("/workouts");
   return { ok: true };
+}
+
+// The coach's notes for a day, loaded when you open the coach (from any tab). The demo account
+// never gets real notes, so it gets a fixed sample.
+export async function loadCoach(day: string): Promise<{ panel: CoachPanelData; demo: boolean }> {
+  if (!isValidDateKey(day)) return { panel: EMPTY_PANEL, demo: false };
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims.sub) return { panel: EMPTY_PANEL, demo: false };
+  if (isDemoEmail(claims.claims.email, process.env.DEMO_EMAIL) && DEMO_PANEL.daily) {
+    return { panel: { ...DEMO_PANEL, daily: { ...DEMO_PANEL.daily, forDate: day } }, demo: true };
+  }
+  return { panel: await loadCoachPanel(supabase, day), demo: false };
 }
