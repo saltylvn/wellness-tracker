@@ -9,12 +9,12 @@ import { loadCoachPanel } from "@/lib/workouts/queries";
 
 // Thumbs up or down on one of your coach's notes. The database only lets you rate your own.
 export async function rateCoachNote(input: {
-  kind: "daily" | "weekly";
+  kind: "daily" | "weekly" | "workouts";
   forDate: string;
   feedback: "up" | "down";
 }): Promise<ActionResult> {
   // Never trust the browser: check everything it sent.
-  if (input.kind !== "daily" && input.kind !== "weekly") return { ok: false, message: "Unknown note." };
+  if (input.kind !== "daily" && input.kind !== "weekly" && input.kind !== "workouts") return { ok: false, message: "Unknown note." };
   if (input.feedback !== "up" && input.feedback !== "down") return { ok: false, message: "Pick 👍 or 👎." };
   if (!isValidDateKey(input.forDate)) return INVALID_DATE;
 
