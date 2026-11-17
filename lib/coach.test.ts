@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EMPTY_PANEL, parseCoachPanel, panelView } from "./coach";
+import { allowedLink, EMPTY_PANEL, parseCoachPanel, panelView, shouldAutoOpen } from "./coach";
 
 const DAILY = {
   headline: "🎯 Today: Push day",
@@ -65,5 +65,40 @@ describe("panelView", () => {
 
   it("is empty when there's no note for that day", () => {
     expect(panelView("2026-11-17", panel, 2)).toEqual({ kind: "empty", lastWeek: null });
+  });
+});
+
+describe("workout picks", () => {
+  const PICK = { title: "Upper/Lower Split", source: "Men's Health", url: "https://www.menshealth.com/fitness/a1/", summary: "Four days.", why: "Fits you." };
+  const note = (picks: unknown[]) => parseCoachPanel({ workouts: { for_date: "2026-11-18", note: { headline: "💪 Picks", plan_summary: "Swap Friday.", picks } } }).workouts;
+
+  it("reads picks with allowlisted links", () => {
+    expect(note([PICK])?.note.picks).toEqual([PICK]);
+  });
+
+  it("drops any pick whose link isn't on the allowlist", () => {
+    const picks = note([PICK, { ...PICK, url: "https://evil.example.com/x" }, { ...PICK, url: "javascript:alert(1)" }, { ...PICK, url: "http://www.menshealth.com/x" }]);
+    expect(picks?.note.picks.map((p) => p.url)).toEqual([PICK.url]);
+  });
+
+  it("drops the whole note when no pick survives", () => {
+    expect(note([{ ...PICK, url: "https://evil.example.com/x" }])).toBeNull();
+  });
+
+  it("checks links the same way the database does", () => {
+    expect(allowedLink("https://nerdfitness.com/blog/x/")).toBe(true);
+    expect(allowedLink("https://www.menshealth.com.evil.io/x")).toBe(false);
+    expect(allowedLink('https://www.menshealth.com/x"onclick=y')).toBe(false);
+    expect(allowedLink("https://www.menshealth.com/a b")).toBe(false);
+  });
+});
+
+describe("shouldAutoOpen", () => {
+  it("opens on Wednesday and Sunday after 5 am, once a day", () => {
+    expect(shouldAutoOpen("2026-11-18", 5, 3, null)).toBe(true);
+    expect(shouldAutoOpen("2026-11-22", 9, 7, "2026-11-18")).toBe(true);
+    expect(shouldAutoOpen("2026-11-18", 4, 3, null)).toBe(false); // before 5 am
+    expect(shouldAutoOpen("2026-11-19", 9, 4, null)).toBe(false); // Thursday
+    expect(shouldAutoOpen("2026-11-18", 9, 3, "2026-11-18")).toBe(false); // already shown today
   });
 });

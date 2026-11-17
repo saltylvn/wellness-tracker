@@ -104,7 +104,7 @@ describe("coach.save_note (the Pi's writer)", () => {
     await expect(save("weekly", d[0].tue, WEEKLY)).rejects.toThrow(/Monday/);
     await expect(save("weekly", d[0].two_weeks, WEEKLY)).rejects.toThrow(/Monday/);
     await save("weekly", d[0].last, WEEKLY); // last week is fine (a late Sunday run)
-    await expect(save("monthly", today, DAILY)).rejects.toThrow(/daily or weekly/);
+    await expect(save("monthly", today, DAILY)).rejects.toThrow(/kind must be/);
   });
 
   it.each([
@@ -201,7 +201,7 @@ describe("the app: my_coach_panel and rate_coach_note", () => {
   it("never shows anyone else's notes", async () => {
     await save("daily", today, DAILY);
     const p = await panel(OTHER, today);
-    expect(p).toEqual({ daily: null, weekly: null, last_week: null });
+    expect(p).toEqual({ daily: null, weekly: null, last_week: null, workouts: null });
   });
 
   it("can't read coach.notes directly", async () => {

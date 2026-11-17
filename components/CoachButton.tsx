@@ -4,20 +4,44 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { loadCoach, rateCoachNote } from "@/app/(tabs)/coach-actions";
 import { useToday } from "@/components/useToday";
 import {
+  allowedLink,
   EMPTY_TEXT,
   panelView,
+  shouldAutoOpen,
   type CoachFeedback,
   type CoachPanelData,
   type DailyNote,
   type Saved,
   type WeeklyNote,
+  type WorkoutsNote,
 } from "@/lib/coach";
 import { isoWeekday } from "@/lib/dates";
 
 // The coach: a small "Coach" button centered at the top of every tab. Tapping it drops
 // the coaching window down from the top of the screen: today's note (on Sunday, the weekly review),
 // with 👍/👎 and a Hide button. The note loads only when you open it, so pages don't wait on it.
-// Notes come from the Raspberry Pi coach and are shown as plain text only (never HTML).
+// Wednesdays and Sundays it also has a Workouts tab (picks from fitness sites, with links), and it opens
+// by itself on that tab the first time the app is opened after 5 am, once the picks are in.
+// Notes come from the Raspberry Pi coach and are shown as plain text; the only links are workout picks
+// on the allowlisted sites (checked in the database and again here).
+
+const SHOWN_KEY = "coach.workoutsShown"; // the date the coach last opened itself
+const CHECKED_KEY = "coach.workoutsChecked"; // when we last looked for picks (at most every 20 minutes)
+
+function readStore(key: string): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function writeStore(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // private mode or storage blocked: the coach just won't remember, which is fine
+  }
+}
 export default function CoachButton() {
   const today = useToday();
   const [open, setOpen] = useState(false);
@@ -25,10 +49,12 @@ export default function CoachButton() {
   const [demo, setDemo] = useState(false);
   const [loadedFor, setLoadedFor] = useState<string | null>(null);
   const [showLastWeek, setShowLastWeek] = useState(false);
+  const [tab, setTab] = useState<"note" | "workouts">("note");
   const [loading, startLoading] = useTransition();
 
   function openCoach() {
     setShowLastWeek(false);
+    setTab("note");
     setOpen(true);
     if (today && loadedFor !== today) {
       startLoading(async () => {
@@ -39,6 +65,30 @@ export default function CoachButton() {
       });
     }
   }
+
+  // Wednesdays and Sundays after 5 am: open by itself on the Workouts tab, once a day, when the picks are in.
+  useEffect(() => {
+    if (!today) return;
+    const now = new Date();
+    if (!shouldAutoOpen(today, now.getHours(), isoWeekday(today), readStore(SHOWN_KEY))) return;
+    const checked = Number(readStore(CHECKED_KEY) ?? 0);
+    if (Date.now() - checked < 20 * 60 * 1000) return;
+    writeStore(CHECKED_KEY, String(Date.now()));
+    let cancelled = false;
+    void loadCoach(today).then((loaded) => {
+      if (cancelled || loaded.demo || !loaded.panel.workouts) return;
+      setPanel(loaded.panel);
+      setDemo(false);
+      setLoadedFor(today);
+      setShowLastWeek(false);
+      setTab("workouts");
+      setOpen(true);
+      writeStore(SHOWN_KEY, today);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [today]);
 
   // Escape hides it; the page behind can't scroll while it's open (like the bottom sheets).
   const closeRef = useRef(() => setOpen(false));
@@ -55,6 +105,8 @@ export default function CoachButton() {
   }, [open]);
 
   const view = panel && today ? panelView(today, panel, isoWeekday(today)) : null;
+  const picks = panel?.workouts && panel.workouts.forDate === today ? panel.workouts : null;
+  const showWorkouts = Boolean(picks) && tab === "workouts";
 
   return (
     <>
@@ -94,16 +146,40 @@ export default function CoachButton() {
               </button>
             </div>
 
+            {!loading && picks && (
+              <div role="tablist" aria-label="Coach" className="grid grid-cols-2 gap-1 rounded-lg bg-card-2 p-1">
+                {(["note", "workouts"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === t}
+                    onClick={() => setTab(t)}
+                    className={`min-h-9 rounded-md text-sm font-semibold active:opacity-70 ${
+                      tab === t ? "bg-background text-foreground" : "text-muted"
+                    }`}
+                  >
+                    {t === "workouts" ? "Workouts" : view?.kind === "weekly" ? "Week" : "Today"}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {(loading || !view) && <p className="text-sm text-muted">Loading…</p>}
+            {!loading && showWorkouts && picks && <WorkoutsBody saved={picks} />}
             {!loading && demo && (
               <p className="text-xs text-muted">Sample note: in your own account, a new one arrives each morning.</p>
             )}
 
-            {!loading && view?.kind === "weekly" && <WeeklyBody saved={view.review} demo={demo} />}
-            {!loading && view?.kind === "daily" && !showLastWeek && <DailyBody saved={view.note} demo={demo} />}
-            {!loading && view?.kind === "empty" && !showLastWeek && <p className="text-sm text-muted">{EMPTY_TEXT}</p>}
+            {!loading && !showWorkouts && view?.kind === "weekly" && <WeeklyBody saved={view.review} demo={demo} />}
+            {!loading && !showWorkouts && view?.kind === "daily" && !showLastWeek && (
+              <DailyBody saved={view.note} demo={demo} />
+            )}
+            {!loading && !showWorkouts && view?.kind === "empty" && !showLastWeek && (
+              <p className="text-sm text-muted">{EMPTY_TEXT}</p>
+            )}
 
-            {!loading && view && view.kind !== "weekly" && view.lastWeek && (
+            {!loading && !showWorkouts && view && view.kind !== "weekly" && view.lastWeek && (
               <>
                 {showLastWeek && <WeeklyBody saved={view.lastWeek} demo={demo} />}
                 <button
@@ -179,7 +255,47 @@ function WeeklyBody({ saved, demo }: { saved: Saved<WeeklyNote>; demo: boolean }
   );
 }
 
-function Rate({ kind, forDate, current }: { kind: "daily" | "weekly"; forDate: string; current: CoachFeedback | null }) {
+function WorkoutsBody({ saved }: { saved: Saved<WorkoutsNote> }) {
+  const n = saved.note;
+  return (
+    <div className="space-y-4">
+      <p className="text-lg font-semibold">{n.headline}</p>
+      <p className="text-base">{n.plan_summary}</p>
+      <ol className="space-y-3">
+        {n.picks.map((p, i) => (
+          <li key={i} className="space-y-1 rounded-xl border border-border bg-card p-3">
+            {allowedLink(p.url) ? (
+              <a
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-base font-semibold text-accent underline-offset-2 active:opacity-70"
+              >
+                {p.title} <span aria-hidden="true">↗</span>
+              </a>
+            ) : (
+              <p className="text-base font-semibold">{p.title}</p>
+            )}
+            <p className="eyebrow">{p.source}</p>
+            <p className="text-sm">{p.summary}</p>
+            {p.why && <p className="text-sm text-muted">{p.why}</p>}
+          </li>
+        ))}
+      </ol>
+      <Rate kind="workouts" forDate={saved.forDate} current={saved.feedback} />
+    </div>
+  );
+}
+
+function Rate({
+  kind,
+  forDate,
+  current,
+}: {
+  kind: "daily" | "weekly" | "workouts";
+  forDate: string;
+  current: CoachFeedback | null;
+}) {
   const [picked, setPicked] = useState<CoachFeedback | null>(current);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
