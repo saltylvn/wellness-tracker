@@ -83,6 +83,8 @@ const monday = dayKey(-dow);
   await p.waitForTimeout(1000);
   await statusBar();
   await p.locator('button[aria-label="Coach"]').first().click();
+  // The window sits under the status bar we draw, so give its header the same room.
+  await p.addStyleTag({ content: '[role=dialog]{padding-top:calc(54px + 1rem) !important}' });
   await p.getByText('focus', { exact: false }).first().waitFor({ timeout: 15000 });
   await p.waitForTimeout(800);
   await save('coach');
