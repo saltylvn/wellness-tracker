@@ -17,7 +17,7 @@
   - A gym check-in barcode, read from a screenshot in the browser and redrawn on the server.
 - **Nutrition:** add food by **photo** or **description** and Google Gemini estimates calories, protein, carbs and fat (always editable before saving); a calorie ring, macro goals, water tracking and a saved-foods library.
 - **Streaks** for workouts and food, plus a daily sunshine log.
-- **Coach:** a 🎯 button at the top of every tab drops down a short coaching note each morning (yesterday vs plan, the week so far, today's focus) and a weekly review every Sunday, with 👍/👎. The notes are written by an AI agent on a Raspberry Pi 5 at home (see [The coach](#the-coach)).
+- **Coach:** a **Coach** button at the top of every tab drops down a short coaching note each morning (yesterday vs plan, the week so far, today's focus) and a weekly review every Sunday, with 👍/👎. The notes are written by an AI agent on a Raspberry Pi 5 at home (see [The coach](#the-coach)).
 - **Accounts:** Google sign-in or username and password, invite-only sign-up, a wait-list offered only when a login is refused, and an admin view to text invites (to wait-list people directly) and see users.
 
 ## Screens (v2.0)
@@ -86,12 +86,12 @@ An always-on **Raspberry Pi 5** at home writes the coaching notes. The agent's c
  coach.save_note()   ◀──save──    check every number, then save        ◀── only
         │
         ▼
- 🎯 Coach window in the app  (my_coach_panel, rate_coach_note)
+ Coach window in the app  (my_coach_panel, rate_coach_note)
 ```
 
 - **Code does the math; the model only writes the words.** Every number is computed and tested in Python, and a checker rejects any note with a number the code didn't produce, medical or diet advice, links or markup. One retry, then a plain-stats note written by code.
 - **Two locked-down database logins.** `coach_reader` can call one function that returns one configured person's data (food and water as daily totals only: no food names, photos or barcode) in read-only transactions. `coach_writer` can call one function that saves one note for today or this week, re-checked for shape and size. Neither can read a table, neither can see other users, both refuse the demo account, and neither is exposed through the REST API ([`20261116000000_coach_access.sql`](supabase/migrations/20261116000000_coach_access.sql), [`20261117000000_coach_notes.sql`](supabase/migrations/20261117000000_coach_notes.sql)).
-- **In the app,** people see and rate only their own notes, which are rendered as plain text, never HTML. A note loads only when 🎯 is tapped, so no page waits on it.
+- **In the app,** people see and rate only their own notes, which are rendered as plain text, never HTML. A note loads only when Coach is tapped, so no page waits on it.
 - **On the Pi:** a sandboxed systemd service on a dedicated user, timers at 6 am Mon–Sat and 6 pm Sunday, secrets in a root-only store, key-only SSH and a LAN-only firewall.
 
 ## Security
@@ -148,7 +148,7 @@ Requires Node.js 24 (see [`.nvmrc`](.nvmrc)) and a free [Supabase](https://supab
 
 ## Roadmap
 
-Shipped: PWA shell and deploy, sign-in (Google, username and password, invite-only), food log with macro goals, AI text and photo estimates, streaks, workouts with PRs and priority lifts, planned cardio and recovery days, water and sunshine logs, the Weight tab with a chart and goal date, an admin view, and the 🎯 coach with daily notes and weekly reviews from a Raspberry Pi agent.
+Shipped: PWA shell and deploy, sign-in (Google, username and password, invite-only), food log with macro goals, AI text and photo estimates, streaks, workouts with PRs and priority lifts, planned cardio and recovery days, water and sunshine logs, the Weight tab with a chart and goal date, an admin view, and the coach with daily notes and weekly reviews from a Raspberry Pi agent.
 
 Next: real-iPhone testing of photo logging and the scroll wheels, integration tests for the server actions, and a "last note is N days old" warning in the coach window when a scheduled run fails.
 

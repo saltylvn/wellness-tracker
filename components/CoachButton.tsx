@@ -14,7 +14,7 @@ import {
 } from "@/lib/coach";
 import { isoWeekday } from "@/lib/dates";
 
-// The coach: a small 🎯 button at the top right of every tab (next to Today and ⚙️). Tapping it drops
+// The coach: a small "Coach" button centered at the top of every tab. Tapping it drops
 // the coaching window down from the top of the screen: today's note (on Sunday, the weekly review),
 // with 👍/👎 and a Hide button. The note loads only when you open it, so pages don't wait on it.
 // Notes come from the Raspberry Pi coach and are shown as plain text only (never HTML).
@@ -58,14 +58,18 @@ export default function CoachButton() {
 
   return (
     <>
+      {/* 44px tall to tap, drawn as a small orange-tinted chip (8px corners, like the app's other buttons). */}
       <button
         type="button"
         onClick={openCoach}
         aria-label="Coach"
         aria-expanded={open}
-        className="flex h-11 w-11 items-center justify-center rounded-full text-xl active:bg-card"
+        className="group flex h-11 items-center justify-center px-1"
       >
-        🎯
+        <span className="flex h-8 items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/10 px-3 text-sm font-semibold text-accent group-active:opacity-70">
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
+          Coach
+        </span>
       </button>
 
       {open && (
@@ -80,9 +84,7 @@ export default function CoachButton() {
             className="mx-auto max-h-[85dvh] w-full max-w-md space-y-4 overflow-y-auto rounded-b-3xl bg-background p-4 pt-[calc(env(safe-area-inset-top)+1rem)]"
           >
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-xl font-bold">
-                <span aria-hidden="true">🎯</span> Coach
-              </h2>
+              <h2 className="text-xl font-bold">Coach</h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
