@@ -35,10 +35,11 @@ export default function FitnessHeader({
 
   return (
     <header className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* Three columns: title on the left, the coach's 🎯 centered, Today and ⚙️ on the right. */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center">
         <h1 className="text-2xl font-bold">Fitness</h1>
-        <div className="flex items-center gap-1">
-          <CoachButton />
+        <CoachButton />
+        <div className="flex items-center gap-1 justify-self-end">
           <TodayPill dateKey={date} href={basePath} />
           <SettingsGear />
         </div>

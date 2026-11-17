@@ -54,10 +54,11 @@ export default async function WeightPage({
       {/* Title, streak and calendar spaced exactly like the Fitness and Nutrition headers, so
           they sit in the same places on all three tabs. */}
       <header className="space-y-4">
-        <div className="flex items-center justify-between">
+        {/* Three columns: title on the left, the coach's 🎯 centered, Today and ⚙️ on the right. */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center">
           <h1 className="text-2xl font-bold">Weight</h1>
-          <div className="flex items-center gap-1">
-            <CoachButton />
+          <CoachButton />
+          <div className="flex items-center gap-1 justify-self-end">
             <TodayPill dateKey={date} href="/weight" />
             <SettingsGear />
           </div>
