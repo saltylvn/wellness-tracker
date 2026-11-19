@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  The look: black and white, with one accent, Brick (#A63A1C, a deep rust), for rings, bars, active
+  The look: black and white, with one accent, Rust (#C2410C, a deep burnt orange), for rings, bars, active
   tabs and highlights. Main buttons are solid black (white in dark mode). Flat cards with a
   hairline border, squarer corners. It follows the phone: white by default, a charcoal grey
   in dark mode. Every color is a token here, so the two themes stay in step.
@@ -15,8 +15,8 @@
   --card-2: #f5f5f5; /* inset areas inside a card */
   --border: #e5e5e5;
   --border-strong: #d4d4d4;
-  /* The one accent (Brick, a deep rust) for rings, bars, active states and highlights. */
-  --accent: #a63a1c;
+  /* The one accent (Rust, a deep burnt orange) for rings, bars, active states and highlights. */
+  --accent: #c2410c;
   --on-accent: #ffffff; /* text on the accent is white */
   /* Main buttons: solid black with white text. */
   --primary: #0a0a0a;
@@ -36,7 +36,7 @@
     --card-2: #323235;
     --border: #38383b;
     --border-strong: #48484c;
-    --accent: #de6a48; /* a lighter brick, so it reads on the grey */
+    --accent: #ea6a33; /* a lighter rust, so it reads on the charcoal */
     --primary: #ededed;
     --on-primary: #1e1e20;
     --danger: #ef5350;
