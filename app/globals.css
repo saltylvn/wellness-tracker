@@ -3,7 +3,7 @@
 /*
   The look: black and white, with one accent, Brick (#A63A1C, a deep rust), for rings, bars, active
   tabs and highlights. Main buttons are solid black (white in dark mode). Flat cards with a
-  hairline border, squarer corners. It follows the phone: white by default, a soft slate grey
+  hairline border, squarer corners. It follows the phone: white by default, a charcoal grey
   in dark mode. Every color is a token here, so the two themes stay in step.
 */
 :root {
@@ -28,17 +28,17 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    /* Dark mode is a soft slate grey ("Graphite"), not black. */
-    --background: #27272a;
+    /* Dark mode is a charcoal grey ("Charcoal"), not black. */
+    --background: #1e1e20;
     --foreground: #ededed;
-    --muted: #b0b0b5;
-    --card: #323236;
-    --card-2: #3c3c40;
-    --border: #46464b;
-    --border-strong: #56565c;
-    --accent: #e47652; /* a lighter brick, so it reads on the grey */
+    --muted: #a8a8ad;
+    --card: #28282a;
+    --card-2: #323235;
+    --border: #38383b;
+    --border-strong: #48484c;
+    --accent: #de6a48; /* a lighter brick, so it reads on the grey */
     --primary: #ededed;
-    --on-primary: #27272a;
+    --on-primary: #1e1e20;
     --danger: #ef5350;
   }
 }
