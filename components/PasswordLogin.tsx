@@ -6,7 +6,7 @@ import { signInWithUsername, type LoginState } from "@/app/login/actions";
 // text-base = 16px: smaller text makes iPhone Safari zoom in when you tap a field.
 const inputClass = "min-h-12 w-full rounded-xl border border-border bg-card px-4 text-base";
 const mainButton =
-  "flex min-h-12 w-full items-center justify-center rounded-lg bg-accent px-4 text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60";
+  "flex min-h-12 w-full items-center justify-center rounded-lg bg-primary px-4 text-base font-semibold text-on-primary active:opacity-80 disabled:opacity-60";
 
 // The second way in, under "Continue with Google": "Log in with password" opens a username
 // and password form. After a login that fails, a quiet link offers the new-person card

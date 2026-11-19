@@ -46,7 +46,7 @@ export default function CalorieRing({
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {/* The one main number: calories eaten, out of your goal. */}
         <span className="text-3xl font-bold leading-none tabular-nums">{fmt(calories)}</span>
-        <span className="mt-1 text-xs text-muted tabular-nums">{goal ? `/ ${fmt(goal)} kcal` : "kcal"}</span>
+        <span className="mt-1 font-mono text-[11px] text-muted">{goal ? `/ ${fmt(goal)} kcal` : "kcal"}</span>
       </div>
     </div>
   );

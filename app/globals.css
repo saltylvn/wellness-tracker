@@ -1,44 +1,52 @@
 @import "tailwindcss";
 
 /*
-  The look: neutral greys with no tint, thin hairline borders instead of shadows, squarer
-  corners, and one accent color (orange). It follows the phone: light by default, near-black
-  when the phone is in dark mode. Every color is a token here, so the two themes stay in step.
+  The look: black and white, with one orange accent (Ember, #E8590C) for rings, bars, active
+  tabs and highlights. Main buttons are solid black (white in dark mode). Flat cards with a
+  hairline border, squarer corners. It follows the phone: white by default, near-black in
+  dark mode. Every color is a token here, so the two themes stay in step.
 */
 :root {
   color-scheme: light;
-  --background: #fcfcfc; /* the page */
-  --foreground: #171717; /* text */
-  --muted: #6b6b6b; /* quieter text */
+  --background: #ffffff; /* the page */
+  --foreground: #0a0a0a; /* text */
+  --muted: #737373; /* quieter text */
   --card: #ffffff;
-  --card-2: #f4f4f4; /* inset areas inside a card */
-  --border: #e6e6e6;
+  --card-2: #f5f5f5; /* inset areas inside a card */
+  --border: #e5e5e5;
   --border-strong: #d4d4d4;
-  /* Orange for accents and "under goal", red for "over goal". */
-  --accent: #f26b2a;
+  /* The one accent: orange for rings, bars, active states and highlights. */
+  --accent: #e8590c;
   --on-accent: #ffffff; /* text on the orange is white */
-  --danger: #e5383b;
+  /* Main buttons: solid black with white text. */
+  --primary: #0a0a0a;
+  --on-primary: #ffffff;
+  --danger: #dc2626;
   --card-shadow: none; /* cards are flat, with a hairline border */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --background: #141414;
-    --foreground: #ededed;
-    --muted: #a1a1a1;
-    --card: #1a1a1a;
-    --card-2: #232323;
-    --border: #2a2a2a;
+    --background: #0a0a0a;
+    --foreground: #fafafa;
+    --muted: #a3a3a3;
+    --card: #141414;
+    --card-2: #1f1f1f;
+    --border: #262626;
     --border-strong: #3a3a3a;
-    --accent: #f5722f;
-    --danger: #ec5d5e;
+    --accent: #f0702a; /* a touch lighter, so it reads on near-black */
+    --primary: #fafafa;
+    --on-primary: #0a0a0a;
+    --danger: #ef5350;
   }
 }
 
 @theme inline {
   --color-accent: var(--accent);
   --color-on-accent: var(--on-accent);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
   --color-danger: var(--danger);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -48,8 +56,8 @@
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-source-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-inter-display), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   /* Squarer shapes: cards (rounded-2xl) 12px; buttons and fields (rounded-xl, rounded-lg) 8px. */
   --radius-2xl: 12px;
   --radius-xl: 8px;
@@ -81,20 +89,21 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Headings use the display font (Manrope), slightly tightened. */
+/* Headings use Inter Display at a medium weight, tightened, like the showcase images. */
 h1,
-h2 {
+h2,
+h3 {
   font-family: var(--font-display);
-  letter-spacing: -0.015em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
-/* Small section labels: mono capitals, quiet. */
+/* Small labels as plain text: lowercase mono, quiet (an engineering touch, like "protein"). */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 400;
+  text-transform: lowercase;
   color: var(--muted);
 }
 
@@ -122,16 +131,14 @@ h2 {
   padding-left: 0.22em; /* balances the letter-spacing so the word is truly centered */
   font-family: var(--font-display);
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.22em;
   color: var(--foreground);
 }
 .splash-sub {
   margin: 6px 0 0;
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 13px;
   color: var(--muted);
 }
 /* After the app has been opened once, later page loads skip the splash. */
