@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/saltylvn/wellness-tracker/actions/workflows/ci.yml)
 
-![DEVELOP in dark mode: the Weight tab, the Coach window and the Fitness tab on iPhone, with the live demo and repository links, four proof numbers (397 automated tests, 18/18 tables with row-level security, about 2 s AI photo estimates, a 6 am daily AI coach note) and the tech stack, including the Raspberry Pi agent](docs/linkedin/DEVELOP-project-cover-4x3.png)
+![DEVELOP: the Coach window in the live demo on an iPhone, the coach agent's run from Postgres to the Raspberry Pi, Gemini, a checker and the Coach window, a plain-text summary of how it is built (food logging, speed, database access, link safety, evals), and four numbers: 421 app tests plus 89 on the agent, 18/18 tables with row-level security, about 2 s per photo estimate and $0 a month to run the coach](docs/linkedin/DEVELOP-project-light-4x3.png)
 
 ## What it does
 

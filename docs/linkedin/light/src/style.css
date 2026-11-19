@@ -1,0 +1,108 @@
+/* DEVELOP showcase, light. The layout system is the Atlas showcase; both apps share these fonts and neutrals. DEVELOP overrides are at the end. */
+@font-face { font-family: "Inter"; src: url("fonts/inter-latin.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Manrope"; src: url("fonts/manrope-latin.woff2") format("woff2"); font-weight: 500 700; }
+@font-face { font-family: "Source Code Pro"; src: url("fonts/source-code-pro-latin.woff2") format("woff2"); font-weight: 400 500; }
+
+:root {
+  --brand: #2b825b;
+  --brand-solid: #2f7d56;
+  --brand-border: color-mix(in oklab, #3ecf8e 45%, transparent);
+  --brand-soft: color-mix(in oklab, #3ecf8e 12%, transparent);
+  --canvas: #fcfcfc;
+  --surface: #ffffff;
+  --surface-2: #f4f4f4;
+  --line: #e6e6e6;
+  --line-strong: #d4d4d4;
+  --ink: #171717;
+  --ink-2: #525252;
+  --ink-3: #6b6e7d;
+  --ink-4: #a8aab3;
+  --c-green: #30a46c;
+  --c-orange: #f76b15;
+  --c-red: #e5484d;
+  --c-purple: #8e4ec6;
+  --c-blue: #0090ff;
+  --c-teal: #12a594;
+  --c-grey: #8d8d8d;
+  --glow: color-mix(in oklab, #3ecf8e 9%, transparent);
+  --sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --display: "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Source Code Pro", ui-monospace, Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--canvas); }
+body {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 400;
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+body.li { width: 1600px; height: 1200px; }
+body.gh { width: 1280px; height: 640px; }
+b, strong, em, i { font-weight: inherit; font-style: normal; }
+
+.sheet { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 56px 64px 46px; background: radial-gradient(70% 55% at 100% 0%, var(--glow), transparent 62%); }
+
+/* ---- top bar: the app's mark, wordmark and where you are ---- */
+.top { display: flex; align-items: center; justify-content: space-between; height: 48px; flex: none; }
+.brand { display: flex; align-items: center; gap: 16px; }
+.mark { --s: 46px; width: var(--s); height: var(--s); border-radius: calc(var(--s) * 0.24); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: calc(var(--s) * 0.07); padding-left: calc(var(--s) * 0.22); background: linear-gradient(135deg, #232323 0%, #171717 60%, #121212 100%); flex: none; }
+.mark i { display: block; height: calc(var(--s) * 0.11); border-radius: calc(var(--s) * 0.055); }
+.mark i:nth-child(1) { width: calc(var(--s) * 0.56); background: #3ecf8e; }
+.mark i:nth-child(2) { width: calc(var(--s) * 0.42); background: #2b9b6a; }
+.mark i:nth-child(3) { width: calc(var(--s) * 0.3); background: #ededed; }
+.wm { font-family: var(--display); font-weight: 500; font-size: 31px; letter-spacing: -0.015em; }
+.path { font-family: var(--mono); font-size: 21px; color: var(--ink-3); margin-left: 2px; }
+
+/* ---- type ---- */
+h1 { font-family: var(--display); font-weight: 500; letter-spacing: -0.022em; line-height: 1.08; }
+.sub { color: var(--ink-2); line-height: 1.45; }
+.eyebrow { font-family: var(--mono); font-weight: 500; font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.mono { font-family: var(--mono); }
+
+/* ---- the app's card, pill and chip ---- */
+.card { background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; }
+.card-brand { border-color: var(--brand-border); background: radial-gradient(120% 90% at 100% 0%, var(--glow), transparent 60%), var(--surface); }
+.ch { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.ch h2 { font-family: var(--display); font-weight: 500; font-size: 27px; letter-spacing: -0.015em; display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+.ch h2 svg { color: var(--brand); flex: none; }
+.hint { font-size: 18px; color: var(--ink-3); }
+.pill { --pc: var(--c-grey); display: inline-flex; align-items: center; gap: 9px; height: 36px; padding: 0 16px; border-radius: 999px; border: 1.5px solid color-mix(in oklab, var(--pc) 35%, transparent); background: color-mix(in oklab, var(--pc) 13%, transparent); color: color-mix(in oklab, var(--pc) 70%, var(--ink)); font-size: 19px; font-weight: 500; white-space: nowrap; }
+.pill.sm { height: 28px; padding: 0 11px; font-size: 15px; gap: 6px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--pc, var(--c-grey)); flex: none; }
+.chip { display: inline-flex; align-items: center; height: 36px; padding: 0 15px; border-radius: 999px; background: var(--surface-2); border: 1.5px solid var(--line); color: var(--ink-2); font-size: 19px; white-space: nowrap; }
+
+/* ---- plain text: the engineer's block. Line numbers, a quiet header, no chrome ---- */
+.plain { background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+.plain .ph { display: flex; justify-content: space-between; align-items: center; padding: 0 24px; height: 50px; border-bottom: 1.5px solid var(--line); font-family: var(--mono); font-size: 17px; color: var(--ink-3); flex: none; }
+.plain pre { font-family: var(--mono); font-weight: 400; color: var(--ink); counter-reset: l; padding: 18px 0; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.plain pre span.l { display: block; counter-increment: l; white-space: pre; padding-right: 24px; }
+.plain pre span.l::before { content: counter(l); display: inline-block; width: 58px; padding-right: 20px; text-align: right; color: var(--ink-4); }
+.k { color: var(--brand); }
+.c { color: var(--ink-3); }
+.p { color: var(--ink-4); }
+.ai { color: var(--c-purple); }
+.ok { color: var(--c-green); }
+
+/* ---- footer ---- */
+.foot { display: flex; justify-content: space-between; align-items: baseline; border-top: 1.5px solid var(--line); padding-top: 20px; margin-top: auto; flex: none; font-size: 21px; color: var(--ink-2); }
+.foot em { color: var(--ink); font-weight: 450; margin-right: 12px; }
+.foot .mono { font-size: 18px; color: var(--ink-3); }
+
+.grow { flex: 1; min-height: 0; }
+.row { display: flex; }
+.col { display: flex; flex-direction: column; }
+
+/* ---- DEVELOP: the app's own accent and icon (wellness-tracker app/globals.css, light theme) ---- */
+:root {
+  --brand: #c4501b;        /* the app's accent, darkened so small text stays readable */
+  --brand-solid: #f26b2a;  /* the app's accent */
+  --brand-border: color-mix(in oklab, #f26b2a 45%, transparent);
+  --brand-soft: color-mix(in oklab, #f26b2a 12%, transparent);
+  --glow: color-mix(in oklab, #f26b2a 9%, transparent);
+}
+.mark { display: grid; place-items: center; padding: 0; background: linear-gradient(180deg, #ffffff 0%, #efefef 100%); border: 1.5px solid var(--line-strong); }
+.mark svg { width: 66%; height: 66%; }

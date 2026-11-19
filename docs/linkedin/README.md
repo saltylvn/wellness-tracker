@@ -20,3 +20,11 @@ They're in **dark mode** (the app's own dark palette) and show the Coach window.
    `DEVELOP-architecture.png`, and `out-social-preview.png` to `../social-preview.png`. Working files are git-ignored.
 
 Update the numbers in `make_slides.py` (tests, tables, migrations) from the repo before re-rendering: count tests without the `.claude/` worktrees (`npx vitest run --exclude '.claude/**'`), and tables with row-level security on a migrated PGlite database.
+
+## The light hero and the social preview
+
+Since 18 November 2026 the README hero (`DEVELOP-project-light-4x3.png`) and the GitHub social
+preview (`../social-preview.png`) are light, in the same look as the owner's Atlas showcase.
+They are made by a separate, smaller set of files in [`light/`](light/): see its README.
+The dark images above (the carousel, the wide covers, the architecture diagram and the earlier
+4:3 cover) are still made by the scripts in this folder.
