@@ -2,3 +2,8 @@
 ph-*.png
 out-*.png
 *.html
+# Working files of the light set (light/): the compiled tools and the full-size renders
+light/src/snap
+light/src/capture
+light/linkedin/
+light/github/
