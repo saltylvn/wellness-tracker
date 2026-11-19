@@ -57,7 +57,7 @@ export const viewport: Viewport = {
   // The status bar matches the page: light, or near-black when the phone is in dark mode.
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#27272a" },
+    { media: "(prefers-color-scheme: dark)", color: "#1e1e20" },
   ],
 };
 
