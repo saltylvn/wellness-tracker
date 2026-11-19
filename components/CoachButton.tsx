@@ -110,17 +110,17 @@ export default function CoachButton() {
 
   return (
     <>
-      {/* 44px tall to tap, drawn as a small orange-tinted chip (8px corners, like the app's other buttons). */}
+      {/* 44px to tap, drawn as the agent icon (a chip) in a small accent-tinted square, the same icon the
+          showcase image uses for "The coach agent". */}
       <button
         type="button"
         onClick={openCoach}
         aria-label="Coach"
         aria-expanded={open}
-        className="group flex h-11 items-center justify-center px-1"
+        className="group flex h-11 w-11 items-center justify-center"
       >
-        <span className="flex h-8 items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/10 px-3 text-sm font-semibold text-accent group-active:opacity-70">
-          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
-          Coach
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-accent/40 bg-accent/10 text-accent group-active:opacity-70">
+          <AgentIcon />
         </span>
       </button>
 
@@ -339,5 +339,26 @@ function Rate({
         </p>
       )}
     </div>
+  );
+}
+
+/** The agent icon: a chip (a square with a core and pins on every side), drawn in the accent color. */
+function AgentIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="5" y="5" width="14" height="14" rx="2" />
+      <rect x="9" y="9" width="6" height="6" rx="1" />
+      <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" />
+    </svg>
   );
 }
