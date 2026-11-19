@@ -5,7 +5,7 @@ import { createInvite, revokeInvite } from "@/app/(tabs)/settings/actions";
 import { INVITE_DAYS, inviteSmsHref, inviteStatus, type InviteRow } from "@/lib/accounts";
 
 const mainButton =
-  "flex min-h-12 w-full items-center justify-center rounded-lg bg-accent px-4 text-base font-semibold text-on-accent active:opacity-80 disabled:opacity-60";
+  "flex min-h-12 w-full items-center justify-center rounded-lg bg-primary px-4 text-base font-semibold text-on-primary active:opacity-80 disabled:opacity-60";
 
 // Settings, for the admin only: "Invite someone". Tap "New invite", then "Text it" opens
 // Messages with the invite link and code written out; you pick who to send it to. The code
