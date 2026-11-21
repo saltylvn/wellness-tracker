@@ -1,6 +1,7 @@
 // Workout picks from the Pi coach (supabase/migrations/20261118000000_coach_workouts.sql), tested on a
 // real Postgres built from every migration. The writer can save today's picks, but only with https
-// links on the allowlisted publishers; the app shows them only to their owner.
+// links on the allowlisted publishers; the app shows them only to their owner. The Plan tab's list of
+// recent picks (20261119000000_coach_plans.sql) is tested at the bottom.
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { PGlite } from "@electric-sql/pglite";
 import { asUser, migratedDatabase } from "./database";
@@ -119,5 +120,59 @@ describe("the app", () => {
     await asUser(db, TYLER, async () => {
       await expect(db.query("select coach.allowed_link('https://www.menshealth.com/')")).rejects.toThrow(/permission denied/);
     });
+  });
+});
+
+describe("the Plan tab's list of picks", () => {
+  type Plan = { for_date: string; note: { headline: string }; feedback: string | null };
+
+  // Picks saved on an earlier day (the writer can only save today's, so these go straight in).
+  async function earlier(userId: string, daysAgo: number, headline: string, kind = "workouts") {
+    await db.query(
+      "insert into coach.notes (user_id, kind, for_date, note, model) values ($1, $2, current_date - $3::int, $4::jsonb, 'test')",
+      [userId, kind, daysAgo, JSON.stringify({ ...WORKOUTS, headline })],
+    );
+  }
+  const plans = (userId: string, limit = "") =>
+    asUser(db, userId, async () => (await db.query<{ p: Plan[] }>(`select public.my_coach_plans(${limit}) as p`)).rows[0].p);
+
+  it("lists your own picks, newest first, with your rating", async () => {
+    await earlier(TYLER, 7, "a week ago");
+    await earlier(TYLER, 3, "three days ago");
+    await earlier(OTHER, 1, "someone else's");
+    await earlier(TYLER, 1, "a daily note", "daily");
+    await save(WORKOUTS);
+    await asUser(db, TYLER, () => db.query("select public.rate_coach_note('workouts', $1::date, 'down')", [today]));
+
+    const mine = await plans(TYLER);
+    expect(mine.map((p) => p.note.headline)).toEqual([WORKOUTS.headline, "three days ago", "a week ago"]);
+    expect(mine[0]).toEqual({ for_date: today, note: WORKOUTS, feedback: "down" });
+    expect((await plans(OTHER)).map((p) => p.note.headline)).toEqual(["someone else's"]);
+  });
+
+  it("gives an empty list when there are none", async () => {
+    expect(await plans(TYLER)).toEqual([]);
+  });
+
+  it("returns between 1 and 30 sets of picks, 10 unless asked", async () => {
+    await db.query(
+      `insert into coach.notes (user_id, kind, for_date, note, model)
+       select $1, 'workouts', current_date - g, '{}'::jsonb, 'test' from generate_series(0, 34) g`,
+      [TYLER],
+    );
+    expect(await plans(TYLER)).toHaveLength(10);
+    expect(await plans(TYLER, "2")).toHaveLength(2);
+    expect(await plans(TYLER, "0")).toHaveLength(1);
+    expect(await plans(TYLER, "1000")).toHaveLength(30);
+    expect(await plans(TYLER, "null")).toHaveLength(10);
+  });
+
+  it("can't be called signed out", async () => {
+    await db.exec("set role anon");
+    try {
+      await expect(db.query("select public.my_coach_plans()")).rejects.toThrow(/permission denied/);
+    } finally {
+      await db.exec("reset role");
+    }
   });
 });

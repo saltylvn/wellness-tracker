@@ -352,6 +352,7 @@ describe("what the API roles can call", () => {
       "invite_code_ok",
       "is_admin",
       "my_coach_panel", // your own coach notes only (coachNotes.test.ts)
+      "my_coach_plans", // your own recent workout picks only, for the Plan tab (coachWorkouts.test.ts)
       "rate_coach_note", // thumbs up/down on your own notes only
       "request_access",
       "reset_demo_data",
