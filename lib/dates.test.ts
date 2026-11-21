@@ -3,6 +3,7 @@ import {
   addDays,
   formatDayNumber,
   formatFullDate,
+  formatShortDate,
   formatShortMonth,
   formatWeekday,
   getLocalDateKey,
@@ -118,5 +119,6 @@ describe("formatting", () => {
     expect(formatShortMonth("2026-10-05")).toBe("Oct");
     expect(formatDayNumber("2026-10-05")).toBe("5");
     expect(formatFullDate("2026-10-05")).toBe("Oct 5, 2026");
+    expect(formatShortDate("2026-11-18")).toBe("Wed, Nov 18");
   });
 });

@@ -69,6 +69,9 @@ export const formatShortMonth = (key: string) => format(key, { month: "short" })
 export const formatDayNumber = (key: string) => format(key, { day: "numeric" });
 export const formatFullDate = (key: string) =>
   format(key, { month: "short", day: "numeric", year: "numeric" });
+/** "Wed, Nov 18": a day's name and date, without the year. */
+export const formatShortDate = (key: string) =>
+  format(key, { weekday: "short", month: "short", day: "numeric" });
 
 /** Whole days from `from` to `to` (negative if `to` is earlier). */
 export function daysBetween(from: string, to: string): number {

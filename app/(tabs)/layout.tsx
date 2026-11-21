@@ -4,7 +4,7 @@ import { isDemoEmail } from "@/lib/demo";
 import { createClient } from "@/lib/supabase/server";
 
 // (tabs) is a "route group": the parentheses mean the folder name is NOT part
-// of the URL, so /food, /workouts and /settings all share this layout (the tab bar).
+// of the URL, so /weight, /workouts, /plan, /food and /settings all share this layout (the tab bar).
 export default async function TabsLayout({ children }: { children: React.ReactNode }) {
   // getClaims reads the signed login token (no network trip), so this check is cheap.
   const { data } = await (await createClient()).auth.getClaims();

@@ -1,7 +1,8 @@
-// The coach's pull-up panel on the Fitness tab: notes written by the Raspberry Pi coach
-// (supabase/migrations/20261117000000_coach_notes.sql). Everything here is plain text: notes are
-// shown as text, never as HTML, so nothing in them can become a link or markup.
-import { isValidDateKey } from "./dates";
+// The coach: notes written by the Raspberry Pi coach (supabase/migrations/20261117000000_coach_notes.sql),
+// shown in the Coach window on every tab, and the workout plans it finds, shown on the Plan tab.
+// Everything here is plain text: notes are shown as text, never as HTML, so nothing in them can
+// become a link or markup (the one exception: a pick's link, checked against a fixed list of sites).
+import { addDays, isoWeekday, isValidDateKey } from "./dates";
 
 export type CoachFeedback = "up" | "down";
 export type DailyNote = { headline: string; yesterday: string; week_so_far: string; focuses: string[]; safety: string[] };
@@ -13,7 +14,7 @@ export type CoachPanelData = {
   daily: Saved<DailyNote> | null;
   weekly: Saved<WeeklyNote> | null; // this week's review (saved on Sunday)
   lastWeek: Saved<WeeklyNote> | null; // last week's, offered on Mondays
-  workouts: Saved<WorkoutsNote> | null; // workout picks, Wednesdays and Sundays
+  workouts: Saved<WorkoutsNote> | null; // that day's workout picks (Wednesdays and Sundays); shown on the Plan tab
 };
 
 export const EMPTY_PANEL: CoachPanelData = { daily: null, weekly: null, lastWeek: null, workouts: null };
@@ -94,6 +95,19 @@ export function parseCoachPanel(raw: unknown): CoachPanelData {
   };
 }
 
+/** How many sets of picks the Plan tab shows: the latest and the nine before it (about five weeks). */
+export const PLAN_LIMIT = 10;
+
+/** Reads my_coach_plans' JSON (your recent picks) as defensively as the panel, newest first. */
+export function parseCoachPlans(raw: unknown): Saved<WorkoutsNote>[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((r) => saved(r, workouts))
+    .filter((p): p is Saved<WorkoutsNote> => p !== null)
+    .sort((a, b) => (a.forDate < b.forDate ? 1 : a.forDate > b.forDate ? -1 : 0))
+    .slice(0, PLAN_LIMIT);
+}
+
 export type PanelView =
   | { kind: "weekly"; review: Saved<WeeklyNote> }
   | { kind: "daily"; note: Saved<DailyNote>; lastWeek: Saved<WeeklyNote> | null }
@@ -127,8 +141,86 @@ export const DEMO_PANEL: CoachPanelData = {
 
 export const EMPTY_TEXT = "Your coach's first note arrives tomorrow morning.";
 
-/** Wednesdays and Sundays the coach opens by itself the first time the app is opened after 5 am,
- * if that day's workout picks are in. `lastShown` is the date it last opened itself. */
-export function shouldAutoOpen(today: string, hour: number, isoWeekdayNumber: number, lastShown: string | null): boolean {
-  return (isoWeekdayNumber === 3 || isoWeekdayNumber === 7) && hour >= 5 && lastShown !== today;
+/** The days the coach looks for new plans: Wednesday (3) and Sunday (7). */
+const isPickDay = (isoWeekdayNumber: number) => isoWeekdayNumber === 3 || isoWeekdayNumber === 7;
+
+/** Wednesdays and Sundays after 5 am the app looks for that day's new plans, to put a dot on the Plan
+ * tab, until you've seen them. `lastSeen` is the date of the newest plans the Plan tab has shown you. */
+export function shouldLookForPlans(today: string, hour: number, isoWeekdayNumber: number, lastSeen: string | null): boolean {
+  return isPickDay(isoWeekdayNumber) && hour >= 5 && lastSeen !== today;
+}
+
+/** The most recent Wednesday or Sunday on or before `day`. */
+export function lastPickDay(day: string): string {
+  for (let back = 0; back < 7; back++) {
+    const candidate = addDays(day, -back);
+    if (isPickDay(isoWeekday(candidate))) return candidate;
+  }
+  return day; // never reached: every week has a Wednesday
+}
+
+/** What the demo account's Plan tab shows instead of real picks (it never gets any): two sample
+ * sets, dated the last two pick days before `today`. The links are real articles on the allowlist. */
+export function demoPlans(today: string): Saved<WorkoutsNote>[] {
+  const latest = lastPickDay(today);
+  return [
+    {
+      forDate: latest,
+      feedback: null,
+      note: {
+        headline: "💪 Three splits that fit a 3-day lifting week",
+        plan_summary:
+          "Your week is three lifting days (Chest & Back, Legs, Delts & Arms) with cardio in between. " +
+          "Each of these keeps three lifting days and changes how the muscle groups are shared out.",
+        picks: [
+          {
+            title: "The Best Push Pull Legs Routines for Mass Gains",
+            source: "Legion",
+            url: "https://legionathletics.com/push-pull-legs/",
+            summary: "Splits the week into pushing (chest, shoulders, triceps), pulling (back, biceps) and leg days.",
+            why: "Closest to your week now: Monday would become push and Friday pull.",
+          },
+          {
+            title: "The Best Upper Lower Split Workouts for Mass & Strength",
+            source: "Legion",
+            url: "https://legionathletics.com/upper-lower-split/",
+            summary: "Alternates upper-body and lower-body sessions, so each muscle group is trained more than once a week.",
+            why: "Adds a second leg day, which would help your squat and deadlift.",
+          },
+          {
+            title: "An Expert Guide to the StrongLifts 5x5 Program",
+            source: "Legion",
+            url: "https://legionathletics.com/stronglifts-5x5/",
+            summary: "Three full-body days a week built on five sets of five, adding a little weight each session.",
+            why: "A simple way to keep your priority lifts moving up.",
+          },
+        ],
+      },
+    },
+    {
+      forDate: lastPickDay(addDays(latest, -1)),
+      feedback: null,
+      note: {
+        headline: "🧱 Building your own routine, step by step",
+        plan_summary:
+          "Two guides on choosing exercises, sets and reps yourself, in case you'd rather adjust your current plan than switch to a new one.",
+        picks: [
+          {
+            title: "How To Build Your Own Workout Routine (Plans & Exercises)",
+            source: "Nerd Fitness",
+            url: "https://www.nerdfitness.com/blog/how-to-build-your-own-workout-routine/",
+            summary: "Nine steps: picking exercises, sets and reps, rest between sets, and how many days a week to train.",
+            why: "Useful the next time you edit a lifting day.",
+          },
+          {
+            title: "5 Strength Training Workouts (for Beginners)",
+            source: "Nerd Fitness",
+            url: "https://www.nerdfitness.com/blog/strength-training-101-where-do-i-start/",
+            summary: "Five beginner programs, from a bodyweight circuit to a two-day barbell split.",
+            why: "The two-day split is a lighter option for a busy week.",
+          },
+        ],
+      },
+    },
+  ];
 }
