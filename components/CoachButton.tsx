@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { loadCoach } from "@/app/(tabs)/coach-actions";
 import CoachRate from "@/components/CoachRate";
 import { useToday } from "@/components/useToday";
@@ -23,6 +24,7 @@ import { isoWeekday } from "@/lib/dates";
 
 export default function CoachButton() {
   const today = useToday();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<CoachPanelData | null>(null);
   const [demo, setDemo] = useState(false);
@@ -58,8 +60,9 @@ export default function CoachButton() {
   }, [open]);
 
   const view = panel && today ? panelView(today, panel, isoWeekday(today)) : null;
-  // New plans came in today? Then offer a way over to the Plan tab, where they're shown.
-  const newPlans = Boolean(today) && panel?.workouts?.forDate === today;
+  // New plans came in today? Then offer a way over to the Plan tab, where they're shown
+  // (not when you're already on it).
+  const newPlans = Boolean(today) && panel?.workouts?.forDate === today && !pathname.startsWith("/plan");
 
   return (
     <>
