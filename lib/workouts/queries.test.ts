@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   loadCardioDay,
+  loadCoachPlans,
   loadFitnessPage,
   loadGymBarcode,
   loadLiftDay,
@@ -231,5 +232,47 @@ describe("loadFitnessPage round trips", () => {
     expect(page.sunshine).toEqual({ minutes: null, lastMinutes: null, goal: null });
     expect(page.priorityLifts).toEqual([]); // only on lifting days
     expect(count).toBe(2);
+  });
+});
+
+describe("loadCoachPlans (the Plan tab)", () => {
+  const PICKS = {
+    headline: "💪 Picks",
+    plan_summary: "Swap Friday.",
+    picks: [{ title: "Upper/Lower Split", source: "Men's Health", url: "https://www.menshealth.com/fitness/a1/", summary: "Four days.", why: "" }],
+  };
+  // A stand-in for supabase.rpc: one prepared answer per database function, and a list of what was called.
+  function fakeRpc(answers: Record<string, { data?: unknown; error?: { code: string } }>) {
+    const called: string[] = [];
+    const client = {
+      rpc: async (name: string) => {
+        called.push(name);
+        return { data: answers[name]?.data ?? null, error: answers[name]?.error ?? null };
+      },
+    };
+    return { db: client as never, called };
+  }
+
+  it("reads your recent picks in one trip", async () => {
+    const { db, called } = fakeRpc({
+      my_coach_plans: { data: [{ for_date: "2026-11-18", note: PICKS, feedback: "up" }, { for_date: "2026-11-15", note: PICKS }] },
+    });
+    const plans = await loadCoachPlans(db, "2026-11-21");
+    expect(plans.map((p) => [p.forDate, p.feedback])).toEqual([["2026-11-18", "up"], ["2026-11-15", null]]);
+    expect(called).toEqual(["my_coach_plans"]);
+  });
+
+  it("falls back to today's picks before the Plan tab's SQL step is run", async () => {
+    const { db, called } = fakeRpc({
+      my_coach_plans: { error: { code: "PGRST202" } },
+      my_coach_panel: { data: { workouts: { for_date: "2026-11-18", note: PICKS } } },
+    });
+    expect((await loadCoachPlans(db, "2026-11-18")).map((p) => p.forDate)).toEqual(["2026-11-18"]);
+    expect(called).toEqual(["my_coach_plans", "my_coach_panel"]);
+  });
+
+  it("is an empty list when there's nothing to show", async () => {
+    expect(await loadCoachPlans(fakeRpc({ my_coach_plans: { data: [] } }).db, "2026-11-21")).toEqual([]);
+    expect(await loadCoachPlans(fakeRpc({ my_coach_plans: { error: { code: "PGRST202" } } }).db, "2026-11-21")).toEqual([]);
   });
 });

@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { allowedLink, EMPTY_PANEL, parseCoachPanel, panelView, shouldAutoOpen } from "./coach";
+import {
+  allowedLink,
+  demoPlans,
+  EMPTY_PANEL,
+  lastPickDay,
+  parseCoachPanel,
+  parseCoachPlans,
+  panelView,
+  PLAN_LIMIT,
+  shouldLookForPlans,
+} from "./coach";
 
 const DAILY = {
   headline: "🎯 Today: Push day",
@@ -93,12 +103,68 @@ describe("workout picks", () => {
   });
 });
 
-describe("shouldAutoOpen", () => {
-  it("opens on Wednesday and Sunday after 5 am, once a day", () => {
-    expect(shouldAutoOpen("2026-11-18", 5, 3, null)).toBe(true);
-    expect(shouldAutoOpen("2026-11-22", 9, 7, "2026-11-18")).toBe(true);
-    expect(shouldAutoOpen("2026-11-18", 4, 3, null)).toBe(false); // before 5 am
-    expect(shouldAutoOpen("2026-11-19", 9, 4, null)).toBe(false); // Thursday
-    expect(shouldAutoOpen("2026-11-18", 9, 3, "2026-11-18")).toBe(false); // already shown today
+describe("parseCoachPlans (the Plan tab's list)", () => {
+  const PICK = { title: "Upper/Lower Split", source: "Men's Health", url: "https://www.menshealth.com/fitness/a1/", summary: "Four days.", why: "Fits you." };
+  const row = (for_date: string, extra: object = {}) => ({
+    for_date,
+    feedback: null,
+    note: { headline: `Picks for ${for_date}`, plan_summary: "Swap Friday.", picks: [PICK] },
+    ...extra,
+  });
+
+  it("reads each set of picks, newest first, with its rating", () => {
+    const plans = parseCoachPlans([row("2026-11-15"), row("2026-11-18", { feedback: "up" }), row("2026-11-11")]);
+    expect(plans.map((p) => p.forDate)).toEqual(["2026-11-18", "2026-11-15", "2026-11-11"]);
+    expect(plans[0].feedback).toBe("up");
+    expect(plans[0].note.picks).toEqual([PICK]);
+  });
+
+  it("leaves out anything malformed instead of breaking the page", () => {
+    expect(parseCoachPlans(null)).toEqual([]);
+    expect(parseCoachPlans({ for_date: "2026-11-18" })).toEqual([]);
+    const plans = parseCoachPlans([
+      row("2026-11-18"),
+      "nope",
+      row("not a date"),
+      { for_date: "2026-11-15", note: { headline: "x", plan_summary: "y", picks: [{ ...PICK, url: "https://evil.example.com/x" }] } },
+    ]);
+    expect(plans.map((p) => p.forDate)).toEqual(["2026-11-18"]);
+  });
+
+  it("shows at most the latest ten", () => {
+    const many = Array.from({ length: 14 }, (_, i) => row(`2026-10-${String(i + 1).padStart(2, "0")}`));
+    const plans = parseCoachPlans(many);
+    expect(plans).toHaveLength(PLAN_LIMIT);
+    expect(plans[0].forDate).toBe("2026-10-14");
+  });
+});
+
+describe("shouldLookForPlans", () => {
+  it("looks on Wednesday and Sunday after 5 am, until today's plans have been seen", () => {
+    expect(shouldLookForPlans("2026-11-18", 5, 3, null)).toBe(true);
+    expect(shouldLookForPlans("2026-11-22", 9, 7, "2026-11-18")).toBe(true);
+    expect(shouldLookForPlans("2026-11-18", 4, 3, null)).toBe(false); // before 5 am
+    expect(shouldLookForPlans("2026-11-19", 9, 4, null)).toBe(false); // Thursday
+    expect(shouldLookForPlans("2026-11-18", 9, 3, "2026-11-18")).toBe(false); // already seen today's
+  });
+});
+
+describe("the demo account's sample plans", () => {
+  it("finds the last Wednesday or Sunday", () => {
+    expect(lastPickDay("2026-11-21")).toBe("2026-11-18"); // Saturday -> Wednesday
+    expect(lastPickDay("2026-11-22")).toBe("2026-11-22"); // Sunday itself
+    expect(lastPickDay("2026-11-24")).toBe("2026-11-22"); // Tuesday -> Sunday
+    expect(lastPickDay("2026-11-18")).toBe("2026-11-18"); // Wednesday itself
+  });
+
+  it("dates the samples on the last two pick days", () => {
+    expect(demoPlans("2026-11-21").map((p) => p.forDate)).toEqual(["2026-11-18", "2026-11-15"]);
+    expect(demoPlans("2026-11-22").map((p) => p.forDate)).toEqual(["2026-11-22", "2026-11-18"]);
+  });
+
+  it("would pass the same checks as real picks (allowlisted links, text sizes)", () => {
+    const samples = demoPlans("2026-11-21");
+    const asSaved = samples.map((p) => ({ for_date: p.forDate, note: p.note, feedback: p.feedback }));
+    expect(parseCoachPlans(asSaved)).toEqual(samples);
   });
 });
