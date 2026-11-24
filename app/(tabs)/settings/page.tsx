@@ -112,7 +112,7 @@ export default async function SettingsPage() {
           <form action={signOut}>
             <button
               type="submit"
-              className="flex min-h-11 items-center px-1 text-base font-semibold text-accent active:opacity-70"
+              className="flex min-h-11 items-center px-1 text-base font-semibold text-accent-ink active:opacity-70"
             >
               Sign out
             </button>

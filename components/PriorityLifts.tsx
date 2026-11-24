@@ -14,7 +14,7 @@ export default function PriorityLifts({ lifts }: { lifts: PriorityLift[] }) {
           key={lift.name}
           className="flex min-w-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm"
         >
-          <span aria-hidden="true" className="text-xs text-accent">
+          <span aria-hidden="true" className="text-xs text-accent-ink">
             ★
           </span>
           <span className="min-w-0 flex-1 truncate font-semibold">{lift.name}</span>

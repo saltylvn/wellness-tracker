@@ -4,7 +4,7 @@ import { goalProgress, type WeeklyGoals } from "@/lib/cardioGoals";
 
 // "This week" progress toward your weekly distance goals, shown on cardio and rest days.
 // Run, cycle and walk show up while they have a goal; swim shows once it has a goal
-// or you've swum this week, one compact line each. The bars stay orange; reaching a goal gets a 🎯.
+// or you've swum this week, one compact line each. The bars are orange, and turn mint with a 🎯 once the goal is reached.
 export default function WeeklyCardioGoals({
   totals,
   goals,
@@ -21,7 +21,7 @@ export default function WeeklyCardioGoals({
         {/* -my-3 keeps the 44px tap area without making the card taller. */}
         <Link
           href="/settings"
-          className="-my-3 flex min-h-11 items-center text-sm font-medium text-accent active:opacity-70"
+          className="-my-3 flex min-h-11 items-center text-sm font-medium text-accent-ink active:opacity-70"
         >
           Edit goals
         </Link>
@@ -30,7 +30,7 @@ export default function WeeklyCardioGoals({
       {rows.length === 0 ? (
         <p className="text-sm text-muted">
           No weekly goals set. Add some in{" "}
-          <Link href="/settings" className="font-medium text-accent underline">
+          <Link href="/settings" className="font-medium text-accent-ink underline">
             Settings
           </Link>
           .
@@ -54,7 +54,7 @@ export default function WeeklyCardioGoals({
                 aria-valuenow={progress ? totals[kind] : undefined}
                 className="h-2 flex-1 overflow-hidden rounded-full bg-border"
               >
-                {progress && <div className="h-full rounded-full bg-accent" style={{ width: `${progress.percent}%` }} />}
+                {progress && <div className={`h-full rounded-full ${progress.reached ? "bg-accent-3" : "bg-accent"}`} style={{ width: `${progress.percent}%` }} />}
               </div>
               <p className="shrink-0 text-sm tabular-nums">
                 {progress?.reached && <span aria-label="Goal reached">🎯 </span>}

@@ -58,7 +58,7 @@ export default function PlannedRest({
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted">Planned</p>
-          <p className={`text-lg font-semibold ${checked ? "text-accent" : ""}`}>{formatRestPlan(plan)}</p>
+          <p className={`text-lg font-semibold ${checked ? "text-accent-ink" : ""}`}>{formatRestPlan(plan)}</p>
         </div>
         <label className="flex min-h-11 shrink-0 items-center gap-2 text-sm font-medium">
           Completed
@@ -67,7 +67,7 @@ export default function PlannedRest({
             checked={checked}
             disabled={pending}
             onChange={(event) => toggle(event.target.checked)}
-            className="h-6 w-6 accent-[var(--accent)]"
+            className="h-6 w-6 accent-[var(--accent-3)]"
           />
         </label>
       </div>

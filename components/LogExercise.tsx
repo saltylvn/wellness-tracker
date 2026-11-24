@@ -124,7 +124,7 @@ export default function LogExercise({
               </>
             )}
           </p>
-          <p className={`text-xs ${todaySets.length ? "font-medium text-accent" : "text-muted"}`}>{summary}</p>
+          <p className={`text-xs ${todaySets.length ? "font-medium text-accent-ink" : "text-muted"}`}>{summary}</p>
         </div>
         <button
           type="button"
@@ -144,7 +144,7 @@ export default function LogExercise({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent active:opacity-70"
+            className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent-ink active:opacity-70"
           >
             Done
           </button>

@@ -101,7 +101,7 @@ export default async function WeightPage({
                 : "Log your first weigh-in below to see your progress."}
             </p>
             {data.targetSetting === null && (
-              <Link href="/settings" className="inline-flex min-h-11 items-center text-sm font-semibold text-accent active:opacity-70">
+              <Link href="/settings" className="inline-flex min-h-11 items-center text-sm font-semibold text-accent-ink active:opacity-70">
                 Open Settings
               </Link>
             )}

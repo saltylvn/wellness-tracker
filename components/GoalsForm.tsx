@@ -202,7 +202,7 @@ export default function GoalsForm({ goals }: { goals: Goals }) {
       </button>
 
       {result && (
-        <p role="status" className={`text-sm ${result.ok ? "text-accent" : "text-danger"}`}>
+        <p role="status" className={`text-sm ${result.ok ? "text-accent-ink" : "text-danger"}`}>
           {result.message}
         </p>
       )}

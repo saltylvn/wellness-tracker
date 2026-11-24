@@ -95,7 +95,7 @@ export default function WeighInCard({
       </p>
 
       {message && !open && (
-        <p role={message.ok ? "status" : "alert"} className={`text-center text-xs ${message.ok ? "text-accent" : "text-danger"}`}>
+        <p role={message.ok ? "status" : "alert"} className={`text-center text-xs ${message.ok ? "text-accent-ink" : "text-danger"}`}>
           {message.text}
         </p>
       )}
@@ -112,7 +112,7 @@ export default function WeighInCard({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent active:opacity-70"
+            className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent-ink active:opacity-70"
           >
             Cancel
           </button>

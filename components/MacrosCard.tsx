@@ -39,7 +39,7 @@ export default function MacrosCard({ macros }: { macros: Macro[] }) {
       </div>
       {!hasGoals && (
         <p className="px-1 text-xs text-muted">
-          <Link href="/settings" className="font-medium text-accent underline">
+          <Link href="/settings" className="font-medium text-accent-ink underline">
             Set macro goals
           </Link>{" "}
           to see progress for each.

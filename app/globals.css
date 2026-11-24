@@ -2,8 +2,14 @@
 
 /*
   The look: neutral greys with no tint, thin hairline borders instead of shadows, squarer
-  corners, and one accent color (orange). It follows the phone: light by default, near-black
-  when the phone is in dark mode. Every color is a token here, so the two themes stay in step.
+  corners, and three brand colors taken from the owner's reference (the "kido" palette):
+    1. orange  #ffac60  --accent    the main color: buttons, rings, bars, highlights
+    2. purple  #898ab0  --accent-2  the coach (anything the AI model writes)
+    3. mint    #88e1d1  --accent-3  done / goal reached (completed boxes, reached goals, logged checks)
+  All three are pale, so text ON them is near-black (--on-accent), and text IN these colors on
+  a light page uses the darker "-ink" version (AA contrast). In dark mode the pale colors read
+  well as text, so the -ink tokens equal the fills. Red (--danger) stays for "over goal".
+  It follows the phone: light by default, near-black when the phone is in dark mode.
 */
 :root {
   color-scheme: light;
@@ -14,9 +20,14 @@
   --card-2: #f4f4f4; /* inset areas inside a card */
   --border: #e6e6e6;
   --border-strong: #d4d4d4;
-  /* Orange for accents and "under goal", red for "over goal". */
-  --accent: #f26b2a;
-  --on-accent: #ffffff; /* text on the orange is white */
+  /* Brand colors (fills) and their darker text versions for the light page. */
+  --accent: #ffac60; /* orange */
+  --accent-ink: #a3530e; /* orange text on light: 5.5:1 on white */
+  --accent-2: #898ab0; /* purple */
+  --accent-2-ink: #5e5f8f;
+  --accent-3: #88e1d1; /* mint */
+  --accent-3-ink: #1d7568;
+  --on-accent: #171717; /* text on any of the three fills is near-black (white fails contrast) */
   --danger: #e5383b;
   --card-shadow: none; /* cards are flat, with a hairline border */
 }
@@ -31,13 +42,23 @@
     --card-2: #232323;
     --border: #2a2a2a;
     --border-strong: #3a3a3a;
-    --accent: #f5722f;
+    --accent: #ffac60;
+    --accent-ink: #ffac60;
+    --accent-2: #898ab0;
+    --accent-2-ink: #a4a5c8;
+    --accent-3: #88e1d1;
+    --accent-3-ink: #88e1d1;
     --danger: #ec5d5e;
   }
 }
 
 @theme inline {
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-2: var(--accent-2);
+  --color-accent-2-ink: var(--accent-2-ink);
+  --color-accent-3: var(--accent-3);
+  --color-accent-3-ink: var(--accent-3-ink);
   --color-on-accent: var(--on-accent);
   --color-danger: var(--danger);
   --color-background: var(--background);
@@ -56,9 +77,9 @@
   --radius-lg: 8px;
 }
 
-/* Keyboard/tap focus outline in the accent color */
+/* Keyboard/tap focus outline in the accent's text color (visible on light and dark) */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-ink);
   outline-offset: 2px;
 }
 

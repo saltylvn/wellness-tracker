@@ -118,8 +118,8 @@ export default function CoachButton() {
         aria-expanded={open}
         className="group flex h-11 items-center justify-center px-1"
       >
-        <span className="flex h-8 items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/10 px-3 text-sm font-semibold text-accent group-active:opacity-70">
-          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
+        <span className="flex h-8 items-center gap-1.5 rounded-lg border border-accent-2/40 bg-accent-2/10 px-3 text-sm font-semibold text-accent-2-ink group-active:opacity-70">
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent-2" />
           Coach
         </span>
       </button>
@@ -140,7 +140,7 @@ export default function CoachButton() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent active:opacity-70"
+                className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent-2-ink active:opacity-70"
               >
                 Hide
               </button>
@@ -185,7 +185,7 @@ export default function CoachButton() {
                 <button
                   type="button"
                   onClick={() => setShowLastWeek((v) => !v)}
-                  className="min-h-11 w-full rounded-xl text-sm font-semibold text-accent active:opacity-70"
+                  className="min-h-11 w-full rounded-xl text-sm font-semibold text-accent-2-ink active:opacity-70"
                 >
                   {showLastWeek ? "Back to today" : "📋 Last week's review"}
                 </button>
@@ -269,7 +269,7 @@ function WorkoutsBody({ saved }: { saved: Saved<WorkoutsNote> }) {
                 href={p.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-base font-semibold text-accent underline-offset-2 active:opacity-70"
+                className="block text-base font-semibold text-accent-2-ink underline-offset-2 active:opacity-70"
               >
                 {p.title} <span aria-hidden="true">↗</span>
               </a>
@@ -326,7 +326,7 @@ function Rate({
             aria-pressed={picked === f}
             aria-label={f === "up" ? "Useful" : "Not useful"}
             className={`min-h-11 min-w-11 rounded-xl border text-lg active:opacity-70 disabled:opacity-60 ${
-              picked === f ? "border-accent bg-accent/10" : "border-border"
+              picked === f ? "border-accent-2 bg-accent-2/10" : "border-border"
             }`}
           >
             {f === "up" ? "👍" : "👎"}

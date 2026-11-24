@@ -28,7 +28,7 @@ export default function WeightStreakBadge({ logs }: { logs: WeighInPoint[] }) {
         </p>
         <p className="text-sm font-medium text-muted">Best: {longest}</p>
       </div>
-      <p className={`mt-0.5 truncate text-sm ${thisWeekCounts ? "font-medium text-accent" : "text-muted"}`}>{hint}</p>
+      <p className={`mt-0.5 truncate text-sm ${thisWeekCounts ? "font-medium text-accent-ink" : "text-muted"}`}>{hint}</p>
     </section>
   );
 }

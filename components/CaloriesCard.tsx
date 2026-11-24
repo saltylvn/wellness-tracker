@@ -29,7 +29,7 @@ export default function CaloriesCard({
             </p>
           )
         ) : (
-          <Link href="/settings" className="text-sm font-medium text-accent underline">
+          <Link href="/settings" className="text-sm font-medium text-accent-ink underline">
             Set a calorie goal
           </Link>
         )}

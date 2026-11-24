@@ -58,7 +58,7 @@ export default async function WorkoutsPage({
       <section className="space-y-1">
         {/* The selected day, large and orange, so it's easy to see which day you're on. */}
         <h2 className="text-2xl font-bold">
-          <span className="text-accent">{formatWeekday(date)}</span>
+          <span className="text-accent-ink">{formatWeekday(date)}</span>
           {today ? (
             <span className="text-lg font-semibold text-muted"> · {dayTitle(today)}</span>
           ) : null}
@@ -98,7 +98,7 @@ export default async function WorkoutsPage({
               <h3 className="text-sm font-semibold text-muted">{formatWeekday(date)}&apos;s recovery</h3>
               <Link
                 href={`/workouts/plan/${today.id}?date=${date}`}
-                className="flex min-h-11 items-center text-sm font-medium text-accent active:opacity-70"
+                className="flex min-h-11 items-center text-sm font-medium text-accent-ink active:opacity-70"
               >
                 Edit plan
               </Link>
@@ -124,7 +124,7 @@ export default async function WorkoutsPage({
               <h3 className="text-sm font-semibold text-muted">{formatWeekday(date)}&apos;s cardio</h3>
               <Link
                 href={`/workouts/plan/${today.id}?date=${date}`}
-                className="flex min-h-11 items-center text-sm font-medium text-accent active:opacity-70"
+                className="flex min-h-11 items-center text-sm font-medium text-accent-ink active:opacity-70"
               >
                 Edit plan
               </Link>
@@ -149,7 +149,7 @@ export default async function WorkoutsPage({
             <h3 className="text-sm font-semibold text-muted">{formatWeekday(date)}&apos;s exercises</h3>
             <Link
               href={`/workouts/plan/${today.id}?date=${date}`}
-              className="flex min-h-11 items-center text-sm font-medium text-accent active:opacity-70"
+              className="flex min-h-11 items-center text-sm font-medium text-accent-ink active:opacity-70"
             >
               Edit plan
             </Link>
@@ -186,7 +186,7 @@ export default async function WorkoutsPage({
                     initialSeconds={defaultSecondsFor(timeSeed?.seconds)}
                   />
                   {connector === "superset" && (
-                    <p className="flex items-center justify-center gap-1.5 text-xs font-semibold text-accent">
+                    <p className="flex items-center justify-center gap-1.5 text-xs font-semibold text-accent-ink">
                       <span aria-hidden="true">⚡</span> Superset · no rest
                     </p>
                   )}

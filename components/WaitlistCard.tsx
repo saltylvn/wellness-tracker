@@ -78,7 +78,7 @@ export default function WaitlistCard({ entries, error }: { entries: WaitlistEntr
                       type="button"
                       onClick={() => makeInvite(entry.id)}
                       disabled={pending}
-                      className="min-h-11 px-2 text-sm font-semibold text-accent active:opacity-70 disabled:opacity-60"
+                      className="min-h-11 px-2 text-sm font-semibold text-accent-ink active:opacity-70 disabled:opacity-60"
                     >
                       Invite
                     </button>

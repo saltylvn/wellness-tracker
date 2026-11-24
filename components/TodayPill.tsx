@@ -10,12 +10,12 @@ export default function TodayPill({ dateKey, href = "/food" }: { dateKey: string
 
   if (!today) return <span className="block h-11" />; // keeps the layout steady
   if (today === dateKey) {
-    return <span className="flex h-11 items-center text-sm font-medium text-accent">Today</span>;
+    return <span className="flex h-11 items-center text-sm font-medium text-accent-ink">Today</span>;
   }
   return (
     <Link
       href={`${href}?date=${today}`} // straight to today, without an extra load to find the date
-      className="flex h-11 items-center text-sm font-medium text-accent active:opacity-70"
+      className="flex h-11 items-center text-sm font-medium text-accent-ink active:opacity-70"
     >
       Jump to today
     </Link>

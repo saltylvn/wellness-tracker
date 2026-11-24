@@ -107,7 +107,7 @@ export default function InviteCard({ invites }: { invites: InviteRow[] }) {
                       <span className="flex items-center">
                         <a
                           href={inviteSmsHref(origin, invite.code)}
-                          className="flex min-h-11 items-center px-2 font-medium text-accent active:opacity-70"
+                          className="flex min-h-11 items-center px-2 font-medium text-accent-ink active:opacity-70"
                         >
                           Text again
                         </a>
