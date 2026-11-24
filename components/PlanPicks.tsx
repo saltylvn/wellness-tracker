@@ -20,7 +20,7 @@ export default function PlanPicks({ saved, demo }: { saved: Saved<WorkoutsNote>;
                 target="_blank"
                 rel="noopener noreferrer"
                 // min-h-11 = at least 44px tall, so the title is easy to tap
-                className="flex min-h-11 items-center text-base font-semibold text-accent active:opacity-70"
+                className="flex min-h-11 items-center text-base font-semibold text-accent-ink active:opacity-70"
               >
                 <span>
                   {pick.title} <span aria-hidden="true">↗</span>

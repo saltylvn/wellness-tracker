@@ -38,8 +38,8 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
               width: "100%",
               border: 0,
               borderRadius: 8,
-              background: "#f26b2a",
-              color: "#fff",
+              background: "#ffac60",
+              color: "#171717",
               fontSize: 16,
               fontWeight: 600,
             }}

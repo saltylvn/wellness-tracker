@@ -100,7 +100,7 @@ export default function WeekSetup({
           // -my-3 keeps the card the same height while giving the link a full 44px tap area.
           <Link
             href={editPlanHref}
-            className="-my-3 flex min-h-11 shrink-0 items-center text-sm font-semibold text-accent active:opacity-70"
+            className="-my-3 flex min-h-11 shrink-0 items-center text-sm font-semibold text-accent-ink active:opacity-70"
           >
             Edit plan ›
           </Link>

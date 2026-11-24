@@ -39,13 +39,13 @@ export default function WaterTracker({ date, totalOz }: { date: string; totalOz:
               <li
                 key={oz}
                 aria-label={`Step ${index + 1}, ${oz} ounces${progress.steps > index ? ", done" : ""}`}
-                className={`h-1.5 flex-1 rounded-full ${progress.steps > index ? "bg-accent" : "bg-border"}`}
+                className={`h-1.5 flex-1 rounded-full ${progress.steps > index ? (progress.goalReached ? "bg-accent-3" : "bg-accent") : "bg-border"}`}
               />
             ))}
           </ol>
           <p className="mt-1 text-xs tabular-nums text-muted">
             <span className="font-medium text-foreground">{progress.total}</span> / {DAILY_WATER_OZ} oz
-            {progress.goalReached && <span className="ml-1.5 font-medium text-accent">🎉 goal</span>}
+            {progress.goalReached && <span className="ml-1.5 font-medium text-accent-3-ink">🎉 goal</span>}
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export default function WaterTracker({ date, totalOz }: { date: string; totalOz:
           type="button"
           onClick={() => change(BOTTLE_OZ, () => addWater({ date }))}
           disabled={pending}
-          className="min-h-11 shrink-0 rounded-lg border border-border px-3 text-sm font-semibold text-accent active:opacity-70 disabled:opacity-60"
+          className="min-h-11 shrink-0 rounded-lg border border-border px-3 text-sm font-semibold text-accent-ink active:opacity-70 disabled:opacity-60"
         >
           +{BOTTLE_OZ} oz
         </button>

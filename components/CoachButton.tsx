@@ -75,7 +75,7 @@ export default function CoachButton() {
         aria-expanded={open}
         className="group flex h-11 w-11 items-center justify-center"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-accent/40 bg-accent/10 text-accent group-active:opacity-70">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-accent-2/40 bg-accent-2/10 text-accent-2-ink group-active:opacity-70">
           <AgentIcon />
         </span>
       </button>
@@ -96,7 +96,7 @@ export default function CoachButton() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent active:opacity-70"
+                className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent-2-ink active:opacity-70"
               >
                 Hide
               </button>
@@ -116,7 +116,7 @@ export default function CoachButton() {
                 <span>
                   <span aria-hidden="true">📋</span> New workout plans today
                 </span>
-                <span className="shrink-0 text-accent">
+                <span className="shrink-0 text-accent-2-ink">
                   Open Plan <span aria-hidden="true">›</span>
                 </span>
               </Link>
@@ -132,7 +132,7 @@ export default function CoachButton() {
                 <button
                   type="button"
                   onClick={() => setShowLastWeek((v) => !v)}
-                  className="min-h-11 w-full rounded-xl text-sm font-semibold text-accent active:opacity-70"
+                  className="min-h-11 w-full rounded-xl text-sm font-semibold text-accent-2-ink active:opacity-70"
                 >
                   {showLastWeek ? "Back to today" : "📋 Last week's review"}
                 </button>

@@ -53,7 +53,7 @@ export default function SunshineLog({
         onClick={openSheet}
         aria-label={`Sunshine: ${minutes ?? 0}${goal !== null ? ` of ${goal}` : ""} minutes today. Tap to log`}
         className={`flex min-h-11 w-full items-center gap-2 px-1 text-sm active:opacity-70 ${
-          reached ? "font-semibold text-accent" : "text-muted"
+          reached ? "font-semibold text-accent-3-ink" : "text-muted"
         }`}
       >
         <span aria-hidden="true">☀️</span>
@@ -69,7 +69,7 @@ export default function SunshineLog({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent active:opacity-70"
+            className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent-ink active:opacity-70"
           >
             Cancel
           </button>

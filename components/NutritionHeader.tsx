@@ -37,7 +37,7 @@ export default function NutritionHeader({
             goes to Weight even after you've flipped through several days here. */}
         <Link
           href={`/weight?date=${date}`}
-          className="-ml-1 flex min-h-11 w-fit items-center gap-1 px-1 text-base font-medium text-accent active:opacity-70"
+          className="-ml-1 flex min-h-11 w-fit items-center gap-1 px-1 text-base font-medium text-accent-ink active:opacity-70"
         >
           <span aria-hidden="true" className="text-2xl leading-none">
             ‹

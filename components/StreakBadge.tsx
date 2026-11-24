@@ -34,7 +34,7 @@ export default function StreakBadge({
         </p>
         <p className="font-mono text-xs text-muted">best: {longest}</p>
       </div>
-      <p className={`mt-0.5 truncate text-sm ${celebration ? "font-medium text-accent" : "text-muted"}`}>
+      <p className={`mt-0.5 truncate text-sm ${celebration ? "font-medium text-accent-ink" : "text-muted"}`}>
         {celebration ??
           (current === 0
             ? startHint

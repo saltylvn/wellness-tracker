@@ -64,7 +64,7 @@ export default function PriorityLiftsForm({ picked, choices }: { picked: string[
       )}
 
       {result && (
-        <p role="status" className={`text-sm ${result.ok ? "text-accent" : "text-danger"}`}>
+        <p role="status" className={`text-sm ${result.ok ? "text-accent-ink" : "text-danger"}`}>
           {result.message}
         </p>
       )}

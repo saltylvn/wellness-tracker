@@ -130,7 +130,7 @@ export default function AiEstimateFlow({ mode, date }: Props) {
         <button
           type="button"
           onClick={() => setStage({ name: "input" })}
-          className="min-h-12 w-full text-base font-medium text-accent active:opacity-70"
+          className="min-h-12 w-full text-base font-medium text-accent-ink active:opacity-70"
         >
           Try again
         </button>

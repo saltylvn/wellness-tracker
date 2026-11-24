@@ -103,7 +103,7 @@ export default function WeightProgress({
         </p>
         <Link
           href="/settings#weight-goal"
-          className="flex min-h-11 shrink-0 items-center text-sm font-medium text-accent active:opacity-70"
+          className="flex min-h-11 shrink-0 items-center text-sm font-medium text-accent-ink active:opacity-70"
         >
           Edit goal
         </Link>

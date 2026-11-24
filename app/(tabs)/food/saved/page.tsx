@@ -57,7 +57,7 @@ export default async function SavedFoodsPage({
               <Link
                 href={`/food/saved/${food.id}?date=${date}`}
                 aria-label={`Edit ${food.name}`}
-                className="flex w-14 shrink-0 items-center justify-center text-sm font-medium text-accent active:bg-border"
+                className="flex w-14 shrink-0 items-center justify-center text-sm font-medium text-accent-ink active:bg-border"
               >
                 Edit
               </Link>

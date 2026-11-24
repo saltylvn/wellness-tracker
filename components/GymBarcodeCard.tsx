@@ -133,7 +133,7 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent active:opacity-70"
+            className="min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-accent-ink active:opacity-70"
           >
             Cancel
           </button>
@@ -189,7 +189,7 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
                 setTyping(false);
                 setError(null);
               }}
-              className="min-h-11 w-full rounded-xl text-base font-medium text-accent active:opacity-70"
+              className="min-h-11 w-full rounded-xl text-base font-medium text-accent-ink active:opacity-70"
             >
               Use a screenshot instead
             </button>
@@ -212,7 +212,7 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
               type="button"
               onClick={() => fileInput.current?.click()}
               disabled={pending}
-              className="min-h-11 w-full rounded-xl text-base font-medium text-accent active:opacity-70 disabled:opacity-60"
+              className="min-h-11 w-full rounded-xl text-base font-medium text-accent-ink active:opacity-70 disabled:opacity-60"
             >
               Choose a different screenshot
             </button>
@@ -234,7 +234,7 @@ export default function GymBarcodeCard({ barcode, svg }: { barcode: GymBarcode |
                 setError(null);
               }}
               disabled={reading}
-              className="min-h-11 w-full rounded-xl text-base font-medium text-accent active:opacity-70 disabled:opacity-60"
+              className="min-h-11 w-full rounded-xl text-base font-medium text-accent-ink active:opacity-70 disabled:opacity-60"
             >
               Type the number instead
             </button>

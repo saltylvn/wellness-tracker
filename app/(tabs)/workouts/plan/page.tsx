@@ -31,7 +31,7 @@ export default async function WeekPlanPage({ searchParams }: { searchParams: Pro
         <h1 className="text-2xl font-bold">Edit plan</h1>
         <Link
           href={date ? `/workouts?date=${date}` : "/workouts"}
-          className="flex min-h-11 items-center px-1 text-base font-semibold text-accent active:opacity-70"
+          className="flex min-h-11 items-center px-1 text-base font-semibold text-accent-ink active:opacity-70"
         >
           Done
         </Link>
@@ -71,7 +71,7 @@ export default async function WeekPlanPage({ searchParams }: { searchParams: Pro
                       <span aria-hidden="true">{KIND_ICON[day.kind]}</span> {dayTitle(day)}
                     </span>
                     {detail && (
-                      <span className={`block text-xs ${needsPlan ? "text-accent" : "text-muted"}`}>
+                      <span className={`block text-xs ${needsPlan ? "text-accent-ink" : "text-muted"}`}>
                         {detail}
                       </span>
                     )}

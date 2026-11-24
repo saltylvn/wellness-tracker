@@ -11,7 +11,7 @@ export default function BackButton({ fallback }: { fallback: string }) {
     <button
       type="button"
       onClick={() => (window.history.length > 1 ? router.back() : router.push(fallback))}
-      className="-ml-1 flex min-h-11 items-center gap-1 px-1 text-base font-medium text-accent active:opacity-70"
+      className="-ml-1 flex min-h-11 items-center gap-1 px-1 text-base font-medium text-accent-ink active:opacity-70"
     >
       <span aria-hidden="true" className="text-2xl leading-none">
         ‹
