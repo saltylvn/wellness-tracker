@@ -3,8 +3,8 @@
 /*
   The look: black and white, with three brand colors taken from the owner's reference (the
   "kido" palette), replacing the earlier single Rust accent:
-    1. orange  #ffac60  --accent    the main color: rings, bars, active tabs, toggles, highlights
-    2. purple  #898ab0  --accent-2  the coach (anything the AI model writes)
+    1. purple  #898ab0  --accent    the main color: rings, bars, active tabs, toggles, highlights
+    2. orange  #ffac60  --accent-2  the coach (anything the AI model writes)
     3. mint    #88e1d1  --accent-3  done / goal reached (completed boxes, reached goals, logged checks)
   Main buttons stay solid black (white in dark mode). All three colors are pale, so text ON them
   is near-black (--on-accent), and text IN these colors on a light page uses the darker "-ink"
@@ -22,10 +22,10 @@
   --border: #e5e5e5;
   --border-strong: #d4d4d4;
   /* Brand colors (fills) and their darker text versions for the light page. */
-  --accent: #ffac60; /* orange */
-  --accent-ink: #a3530e; /* orange text on light: 5.5:1 on white */
-  --accent-2: #898ab0; /* purple */
-  --accent-2-ink: #5e5f8f;
+  --accent: #898ab0; /* purple */
+  --accent-ink: #5e5f8f; /* purple text on light: 6:1 on white */
+  --accent-2: #ffac60; /* orange */
+  --accent-2-ink: #a3530e; /* orange text on light: 5.5:1 on white */
   --accent-3: #88e1d1; /* mint */
   --accent-3-ink: #1d7568;
   --on-accent: #171717; /* text on any of the three fills is near-black (white fails contrast) */
@@ -47,10 +47,10 @@
     --card-2: #323235;
     --border: #38383b;
     --border-strong: #48484c;
-    --accent: #ffac60;
-    --accent-ink: #ffac60;
-    --accent-2: #898ab0;
-    --accent-2-ink: #a4a5c8;
+    --accent: #898ab0;
+    --accent-ink: #a4a5c8; /* a lighter purple, so text reads on the charcoal */
+    --accent-2: #ffac60;
+    --accent-2-ink: #ffac60;
     --accent-3: #88e1d1;
     --accent-3-ink: #88e1d1;
     --primary: #ededed;
