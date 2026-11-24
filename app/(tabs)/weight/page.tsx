@@ -16,8 +16,9 @@ import { chosenPace, goalNumbers, planSummary, recentTrend, weighInsSinceStart }
 import { loadWeightData } from "@/lib/weightQueries";
 import { createClient } from "@/lib/supabase/server";
 
-// The Weight tab: today's weigh-in wheels first, then one card with your progress toward
-// your target, a chart, and your weekly pace from Settings (weeks to go, goal date).
+// The Weight tab: today's weigh-in wheels first, a row that opens Nutrition (the food log), then
+// one card with your progress toward your target, a chart, and your weekly pace from Settings
+// (weeks to go, goal date).
 export default async function WeightPage({
   searchParams,
 }: {
@@ -51,8 +52,8 @@ export default async function WeightPage({
 
   return (
     <div className="space-y-6">
-      {/* Title, streak and calendar spaced exactly like the Fitness and Nutrition headers, so
-          they sit in the same places on all three tabs. */}
+      {/* Title, streak and calendar spaced exactly like the Fitness header (and Nutrition's), so
+          they sit in the same places on each. */}
       <header className="space-y-4">
         {/* Three columns: title on the left, the coach's 🎯 centered, Today and ⚙️ on the right. */}
         <div className="grid grid-cols-[1fr_auto_1fr] items-center">
@@ -74,6 +75,22 @@ export default async function WeightPage({
       {/* Today's weigh-in first, above your progress and the graph. No key={date} here: on the
           Fitness page that left stale copies on screen. */}
       <WeighInCard date={date} latest={latest} fallback={data.startSetting ?? data.targetSetting} />
+
+      {/* Nutrition lives here now (the third tab is Plan): one row that opens the food log for this day. */}
+      <Link
+        href={`/food?date=${date}`}
+        className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-card px-4 active:opacity-70"
+      >
+        <span className="text-base font-semibold">
+          <span aria-hidden="true">🍎</span> Nutrition
+        </span>
+        <span className="flex items-center gap-1 text-sm text-muted">
+          Food, water and macros
+          <span aria-hidden="true" className="text-lg">
+            ›
+          </span>
+        </span>
+      </Link>
 
       {data.databaseBehind && (
         <p role="alert" className="rounded-2xl border border-danger p-4 text-sm text-danger">

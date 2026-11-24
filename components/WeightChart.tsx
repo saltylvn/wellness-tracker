@@ -99,19 +99,19 @@ export default function WeightChart({
               strokeWidth={1}
               strokeDasharray="2 4"
             />
-            <text x={PAD.left - 6} y={y(lb) + 4} textAnchor="end" fontSize={10} fill="var(--muted)">
+            <text x={PAD.left - 6} y={y(lb) + 4} textAnchor="end" fontSize={10} fontFamily="var(--font-mono)" fill="var(--muted)">
               {lb}
             </text>
           </g>
         ))}
         {/* Dates along the bottom: the first day, the middle, and the last day shown. */}
-        <text x={PAD.left} y={H - 6} fontSize={10} fill="var(--muted)">
+        <text x={PAD.left} y={H - 6} fontSize={10} fontFamily="var(--font-mono)" fill="var(--muted)">
           {shortDate(firstDate)}
         </text>
-        <text x={(PAD.left + W - PAD.right) / 2} y={H - 6} textAnchor="middle" fontSize={10} fill="var(--muted)">
+        <text x={(PAD.left + W - PAD.right) / 2} y={H - 6} textAnchor="middle" fontSize={10} fontFamily="var(--font-mono)" fill="var(--muted)">
           {shortDate(middleDate)}
         </text>
-        <text x={W - PAD.right} y={H - 6} textAnchor="end" fontSize={10} fill="var(--muted)">
+        <text x={W - PAD.right} y={H - 6} textAnchor="end" fontSize={10} fontFamily="var(--font-mono)" fill="var(--muted)">
           {shortDate(lastDate)}
         </text>
 
@@ -126,7 +126,7 @@ export default function WeightChart({
               strokeWidth={1.5}
               strokeDasharray="4 4"
             />
-            <text x={PAD.left + 4} y={y(target) - 5} fontSize={10} fill="var(--muted)">
+            <text x={PAD.left + 4} y={y(target) - 5} fontSize={10} fontFamily="var(--font-mono)" fill="var(--muted)">
               Target {formatWeightLb(target)}
             </text>
           </g>

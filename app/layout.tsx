@@ -6,14 +6,24 @@ import "./globals.css";
 import { ICON_VERSION } from "@/lib/iconVersion";
 
 // The fonts are files in this repo (app/fonts, free to use: see LICENSES.txt), served from
-// this site, so a build never depends on reaching Google Fonts. Inter is for text, Manrope
-// for headings, and Source Code Pro for the small capital-letter labels.
+// this site, so a build never depends on reaching Google Fonts. Inter is for text, Inter Display
+// for headings, and JetBrains Mono for plain-text labels and small numbers.
 const inter = localFont({ src: "./fonts/inter-latin.woff2", weight: "100 900", variable: "--font-inter", display: "swap" });
-const manrope = localFont({ src: "./fonts/manrope-latin.woff2", weight: "500 700", variable: "--font-manrope", display: "swap" });
-const sourceCode = localFont({
-  src: "./fonts/source-code-pro-latin.woff2",
-  weight: "400 500",
-  variable: "--font-source-code",
+const interDisplay = localFont({
+  src: [
+    { path: "./fonts/inter-display-500.woff2", weight: "500" },
+    { path: "./fonts/inter-display-600.woff2", weight: "600" },
+    { path: "./fonts/inter-display-700.woff2", weight: "700" },
+  ],
+  variable: "--font-inter-display",
+  display: "swap",
+});
+const jetbrainsMono = localFont({
+  src: [
+    { path: "./fonts/jetbrains-mono-400.woff2", weight: "400" },
+    { path: "./fonts/jetbrains-mono-500.woff2", weight: "500" },
+  ],
+  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
@@ -46,8 +56,8 @@ export const viewport: Viewport = {
   viewportFit: "cover", // let the page extend under the notch / home bar
   // The status bar matches the page: light, or near-black when the phone is in dark mode.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
-    { media: "(prefers-color-scheme: dark)", color: "#141414" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#1e1e20" },
   ],
 };
 
@@ -63,7 +73,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     // suppressHydrationWarning: the script above adds a class to <html> before React starts.
-    <html lang="en" className={`${inter.variable} ${manrope.variable} ${sourceCode.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${interDisplay.variable} ${jetbrainsMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: SPLASH_ONCE_SCRIPT }} />
       </head>

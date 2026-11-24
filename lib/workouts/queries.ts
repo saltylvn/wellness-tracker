@@ -3,7 +3,15 @@ import type { CardioLogRow } from "../cardio";
 import { weeklyTotals, type WeeklyGoals } from "../cardioGoals";
 import { addDays, isoWeekday, weekDays } from "../dates";
 import { planFromRow, type CardioPlan } from "../cardioPlan";
-import { EMPTY_PANEL, parseCoachPanel, type CoachPanelData } from "../coach";
+import {
+  EMPTY_PANEL,
+  parseCoachPanel,
+  parseCoachPlans,
+  PLAN_LIMIT,
+  type CoachPanelData,
+  type Saved,
+  type WorkoutsNote,
+} from "../coach";
 import { parseGymBarcode, type GymBarcode } from "../gymBarcode";
 import { priorityNames, type PriorityLift } from "../priorityLifts";
 import { restPlanFromRow, type RestPlan } from "../restPlan";
@@ -278,10 +286,22 @@ export async function loadDayPlans(
   return { cardioPlan: planFromRow(data), restPlan: restPlanFromRow(data) };
 }
 
-/** The coach's notes for a day (the 🎯 Coach window, loaded when opened). Before the coach SQL step is run, none. */
+/** The coach's notes for a day (the Coach window, loaded when opened). Before the coach SQL step is run, none. */
 export async function loadCoachPanel(supabase: SupabaseClient, date: string): Promise<CoachPanelData> {
   const { data, error } = await supabase.rpc("my_coach_panel", { p_day: date });
   return error ? EMPTY_PANEL : parseCoachPanel(data);
+}
+
+/**
+ * The Plan tab: the workout plans your coach found, newest first. Before the Plan tab's SQL step
+ * (20261119000000_coach_plans.sql) is run, only today's picks can be read (the older way), so the
+ * tab still works, just without the earlier ones.
+ */
+export async function loadCoachPlans(supabase: SupabaseClient, today: string): Promise<Saved<WorkoutsNote>[]> {
+  const { data, error } = await supabase.rpc("my_coach_plans", { p_limit: PLAN_LIMIT });
+  if (!error) return parseCoachPlans(data);
+  const { workouts } = await loadCoachPanel(supabase, today);
+  return workouts ? [workouts] : [];
 }
 
 export type FitnessPageData = {

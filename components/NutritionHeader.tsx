@@ -10,9 +10,10 @@ import { addDays } from "@/lib/dates";
 const arrowClass =
   "flex h-11 w-11 items-center justify-center rounded-full text-2xl text-muted active:bg-card";
 
-// The top of the Nutrition tab, laid out like the Fitness and Weight tabs: title on the left,
-// "Today / Jump to today" and settings on the right, your streak, then the week strip right
-// under it (orange or red ring per day, against your calorie goal; it also shows which day
+// The top of the Nutrition page (opened from the Weight tab; it was a tab until the Plan tab took
+// its place), laid out like the Fitness and Weight tabs: a "‹ Weight" link back, then the title on
+// the left, "Today / Jump to today" and settings on the right, your streak, then the week strip
+// right under it (orange or red ring per day, against your calorie goal; it also shows which day
 // you're on, so there's no separate date line), then the day's calories card and the macros card.
 export default function NutritionHeader({
   date,
@@ -31,13 +32,26 @@ export default function NutritionHeader({
 }) {
   return (
     <header className="space-y-4">
-      {/* Three columns: title on the left, the coach's 🎯 centered, Today and ⚙️ on the right. */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-        <h1 className="text-2xl font-bold">Nutrition</h1>
-        <CoachButton />
-        <div className="flex items-center gap-1 justify-self-end">
-          <TodayPill dateKey={date} href="/food" />
-          <SettingsGear />
+      <div>
+        {/* Back to the Weight tab, on the same day. A plain link (not the browser's "back"), so it
+            goes to Weight even after you've flipped through several days here. */}
+        <Link
+          href={`/weight?date=${date}`}
+          className="-ml-1 flex min-h-11 w-fit items-center gap-1 px-1 text-base font-medium text-accent-ink active:opacity-70"
+        >
+          <span aria-hidden="true" className="text-2xl leading-none">
+            ‹
+          </span>
+          Weight
+        </Link>
+        {/* Three columns: title on the left, the Coach button centered, Today and ⚙️ on the right. */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+          <h1 className="text-2xl font-bold">Nutrition</h1>
+          <CoachButton />
+          <div className="flex items-center gap-1 justify-self-end">
+            <TodayPill dateKey={date} href="/food" />
+            <SettingsGear />
+          </div>
         </div>
       </div>
 

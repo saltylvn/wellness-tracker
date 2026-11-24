@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { addWater, undoWater } from "@/app/(tabs)/food/water-actions";
 import { BOTTLE_OZ, DAILY_WATER_OZ, STEP_MILESTONES, waterProgress } from "@/lib/water";
 
-// A slim water row on the Nutrition tab: tap "+20 oz" each time you finish a bottle.
+// A slim water row on the Nutrition page: tap "+20 oz" each time you finish a bottle.
 // Three small pills (20, 40, 60 oz) fill in as you go; the third is your daily goal.
 export default function WaterTracker({ date, totalOz }: { date: string; totalOz: number }) {
   const router = useRouter();

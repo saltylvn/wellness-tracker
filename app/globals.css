@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
 /*
-  The look: neutral greys with no tint, thin hairline borders instead of shadows, squarer
-  corners, and three brand colors taken from the owner's reference (the "kido" palette):
-    1. orange  #ffac60  --accent    the main color: buttons, rings, bars, highlights
+  The look: black and white, with three brand colors taken from the owner's reference (the
+  "kido" palette), replacing the earlier single Rust accent:
+    1. orange  #ffac60  --accent    the main color: rings, bars, active tabs, toggles, highlights
     2. purple  #898ab0  --accent-2  the coach (anything the AI model writes)
     3. mint    #88e1d1  --accent-3  done / goal reached (completed boxes, reached goals, logged checks)
-  All three are pale, so text ON them is near-black (--on-accent), and text IN these colors on
-  a light page uses the darker "-ink" version (AA contrast). In dark mode the pale colors read
-  well as text, so the -ink tokens equal the fills. Red (--danger) stays for "over goal".
-  It follows the phone: light by default, near-black when the phone is in dark mode.
+  Main buttons stay solid black (white in dark mode). All three colors are pale, so text ON them
+  is near-black (--on-accent), and text IN these colors on a light page uses the darker "-ink"
+  version (AA contrast); in dark mode the -ink tokens equal the fills. Red (--danger) stays
+  for "over goal". Flat cards with a hairline border, squarer corners. It follows the phone:
+  white by default, a charcoal grey in dark mode. Every color is a token here.
 */
 :root {
   color-scheme: light;
-  --background: #fcfcfc; /* the page */
-  --foreground: #171717; /* text */
-  --muted: #6b6b6b; /* quieter text */
+  --background: #ffffff; /* the page */
+  --foreground: #0a0a0a; /* text */
+  --muted: #737373; /* quieter text */
   --card: #ffffff;
-  --card-2: #f4f4f4; /* inset areas inside a card */
-  --border: #e6e6e6;
+  --card-2: #f5f5f5; /* inset areas inside a card */
+  --border: #e5e5e5;
   --border-strong: #d4d4d4;
   /* Brand colors (fills) and their darker text versions for the light page. */
   --accent: #ffac60; /* orange */
@@ -28,27 +29,33 @@
   --accent-3: #88e1d1; /* mint */
   --accent-3-ink: #1d7568;
   --on-accent: #171717; /* text on any of the three fills is near-black (white fails contrast) */
-  --danger: #e5383b;
+  /* Main buttons: solid black with white text. */
+  --primary: #0a0a0a;
+  --on-primary: #ffffff;
+  --danger: #dc2626;
   --card-shadow: none; /* cards are flat, with a hairline border */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --background: #141414;
+    /* Dark mode is a charcoal grey ("Charcoal"), not black. */
+    --background: #1e1e20;
     --foreground: #ededed;
-    --muted: #a1a1a1;
-    --card: #1a1a1a;
-    --card-2: #232323;
-    --border: #2a2a2a;
-    --border-strong: #3a3a3a;
+    --muted: #a8a8ad;
+    --card: #28282a;
+    --card-2: #323235;
+    --border: #38383b;
+    --border-strong: #48484c;
     --accent: #ffac60;
     --accent-ink: #ffac60;
     --accent-2: #898ab0;
     --accent-2-ink: #a4a5c8;
     --accent-3: #88e1d1;
     --accent-3-ink: #88e1d1;
-    --danger: #ec5d5e;
+    --primary: #ededed;
+    --on-primary: #1e1e20;
+    --danger: #ef5350;
   }
 }
 
@@ -60,6 +67,8 @@
   --color-accent-3: var(--accent-3);
   --color-accent-3-ink: var(--accent-3-ink);
   --color-on-accent: var(--on-accent);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
   --color-danger: var(--danger);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -69,8 +78,8 @@
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-source-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-inter-display), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   /* Squarer shapes: cards (rounded-2xl) 12px; buttons and fields (rounded-xl, rounded-lg) 8px. */
   --radius-2xl: 12px;
   --radius-xl: 8px;
@@ -102,20 +111,21 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Headings use the display font (Manrope), slightly tightened. */
+/* Headings use Inter Display at a medium weight, tightened, like the showcase images. */
 h1,
-h2 {
+h2,
+h3 {
   font-family: var(--font-display);
-  letter-spacing: -0.015em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
-/* Small section labels: mono capitals, quiet. */
+/* Small labels as plain text: lowercase mono, quiet (an engineering touch, like "protein"). */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 400;
+  text-transform: lowercase;
   color: var(--muted);
 }
 
@@ -143,16 +153,14 @@ h2 {
   padding-left: 0.22em; /* balances the letter-spacing so the word is truly centered */
   font-family: var(--font-display);
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.22em;
   color: var(--foreground);
 }
 .splash-sub {
   margin: 6px 0 0;
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 13px;
   color: var(--muted);
 }
 /* After the app has been opened once, later page loads skip the splash. */

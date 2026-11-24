@@ -17,8 +17,8 @@ export default function PriorityLifts({ lifts }: { lifts: PriorityLift[] }) {
           <span aria-hidden="true" className="text-xs text-accent-ink">
             ★
           </span>
-          <span className="min-w-0 flex-1 truncate font-semibold">{lift.name}</span>
-          <span className="shrink-0 text-xs text-muted tabular-nums">
+          <span className="min-w-0 flex-1 truncate font-medium">{lift.name}</span>
+          <span className="shrink-0 font-mono text-xs text-muted">
             {lift.best === null ? "PR –" : `PR ${formatWeight(lift.best)}`}
           </span>
         </div>

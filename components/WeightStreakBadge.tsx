@@ -26,7 +26,7 @@ export default function WeightStreakBadge({ logs }: { logs: WeighInPoint[] }) {
           <span aria-hidden="true">🔥</span>{" "}
           {current > 0 ? `${current}-week streak` : "No streak yet"}
         </p>
-        <p className="text-sm font-medium text-muted">Best: {longest}</p>
+        <p className="font-mono text-xs text-muted">best: {longest}</p>
       </div>
       <p className={`mt-0.5 truncate text-sm ${thisWeekCounts ? "font-medium text-accent-ink" : "text-muted"}`}>{hint}</p>
     </section>
