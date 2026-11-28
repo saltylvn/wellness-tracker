@@ -82,8 +82,8 @@ export default function WeightChart({
       >
         <defs>
           <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--accent)" stopOpacity={0.22} />
-            <stop offset="1" stopColor="var(--accent)" stopOpacity={0} />
+            <stop offset="0" stopColor="var(--accent-2)" stopOpacity={0.22} />
+            <stop offset="1" stopColor="var(--accent-2)" stopOpacity={0} />
           </linearGradient>
         </defs>
 
@@ -133,10 +133,10 @@ export default function WeightChart({
         )}
 
         <path d={area} fill={`url(#${fillId})`} />
-        <path d={line} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+        <path d={line} fill="none" stroke="var(--accent-2)" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
         {/* A small dot on every weigh-in (left off when there are lots, to keep the line clean). */}
         {logs.length <= MAX_DOTS &&
-          logs.map((l) => <circle key={l.date} cx={x(l.date)} cy={y(l.pounds)} r={2} fill="var(--accent)" />)}
+          logs.map((l) => <circle key={l.date} cx={x(l.date)} cy={y(l.pounds)} r={2} fill="var(--accent-2)" />)}
 
         {shown && (
           <line
@@ -151,8 +151,8 @@ export default function WeightChart({
         {/* The latest weigh-in (or the one you're touching): a dot with a soft halo, and its weight above it. */}
         {(shown ? [shown] : [latest]).map((l) => (
           <g key={l.date}>
-            <circle cx={x(l.date)} cy={y(l.pounds)} r={10} fill="var(--accent)" fillOpacity={0.15} />
-            <circle cx={x(l.date)} cy={y(l.pounds)} r={5} fill="var(--accent)" stroke="var(--card)" strokeWidth={2} />
+            <circle cx={x(l.date)} cy={y(l.pounds)} r={10} fill="var(--accent-2)" fillOpacity={0.15} />
+            <circle cx={x(l.date)} cy={y(l.pounds)} r={5} fill="var(--accent-2)" stroke="var(--card)" strokeWidth={2} />
             {!shown && (
               <text
                 x={Math.min(x(l.date), W - PAD.right - 14)}

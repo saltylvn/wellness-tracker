@@ -3,8 +3,12 @@
 /*
   The look: black and white, with three brand colors taken from the owner's reference (the
   "kido" palette), replacing the earlier single Rust accent:
-    1. purple  #898ab0  --accent    the main color: rings, bars, active tabs, toggles, highlights
-    2. orange  #ffac60  --accent-2  the coach (anything the AI model writes)
+    1. --accent    the main color: day rings, toggles, active tab, links, Weigh in.
+                   Light mode: purple #898ab0. Dark mode: orange #ffac60.
+    2. orange  #ffac60  --accent-2  in both modes: progress bars, the calorie ring, the weight
+                   chart, priority lifts, and the coach (anything the AI model writes).
+                   So light mode shows purple and orange side by side; dark mode is mostly orange.
+    The "Today" button has its own token, --today: purple in light mode, mint in dark mode.
     3. mint    #88e1d1  --accent-3  done / goal reached (completed boxes, reached goals, logged checks)
   Main buttons stay solid black (white in dark mode). All three colors are pale, so text ON them
   is near-black (--on-accent), and text IN these colors on a light page uses the darker "-ink"
@@ -29,6 +33,7 @@
   --accent-3: #88e1d1; /* mint */
   --accent-3-ink: #1d7568;
   --on-accent: #171717; /* text on any of the three fills is near-black (white fails contrast) */
+  --today: #5e5f8f; /* the "Today" button: purple (text shade) */
   /* Main buttons: solid black with white text. */
   --primary: #0a0a0a;
   --on-primary: #ffffff;
@@ -47,8 +52,9 @@
     --card-2: #323235;
     --border: #38383b;
     --border-strong: #48484c;
-    --accent: #898ab0;
-    --accent-ink: #a4a5c8; /* a lighter purple, so text reads on the charcoal */
+    --accent: #ffac60; /* dark mode is mostly orange */
+    --accent-ink: #ffac60;
+    --today: #88e1d1; /* mint */
     --accent-2: #ffac60;
     --accent-2-ink: #ffac60;
     --accent-3: #88e1d1;
@@ -67,6 +73,7 @@
   --color-accent-3: var(--accent-3);
   --color-accent-3-ink: var(--accent-3-ink);
   --color-on-accent: var(--on-accent);
+  --color-today: var(--today);
   --color-primary: var(--primary);
   --color-on-primary: var(--on-primary);
   --color-danger: var(--danger);

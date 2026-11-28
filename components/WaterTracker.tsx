@@ -39,7 +39,7 @@ export default function WaterTracker({ date, totalOz }: { date: string; totalOz:
               <li
                 key={oz}
                 aria-label={`Step ${index + 1}, ${oz} ounces${progress.steps > index ? ", done" : ""}`}
-                className={`h-1.5 flex-1 rounded-full ${progress.steps > index ? (progress.goalReached ? "bg-accent-3" : "bg-accent") : "bg-border"}`}
+                className={`h-1.5 flex-1 rounded-full ${progress.steps > index ? (progress.goalReached ? "bg-accent-3" : "bg-accent-2") : "bg-border"}`}
               />
             ))}
           </ol>

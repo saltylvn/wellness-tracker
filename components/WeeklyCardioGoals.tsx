@@ -54,7 +54,7 @@ export default function WeeklyCardioGoals({
                 aria-valuenow={progress ? totals[kind] : undefined}
                 className="h-2 flex-1 overflow-hidden rounded-full bg-border"
               >
-                {progress && <div className={`h-full rounded-full ${progress.reached ? "bg-accent-3" : "bg-accent"}`} style={{ width: `${progress.percent}%` }} />}
+                {progress && <div className={`h-full rounded-full ${progress.reached ? "bg-accent-3" : "bg-accent-2"}`} style={{ width: `${progress.percent}%` }} />}
               </div>
               <p className="shrink-0 text-sm tabular-nums">
                 {progress?.reached && <span aria-label="Goal reached">🎯 </span>}
