@@ -39,7 +39,7 @@ export default function CalorieRing({
           strokeLinecap="round"
           strokeDasharray={`${CIRCUMFERENCE * fraction} ${CIRCUMFERENCE}`}
           transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}
-          className={status === "over" ? "stroke-danger" : "stroke-accent"}
+          className={status === "over" ? "stroke-danger" : "stroke-accent-2"}
           style={{ opacity: fraction === 0 ? 0 : 1 }}
         />
       </svg>

@@ -56,7 +56,7 @@ export default function WeightProgress({
           aria-valuemax={100}
           aria-valuenow={percent}
         >
-          <div className="h-full rounded-full bg-accent" style={{ width: `${percent}%` }} />
+          <div className="h-full rounded-full bg-accent-2" style={{ width: `${percent}%` }} />
         </div>
         {/* How far you've come, in bold black so it's easy to read at a glance. */}
         <p className="flex items-baseline justify-between text-sm font-bold text-foreground tabular-nums">

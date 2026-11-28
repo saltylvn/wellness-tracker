@@ -31,7 +31,7 @@ export default function MacrosCard({ macros }: { macros: Macro[] }) {
               className="h-1.5 overflow-hidden rounded-full bg-border"
             >
               {goal ? (
-                <div className="h-full rounded-full bg-accent" style={{ width: `${Math.min(100, (grams / goal) * 100)}%` }} />
+                <div className="h-full rounded-full bg-accent-2" style={{ width: `${Math.min(100, (grams / goal) * 100)}%` }} />
               ) : null}
             </div>
           </div>
